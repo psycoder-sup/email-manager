@@ -1,0 +1,71 @@
+# Xcode
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.xcuserstate
+*.xcscmblueprint
+
+# Build artifacts
+build/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved
+
+# CocoaPods (if used in future)
+Pods/
+
+# Carthage (if used in future)
+Carthage/Build/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Code Injection
+iOSInjectionProject/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Environment and secrets
+# IMPORTANT: Keep xcconfig files with credentials out of version control
+# Uncomment these lines for production use:
+# Cluademail/Resources/Configuration/Development.xcconfig
+# Cluademail/Resources/Configuration/Staging.xcconfig
+# Cluademail/Resources/Configuration/Production.xcconfig
+*.local.xcconfig
+.env
+.env.*
+*.secret
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# Test artifacts
+*.xcresult
+coverage/
+
+# Archives
+*.xcarchive
+
+# Logs
+*.log

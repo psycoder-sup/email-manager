@@ -1,0 +1,103 @@
+name: Cluademail
+
+options:
+  bundleIdPrefix: com.cluademail
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "15.0"
+  generateEmptyDirectories: true
+  groupSortPosition: top
+
+settings:
+  base:
+    PRODUCT_NAME: Cluademail
+    MARKETING_VERSION: 1.0.0
+    CURRENT_PROJECT_VERSION: 1
+    SWIFT_VERSION: "5.9"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+
+configs:
+  Debug:
+    buildSettings:
+      DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+  Release:
+    buildSettings:
+      DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+
+configFiles:
+  Debug: Cluademail/Resources/Configuration/Development.xcconfig
+  Release: Cluademail/Resources/Configuration/Production.xcconfig
+
+targets:
+  Cluademail:
+    type: application
+    platform: macOS
+    sources:
+      - path: Cluademail
+        excludes:
+          - "**/*.xcconfig"
+    resources:
+      - path: Cluademail/Resources/Assets.xcassets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cluademail.app
+        INFOPLIST_FILE: Cluademail/Supporting/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Cluademail/Supporting/Cluademail.entitlements
+        CODE_SIGN_STYLE: Automatic
+        COMBINE_HIDPI_IMAGES: YES
+      configs:
+        Debug:
+          # Allow ad-hoc signing for development without a team
+          CODE_SIGN_IDENTITY: "-"
+          ENABLE_HARDENED_RUNTIME: NO
+        Release:
+          ENABLE_HARDENED_RUNTIME: YES
+
+  CluademailTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: CluademailTests
+    dependencies:
+      - target: Cluademail
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cluademail.app.tests
+        PRODUCT_MODULE_NAME: CluademailTests
+        INFOPLIST_FILE: CluademailTests/Info.plist
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Cluademail.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Cluademail
+
+  CluademailUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - path: CluademailUITests
+    dependencies:
+      - target: Cluademail
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cluademail.app.uitests
+        PRODUCT_MODULE_NAME: CluademailUITests
+        INFOPLIST_FILE: CluademailUITests/Info.plist
+        TEST_TARGET_NAME: Cluademail
+
+schemes:
+  Cluademail:
+    build:
+      targets:
+        Cluademail: all
+        CluademailTests: [test]
+        CluademailUITests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - CluademailTests
+        - CluademailUITests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

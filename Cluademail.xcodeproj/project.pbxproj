@@ -1,0 +1,794 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2789906515CE28C160811F49 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30C157AACFEE656609A00AC7 /* SettingsView.swift */; };
+		27E1EE1AF7AB31608F17BD40 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC60EFE150494BB055812FAF /* Assets.xcassets */; };
+		2FA220C7E220A06974A73F86 /* ErrorHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C7D8310C3620C35F8B5BD /* ErrorHandler.swift */; };
+		3B542D7F96B11D013D49315D /* XCTestCase+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6B3E327B44702BE4C9448A /* XCTestCase+Extensions.swift */; };
+		49719336365774100D705BF6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72CA77249561968D27292B08 /* ContentView.swift */; };
+		57EAB9D2043DB319C192AE74 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A2F028C7875FF4C33BC9A6 /* AppState.swift */; };
+		71E58CBF23E4C2DCE8B43BB1 /* ErrorAlertModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503A72A83DBAB2D8BA95E8CB /* ErrorAlertModifier.swift */; };
+		82538CDDD4B5D083C1BB9703 /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBCAAC030732F5D59FCCECC7 /* AppError.swift */; };
+		8CE44C31427A055B389F6877 /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551B0B4438D418F5EEEA82A3 /* AppConfiguration.swift */; };
+		90301D1A04BFAD7D7AB6EBE2 /* CluademailApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA733F8F65150D0002B16D66 /* CluademailApp.swift */; };
+		94E1699DB485E2B211CCC80A /* AppStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9743CC82674D4EE6DEB9C4BD /* AppStateTests.swift */; };
+		980D9B7DCFCD27941C85F3C5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BF8CBC97A005E47AA7DC209 /* AppDelegate.swift */; };
+		A38E88DD3AB8756487A37A2D /* ErrorHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 104CFBC7A213A34B59692906 /* ErrorHandlerTests.swift */; };
+		A47A1535F14D0907748DE398 /* Logger+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB89B4E28E6824D836211BC5 /* Logger+Extensions.swift */; };
+		AFFABDBF3C8B14B1E4DAE348 /* TestFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A6481F2D2309A3F8DDF2C8E /* TestFixtures.swift */; };
+		BB1A38FE4D19CCE21B3C4AED /* MockErrorHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAB7373673CE62819DBB2C89 /* MockErrorHandler.swift */; };
+		D1A916AA2024E4483F8D5161 /* CluademailUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CA035031CDBDECC562FD292 /* CluademailUITestsLaunchTests.swift */; };
+		D91F79D3BE1111B2301DDF09 /* CluademailUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C022D36E2E2196F8D84A4B0 /* CluademailUITests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		05AE0C79031D51E7A388ADB3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C9BE3A4861397F1250573C33 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D83F4DAF83049B6943F21A4;
+			remoteInfo = Cluademail;
+		};
+		989B786D97304EC93B1BD249 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C9BE3A4861397F1250573C33 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D83F4DAF83049B6943F21A4;
+			remoteInfo = Cluademail;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0CA035031CDBDECC562FD292 /* CluademailUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CluademailUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		104CFBC7A213A34B59692906 /* ErrorHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHandlerTests.swift; sourceTree = "<group>"; };
+		105A8ECA5CFDA420A260FD80 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		2397DACF6BA7F233B169CA7A /* Development.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Development.xcconfig; sourceTree = "<group>"; };
+		24D7DD02A8EFF85A8CA628E8 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		2A8D6609E880396A0CC37BF3 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		2C022D36E2E2196F8D84A4B0 /* CluademailUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CluademailUITests.swift; sourceTree = "<group>"; };
+		30C157AACFEE656609A00AC7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		503A72A83DBAB2D8BA95E8CB /* ErrorAlertModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorAlertModifier.swift; sourceTree = "<group>"; };
+		551B0B4438D418F5EEEA82A3 /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
+		6960B4F7F2C0913B2DC5593E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		6BF8CBC97A005E47AA7DC209 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		6EAB9E61108A7F0C732B2818 /* Cluademail.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cluademail.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		72CA77249561968D27292B08 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		7613D167D9C280C9005F0DDB /* Cluademail.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Cluademail.entitlements; sourceTree = "<group>"; };
+		7B0C4F530B66135464A74894 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		7BC2CF94B5B0E25DA6CA2A41 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		9743CC82674D4EE6DEB9C4BD /* AppStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
+		987016A011314ADC70583BD8 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		9A6481F2D2309A3F8DDF2C8E /* TestFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestFixtures.swift; sourceTree = "<group>"; };
+		9C72D71C20E70727C71272EE /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		A55C7D8310C3620C35F8B5BD /* ErrorHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHandler.swift; sourceTree = "<group>"; };
+		AC66E440378DDF981F7F95EC /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		B97EB1C9A806F9C4D683B5F5 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		BD3D300B9C700FFE1AC5D905 /* Production.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Production.xcconfig; sourceTree = "<group>"; };
+		C55CE7C313929B9D96E9FFA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		C89FFBA5DECB84802D6F2FFC /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		CA733F8F65150D0002B16D66 /* CluademailApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CluademailApp.swift; sourceTree = "<group>"; };
+		CAB7373673CE62819DBB2C89 /* MockErrorHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockErrorHandler.swift; sourceTree = "<group>"; };
+		CBCAAC030732F5D59FCCECC7 /* AppError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppError.swift; sourceTree = "<group>"; };
+		CF31137F9BF2159C9220AF0A /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		D03F65D2D6D8D02AB5797EF0 /* CluademailTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CluademailTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DC60EFE150494BB055812FAF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E8A2F028C7875FF4C33BC9A6 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		FADC604581589681D5387934 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		FB6B3E327B44702BE4C9448A /* XCTestCase+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+Extensions.swift"; sourceTree = "<group>"; };
+		FB89B4E28E6824D836211BC5 /* Logger+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+Extensions.swift"; sourceTree = "<group>"; };
+		FD7A8B09E9E6DC340183A13B /* CluademailUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CluademailUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0DF60C0CA44A06CB2D9CD8A9 /* EmailDetail */ = {
+			isa = PBXGroup;
+			children = (
+				C89FFBA5DECB84802D6F2FFC /* .gitkeep */,
+			);
+			path = EmailDetail;
+			sourceTree = "<group>";
+		};
+		1851CD15F288FE95A485E7B7 /* CluademailUITests */ = {
+			isa = PBXGroup;
+			children = (
+				2C022D36E2E2196F8D84A4B0 /* CluademailUITests.swift */,
+				0CA035031CDBDECC562FD292 /* CluademailUITestsLaunchTests.swift */,
+				C55CE7C313929B9D96E9FFA4 /* Info.plist */,
+			);
+			path = CluademailUITests;
+			sourceTree = "<group>";
+		};
+		1DCCDB03A8D93EEE0EE594C0 /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				2397DACF6BA7F233B169CA7A /* Development.xcconfig */,
+				BD3D300B9C700FFE1AC5D905 /* Production.xcconfig */,
+			);
+			name = Configuration;
+			path = Cluademail/Resources/Configuration;
+			sourceTree = "<group>";
+		};
+		24B74075E24253D04A63D16C /* Compose */ = {
+			isa = PBXGroup;
+			children = (
+				FADC604581589681D5387934 /* .gitkeep */,
+			);
+			path = Compose;
+			sourceTree = "<group>";
+		};
+		24B7A430943094BBD26B4968 /* Accounts */ = {
+			isa = PBXGroup;
+			children = (
+				6960B4F7F2C0913B2DC5593E /* .gitkeep */,
+			);
+			path = Accounts;
+			sourceTree = "<group>";
+		};
+		25827B9D898B15768452AB1B /* Repositories */ = {
+			isa = PBXGroup;
+			children = (
+				B97EB1C9A806F9C4D683B5F5 /* .gitkeep */,
+			);
+			path = Repositories;
+			sourceTree = "<group>";
+		};
+		35C475ECADC5C06404E48513 /* Logging */ = {
+			isa = PBXGroup;
+			children = (
+				FB89B4E28E6824D836211BC5 /* Logger+Extensions.swift */,
+			);
+			path = Logging;
+			sourceTree = "<group>";
+		};
+		3E41E0A514B01982CD4BE43D /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				AC66E440378DDF981F7F95EC /* .gitkeep */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
+		43577DF78FD52BCFF0C452FF /* Unit */ = {
+			isa = PBXGroup;
+			children = (
+				9743CC82674D4EE6DEB9C4BD /* AppStateTests.swift */,
+				104CFBC7A213A34B59692906 /* ErrorHandlerTests.swift */,
+			);
+			path = Unit;
+			sourceTree = "<group>";
+		};
+		49D679A48A5196B2A4ACEEEF /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				E28F9CA5B098B5B945EEA645 /* Errors */,
+				35C475ECADC5C06404E48513 /* Logging */,
+				D20BED6D11C1CA24FDE70451 /* Models */,
+				25827B9D898B15768452AB1B /* Repositories */,
+				ACDB85C3247E8F10421DE0C5 /* Services */,
+				9CD1B0040B989E1168E58D31 /* Utilities */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		4B68ED5FF024C686FE5B66BD /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				9C72D71C20E70727C71272EE /* .gitkeep */,
+			);
+			path = Tools;
+			sourceTree = "<group>";
+		};
+		6D997894679FBA8C19CEF5D9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6EAB9E61108A7F0C732B2818 /* Cluademail.app */,
+				D03F65D2D6D8D02AB5797EF0 /* CluademailTests.xctest */,
+				FD7A8B09E9E6DC340183A13B /* CluademailUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6FF686FE4739DC7349C09D1E = {
+			isa = PBXGroup;
+			children = (
+				A9F1737784706701626C8B5B /* Cluademail */,
+				FB896CC6C6C688FAE1D0CB2F /* CluademailTests */,
+				1851CD15F288FE95A485E7B7 /* CluademailUITests */,
+				1DCCDB03A8D93EEE0EE594C0 /* Configuration */,
+				6D997894679FBA8C19CEF5D9 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		8152231D95DA837F7A059B3F /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				CAB7373673CE62819DBB2C89 /* MockErrorHandler.swift */,
+			);
+			path = Mocks;
+			sourceTree = "<group>";
+		};
+		862D7B9467D9667D8C3965F7 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				30C157AACFEE656609A00AC7 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		86833C548C239750E42D65E0 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				24B7A430943094BBD26B4968 /* Accounts */,
+				24B74075E24253D04A63D16C /* Compose */,
+				0DF60C0CA44A06CB2D9CD8A9 /* EmailDetail */,
+				AAC8A096A55122D3A41F3087 /* EmailList */,
+				3E41E0A514B01982CD4BE43D /* Search */,
+				862D7B9467D9667D8C3965F7 /* Settings */,
+				72CA77249561968D27292B08 /* ContentView.swift */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		958FC52FAE85106688CB46F2 /* Server */ = {
+			isa = PBXGroup;
+			children = (
+				CF31137F9BF2159C9220AF0A /* .gitkeep */,
+			);
+			path = Server;
+			sourceTree = "<group>";
+		};
+		9C880789F12D3D957DBA01C7 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				551B0B4438D418F5EEEA82A3 /* AppConfiguration.swift */,
+				6BF8CBC97A005E47AA7DC209 /* AppDelegate.swift */,
+				E8A2F028C7875FF4C33BC9A6 /* AppState.swift */,
+				CA733F8F65150D0002B16D66 /* CluademailApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		9CD1B0040B989E1168E58D31 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				2A8D6609E880396A0CC37BF3 /* .gitkeep */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		A9F1737784706701626C8B5B /* Cluademail */ = {
+			isa = PBXGroup;
+			children = (
+				9C880789F12D3D957DBA01C7 /* App */,
+				49D679A48A5196B2A4ACEEEF /* Core */,
+				86833C548C239750E42D65E0 /* Features */,
+				D83AD177F4067E74D7BF2594 /* MCP */,
+				F53FBA9FBD2BF2AF9D39D093 /* Resources */,
+				C1D4DD7B92B4547764857F03 /* Supporting */,
+			);
+			path = Cluademail;
+			sourceTree = "<group>";
+		};
+		AAC8A096A55122D3A41F3087 /* EmailList */ = {
+			isa = PBXGroup;
+			children = (
+				987016A011314ADC70583BD8 /* .gitkeep */,
+			);
+			path = EmailList;
+			sourceTree = "<group>";
+		};
+		ACDB85C3247E8F10421DE0C5 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				105A8ECA5CFDA420A260FD80 /* .gitkeep */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		C1D4DD7B92B4547764857F03 /* Supporting */ = {
+			isa = PBXGroup;
+			children = (
+				7613D167D9C280C9005F0DDB /* Cluademail.entitlements */,
+				7B0C4F530B66135464A74894 /* Info.plist */,
+			);
+			path = Supporting;
+			sourceTree = "<group>";
+		};
+		D20BED6D11C1CA24FDE70451 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				24D7DD02A8EFF85A8CA628E8 /* .gitkeep */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		D83AD177F4067E74D7BF2594 /* MCP */ = {
+			isa = PBXGroup;
+			children = (
+				958FC52FAE85106688CB46F2 /* Server */,
+				4B68ED5FF024C686FE5B66BD /* Tools */,
+			);
+			path = MCP;
+			sourceTree = "<group>";
+		};
+		E28F9CA5B098B5B945EEA645 /* Errors */ = {
+			isa = PBXGroup;
+			children = (
+				CBCAAC030732F5D59FCCECC7 /* AppError.swift */,
+				503A72A83DBAB2D8BA95E8CB /* ErrorAlertModifier.swift */,
+				A55C7D8310C3620C35F8B5BD /* ErrorHandler.swift */,
+			);
+			path = Errors;
+			sourceTree = "<group>";
+		};
+		EAF10F9DC94373DEC339FD01 /* TestHelpers */ = {
+			isa = PBXGroup;
+			children = (
+				9A6481F2D2309A3F8DDF2C8E /* TestFixtures.swift */,
+				FB6B3E327B44702BE4C9448A /* XCTestCase+Extensions.swift */,
+			);
+			path = TestHelpers;
+			sourceTree = "<group>";
+		};
+		F53FBA9FBD2BF2AF9D39D093 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				DC60EFE150494BB055812FAF /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		FB896CC6C6C688FAE1D0CB2F /* CluademailTests */ = {
+			isa = PBXGroup;
+			children = (
+				8152231D95DA837F7A059B3F /* Mocks */,
+				EAF10F9DC94373DEC339FD01 /* TestHelpers */,
+				43577DF78FD52BCFF0C452FF /* Unit */,
+				7BC2CF94B5B0E25DA6CA2A41 /* Info.plist */,
+			);
+			path = CluademailTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1D83F4DAF83049B6943F21A4 /* Cluademail */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 551A8F63C61689D9B60875EF /* Build configuration list for PBXNativeTarget "Cluademail" */;
+			buildPhases = (
+				42047344298F8D58EE431E65 /* Sources */,
+				BDB973C528EFED6F15A6F318 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Cluademail;
+			packageProductDependencies = (
+			);
+			productName = Cluademail;
+			productReference = 6EAB9E61108A7F0C732B2818 /* Cluademail.app */;
+			productType = "com.apple.product-type.application";
+		};
+		3D252E2034FAD1BAEFD707F8 /* CluademailUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2FB3904BCA64ECDF5F615EDA /* Build configuration list for PBXNativeTarget "CluademailUITests" */;
+			buildPhases = (
+				C20741986A7A7D6BC1275F05 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BD2897CDC101CDCB770E532F /* PBXTargetDependency */,
+			);
+			name = CluademailUITests;
+			packageProductDependencies = (
+			);
+			productName = CluademailUITests;
+			productReference = FD7A8B09E9E6DC340183A13B /* CluademailUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		4C3D04C0E278114705EC5FC1 /* CluademailTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CD733CE3ED0687EE708C2FA5 /* Build configuration list for PBXNativeTarget "CluademailTests" */;
+			buildPhases = (
+				FE11337A37D2E4D7C92480B4 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				121631714F5954F6E40F0A18 /* PBXTargetDependency */,
+			);
+			name = CluademailTests;
+			packageProductDependencies = (
+			);
+			productName = CluademailTests;
+			productReference = D03F65D2D6D8D02AB5797EF0 /* CluademailTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C9BE3A4861397F1250573C33 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					1D83F4DAF83049B6943F21A4 = {
+						ProvisioningStyle = Automatic;
+					};
+					3D252E2034FAD1BAEFD707F8 = {
+						TestTargetID = 1D83F4DAF83049B6943F21A4;
+					};
+				};
+			};
+			buildConfigurationList = 9FD2190BB9ACD3AE4CB367E7 /* Build configuration list for PBXProject "Cluademail" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 6FF686FE4739DC7349C09D1E;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1D83F4DAF83049B6943F21A4 /* Cluademail */,
+				4C3D04C0E278114705EC5FC1 /* CluademailTests */,
+				3D252E2034FAD1BAEFD707F8 /* CluademailUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BDB973C528EFED6F15A6F318 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				27E1EE1AF7AB31608F17BD40 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		42047344298F8D58EE431E65 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8CE44C31427A055B389F6877 /* AppConfiguration.swift in Sources */,
+				980D9B7DCFCD27941C85F3C5 /* AppDelegate.swift in Sources */,
+				82538CDDD4B5D083C1BB9703 /* AppError.swift in Sources */,
+				57EAB9D2043DB319C192AE74 /* AppState.swift in Sources */,
+				90301D1A04BFAD7D7AB6EBE2 /* CluademailApp.swift in Sources */,
+				49719336365774100D705BF6 /* ContentView.swift in Sources */,
+				71E58CBF23E4C2DCE8B43BB1 /* ErrorAlertModifier.swift in Sources */,
+				2FA220C7E220A06974A73F86 /* ErrorHandler.swift in Sources */,
+				A47A1535F14D0907748DE398 /* Logger+Extensions.swift in Sources */,
+				2789906515CE28C160811F49 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C20741986A7A7D6BC1275F05 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D91F79D3BE1111B2301DDF09 /* CluademailUITests.swift in Sources */,
+				D1A916AA2024E4483F8D5161 /* CluademailUITestsLaunchTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FE11337A37D2E4D7C92480B4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				94E1699DB485E2B211CCC80A /* AppStateTests.swift in Sources */,
+				A38E88DD3AB8756487A37A2D /* ErrorHandlerTests.swift in Sources */,
+				BB1A38FE4D19CCE21B3C4AED /* MockErrorHandler.swift in Sources */,
+				AFFABDBF3C8B14B1E4DAE348 /* TestFixtures.swift in Sources */,
+				3B542D7F96B11D013D49315D /* XCTestCase+Extensions.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		121631714F5954F6E40F0A18 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D83F4DAF83049B6943F21A4 /* Cluademail */;
+			targetProxy = 05AE0C79031D51E7A388ADB3 /* PBXContainerItemProxy */;
+		};
+		BD2897CDC101CDCB770E532F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D83F4DAF83049B6943F21A4 /* Cluademail */;
+			targetProxy = 989B786D97304EC93B1BD249 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		23D3409E18B506D08495AA25 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = CluademailTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cluademail.app.tests;
+				PRODUCT_MODULE_NAME = CluademailTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cluademail.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Cluademail";
+			};
+			name = Release;
+		};
+		2842E56C143B4C81DD592C9E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = CluademailTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cluademail.app.tests;
+				PRODUCT_MODULE_NAME = CluademailTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cluademail.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Cluademail";
+			};
+			name = Debug;
+		};
+		41C2AB126AC45FD24CFCE697 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Cluademail/Supporting/Cluademail.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = Cluademail/Supporting/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cluademail.app;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		497FF8D914F39611A8227DCD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = CluademailUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cluademail.app.uitests;
+				PRODUCT_MODULE_NAME = CluademailUITests;
+				SDKROOT = macosx;
+				TEST_TARGET_NAME = Cluademail;
+			};
+			name = Debug;
+		};
+		857B41394DC3A0BDD8F8DFDA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = CluademailUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cluademail.app.uitests;
+				PRODUCT_MODULE_NAME = CluademailUITests;
+				SDKROOT = macosx;
+				TEST_TARGET_NAME = Cluademail;
+			};
+			name = Release;
+		};
+		893CF0840586C1F74DF0C9E4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BD3D300B9C700FFE1AC5D905 /* Production.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = Cluademail;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		96841D015AC999919795683E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Cluademail/Supporting/Cluademail.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
+				INFOPLIST_FILE = Cluademail/Supporting/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cluademail.app;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		99A8124BD3CC8C3E095758FD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2397DACF6BA7F233B169CA7A /* Development.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = Cluademail;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2FB3904BCA64ECDF5F615EDA /* Build configuration list for PBXNativeTarget "CluademailUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				497FF8D914F39611A8227DCD /* Debug */,
+				857B41394DC3A0BDD8F8DFDA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		551A8F63C61689D9B60875EF /* Build configuration list for PBXNativeTarget "Cluademail" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				96841D015AC999919795683E /* Debug */,
+				41C2AB126AC45FD24CFCE697 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9FD2190BB9ACD3AE4CB367E7 /* Build configuration list for PBXProject "Cluademail" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				99A8124BD3CC8C3E095758FD /* Debug */,
+				893CF0840586C1F74DF0C9E4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CD733CE3ED0687EE708C2FA5 /* Build configuration list for PBXNativeTarget "CluademailTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2842E56C143B4C81DD592C9E /* Debug */,
+				23D3409E18B506D08495AA25 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C9BE3A4861397F1250573C33 /* Project object */;
+}

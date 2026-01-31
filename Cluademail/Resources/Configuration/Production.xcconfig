@@ -1,0 +1,13 @@
+// Production Configuration
+// This file contains production-specific settings
+
+// Google OAuth Client ID for production
+// IMPORTANT: Set this via environment variable or CI/CD secrets
+// Do NOT commit actual production credentials to version control
+GOOGLE_CLIENT_ID = $(GOOGLE_CLIENT_ID_PROD)
+
+// Environment identifier
+APP_ENVIRONMENT = production
+
+// Production optimizations
+SWIFT_OPTIMIZATION_LEVEL = -O

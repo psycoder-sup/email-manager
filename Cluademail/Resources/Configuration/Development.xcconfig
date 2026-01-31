@@ -1,0 +1,15 @@
+// Development Configuration
+// This file contains development-specific settings
+
+// Google OAuth Client ID for development
+// Replace with your actual development client ID from Google Cloud Console
+GOOGLE_CLIENT_ID = YOUR_DEV_CLIENT_ID_HERE.apps.googleusercontent.com
+
+// Environment identifier
+APP_ENVIRONMENT = development
+
+// Bundle ID suffix for development builds (optional)
+// PRODUCT_BUNDLE_IDENTIFIER = com.cluademail.app.dev
+
+// Enable additional debugging
+OTHER_SWIFT_FLAGS = $(inherited) -D DEBUG
