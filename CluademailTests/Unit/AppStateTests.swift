@@ -36,7 +36,7 @@ final class AppStateTests: XCTestCase {
     }
 
     func testAccountSelection() {
-        let account = Account(id: UUID(), email: "test@gmail.com", displayName: "Test")
+        let account = Account(email: "test@gmail.com", displayName: "Test")
 
         sut.selectedAccount = account
         XCTAssertEqual(sut.selectedAccount?.email, "test@gmail.com")

@@ -11,7 +11,12 @@ struct CluademailApp: App {
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            // Models will be added in Task 02
+            Account.self,
+            Email.self,
+            EmailThread.self,
+            Attachment.self,
+            Label.self,
+            SyncState.self
         ])
         let modelConfiguration = ModelConfiguration(
             schema: schema,

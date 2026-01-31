@@ -15,25 +15,25 @@ struct SettingsView: View {
         TabView(selection: $selectedTab) {
             AccountsSettingsView()
                 .tabItem {
-                    Label("Accounts", systemImage: "person.crop.circle")
+                    SwiftUI.Label("Accounts", systemImage: "person.crop.circle")
                 }
                 .tag(SettingsTab.accounts)
 
             SyncSettingsView()
                 .tabItem {
-                    Label("Sync", systemImage: "arrow.triangle.2.circlepath")
+                    SwiftUI.Label("Sync", systemImage: "arrow.triangle.2.circlepath")
                 }
                 .tag(SettingsTab.sync)
 
             MCPSettingsView()
                 .tabItem {
-                    Label("MCP", systemImage: "server.rack")
+                    SwiftUI.Label("MCP", systemImage: "server.rack")
                 }
                 .tag(SettingsTab.mcp)
 
             AboutSettingsView()
                 .tabItem {
-                    Label("About", systemImage: "info.circle")
+                    SwiftUI.Label("About", systemImage: "info.circle")
                 }
                 .tag(SettingsTab.about)
         }
@@ -106,10 +106,10 @@ struct MCPSettingsView: View {
                 Toggle("Enable MCP Server", isOn: $mcpEnabled)
 
                 if appState.mcpServerRunning {
-                    Label("Server Running", systemImage: "checkmark.circle.fill")
+                    SwiftUI.Label("Server Running", systemImage: "checkmark.circle.fill")
                         .foregroundStyle(.green)
                 } else {
-                    Label("Server Stopped", systemImage: "xmark.circle.fill")
+                    SwiftUI.Label("Server Stopped", systemImage: "xmark.circle.fill")
                         .foregroundStyle(.secondary)
                 }
             } header: {

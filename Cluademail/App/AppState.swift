@@ -73,18 +73,3 @@ enum Folder: String, CaseIterable, Identifiable {
     }
 }
 
-// MARK: - Placeholder Types (to be replaced in Task 02)
-
-/// Placeholder for Account model (Task 02)
-struct Account: Identifiable, Hashable {
-    let id: UUID
-    let email: String
-    let displayName: String
-}
-
-/// Placeholder for Email model (Task 02)
-struct Email: Identifiable, Hashable {
-    let id: String
-    let subject: String
-    let snippet: String
-}

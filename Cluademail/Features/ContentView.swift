@@ -31,7 +31,7 @@ struct SidebarView: View {
         )) {
             Section("Folders") {
                 ForEach(Folder.allCases) { folder in
-                    Label(folder.displayName, systemImage: folder.systemImage)
+                    SwiftUI.Label(folder.displayName, systemImage: folder.systemImage)
                         .tag(folder)
                 }
             }

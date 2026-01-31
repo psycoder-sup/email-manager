@@ -29,7 +29,8 @@ Core/Models/
 ├── EmailThread.swift
 ├── Attachment.swift
 ├── Label.swift
-└── SyncState.swift
+├── SyncState.swift
+└── GmailDTOs.swift
 ```
 
 ## Implementation Details
@@ -47,6 +48,7 @@ Core/Models/
 **Relationships**:
 - One-to-many with Email (cascade delete)
 - One-to-many with Label (cascade delete)
+- One-to-many with EmailThread (cascade delete)
 
 **Initialization**: Requires email and displayName; generates UUID, sets isEnabled=true
 
@@ -175,16 +177,74 @@ Core/Models/
 
 ## Acceptance Criteria
 
-- [ ] All model files created in `Core/Models/`
-- [ ] Models compile without errors
-- [ ] SwiftData `@Model` classes have appropriate relationships defined
-- [ ] All models conform to `Identifiable`
-- [ ] `Email` model can represent all Gmail message metadata
-- [ ] `Attachment` model tracks download state and local file path
-- [ ] `Label` model distinguishes system vs user labels
-- [ ] DTO structs created for Gmail API response mapping
-- [ ] Unit tests for model initialization and computed properties
-- [ ] Models support encoding/decoding for API communication
+- [x] All model files created in `Core/Models/`
+- [x] Models compile without errors
+- [x] SwiftData `@Model` classes have appropriate relationships defined
+- [x] All models conform to `Identifiable`
+- [x] `Email` model can represent all Gmail message metadata
+- [x] `Attachment` model tracks download state and local file path
+- [x] `Label` model distinguishes system vs user labels
+- [x] DTO structs created for Gmail API response mapping
+- [x] Unit tests for model initialization and computed properties
+- [x] Models support encoding/decoding for API communication
+
+## Completion Summary
+
+**Status:** COMPLETED
+
+**Date:** 2025-01-31 (simplified 2025-01-31)
+
+**Implementation Notes:**
+
+1. **Model Files Created** (7 files in `Core/Models/`):
+   - `Account.swift` - Gmail account with cascade relationships to emails, labels, threads
+   - `Email.swift` - Full email with optional body fields for lazy loading, 5 computed label properties
+   - `EmailThread.swift` - Thread grouping with aggregated metadata
+   - `Attachment.swift` - File metadata with `displaySize` computed property
+   - `Label.swift` - Includes `LabelType` and `LabelVisibility` enums, system label constants
+   - `SyncState.swift` - Includes `SyncStatus` enum for sync tracking
+   - `GmailDTOs.swift` - All Codable structs for Gmail API (messages, threads, labels, history)
+
+2. **Test Files Created** (6 files in `CluademailTests/Unit/Models/`):
+   - `AccountTests.swift` - 3 tests
+   - `EmailTests.swift` - 14 tests (including computed property tests)
+   - `EmailThreadTests.swift` - 3 tests
+   - `AttachmentTests.swift` - 8 tests (including displaySize formatting)
+   - `LabelTests.swift` - 8 tests (including enum Codable tests)
+   - `SyncStateTests.swift` - 5 tests
+   - `GmailDTOsTests.swift` - 13 tests for JSON decoding
+
+3. **Test Results**: 78 unit tests passing, 8 UI tests passing (86 total)
+
+4. **Key Design Decisions**:
+   - Optional `bodyText`/`bodyHtml` for lazy loading support
+   - Cascade delete for Account → Emails, Labels, Threads
+   - Cascade delete for Email → Attachments
+   - Single `GmailDTOs.swift` file for all API response structs
+   - Identity-based Equatable (SwiftData default)
+   - Type-safe enums: `LabelType`, `LabelVisibility`, `SyncStatus` (all Codable + Sendable)
+   - Computed `id` properties for Identifiable conformance
+
+5. **Files Modified**:
+   - `CluademailApp.swift` - Added models to SwiftData Schema
+   - `AppState.swift` - Removed placeholder Account/Email structs
+   - `ContentView.swift` - Fixed SwiftUI.Label naming collision
+   - `SettingsView.swift` - Fixed SwiftUI.Label naming collision
+   - `TestFixtures.swift` - Added factory methods for all new models
+
+6. **Code Review Findings (Fixed)**:
+   - Added missing `threads` relationship to Account model
+   - Created missing EmailThreadTests.swift
+
+7. **Code Simplification** (2025-01-31):
+   - Removed redundant `makeUserLabel` from TestFixtures (`makeLabel(type: .user)` achieves the same)
+   - Consolidated 10 individual system label tests into 1 comprehensive test in LabelTests
+   - Removed 3 redundant tests from AccountTests (duplicated assertions from `testInitSetsDefaultValues`)
+   - Removed 6 redundant tests from EmailThreadTests (4 duplicate default value tests + 2 fixture tests)
+   - Removed 1 redundant test from EmailTests (`testMultipleLabelsComputedProperties` - covered by individual tests)
+   - Net reduction: ~110 lines of redundant test code removed
+
+8. **Next Steps**: Task 03 (Local Database Layer) can now begin
 
 ## References
 

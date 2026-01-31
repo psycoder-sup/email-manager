@@ -9,17 +9,14 @@ enum TestFixtures {
 
     /// Creates a test Account with optional customization.
     /// - Parameters:
-    ///   - id: Account ID (default: new UUID)
     ///   - email: Email address (default: "test@gmail.com")
     ///   - displayName: Display name (default: "Test User")
     /// - Returns: A configured Account
     static func makeAccount(
-        id: UUID = UUID(),
         email: String = "test@gmail.com",
         displayName: String = "Test User"
     ) -> Account {
         Account(
-            id: id,
             email: email,
             displayName: displayName
         )
@@ -41,19 +38,43 @@ enum TestFixtures {
 
     /// Creates a test Email with optional customization.
     /// - Parameters:
-    ///   - id: Gmail message ID (default: generated)
+    ///   - gmailId: Gmail message ID (default: generated UUID string)
+    ///   - threadId: Gmail thread ID (default: generated UUID string)
     ///   - subject: Email subject (default: "Test Subject")
     ///   - snippet: Email snippet (default: "Test email content...")
+    ///   - fromAddress: Sender's email address (default: "sender@gmail.com")
+    ///   - fromName: Sender's name (default: "Test Sender")
+    ///   - toAddresses: Recipients (default: ["recipient@gmail.com"])
+    ///   - date: Email date (default: now)
+    ///   - isRead: Read status (default: false)
+    ///   - isStarred: Starred status (default: false)
+    ///   - labelIds: Label IDs (default: ["INBOX"])
     /// - Returns: A configured Email
     static func makeEmail(
-        id: String = UUID().uuidString,
+        gmailId: String = UUID().uuidString,
+        threadId: String = UUID().uuidString,
         subject: String = "Test Subject",
-        snippet: String = "Test email content..."
+        snippet: String = "Test email content...",
+        fromAddress: String = "sender@gmail.com",
+        fromName: String? = "Test Sender",
+        toAddresses: [String] = ["recipient@gmail.com"],
+        date: Date = Date(),
+        isRead: Bool = false,
+        isStarred: Bool = false,
+        labelIds: [String] = ["INBOX"]
     ) -> Email {
         Email(
-            id: id,
+            gmailId: gmailId,
+            threadId: threadId,
             subject: subject,
-            snippet: snippet
+            snippet: snippet,
+            fromAddress: fromAddress,
+            fromName: fromName,
+            toAddresses: toAddresses,
+            date: date,
+            isRead: isRead,
+            isStarred: isStarred,
+            labelIds: labelIds
         )
     }
 
@@ -67,6 +88,105 @@ enum TestFixtures {
                 snippet: "This is email number \(index)"
             )
         }
+    }
+
+    // MARK: - EmailThread Fixtures
+
+    /// Creates a test EmailThread with optional customization.
+    /// - Parameters:
+    ///   - threadId: Gmail thread ID (default: generated UUID string)
+    ///   - subject: Thread subject (default: "Test Thread")
+    ///   - snippet: Preview snippet (default: "Test thread content...")
+    ///   - lastMessageDate: Last message date (default: now)
+    ///   - messageCount: Message count (default: 1)
+    ///   - isRead: Read state (default: false)
+    ///   - isStarred: Starred state (default: false)
+    ///   - participantEmails: Participant emails (default: ["user@gmail.com"])
+    /// - Returns: A configured EmailThread
+    static func makeEmailThread(
+        threadId: String = UUID().uuidString,
+        subject: String = "Test Thread",
+        snippet: String = "Test thread content...",
+        lastMessageDate: Date = Date(),
+        messageCount: Int = 1,
+        isRead: Bool = false,
+        isStarred: Bool = false,
+        participantEmails: [String] = ["user@gmail.com"]
+    ) -> EmailThread {
+        EmailThread(
+            threadId: threadId,
+            subject: subject,
+            snippet: snippet,
+            lastMessageDate: lastMessageDate,
+            messageCount: messageCount,
+            isRead: isRead,
+            isStarred: isStarred,
+            participantEmails: participantEmails
+        )
+    }
+
+    // MARK: - Attachment Fixtures
+
+    /// Creates a test Attachment with optional customization.
+    /// - Parameters:
+    ///   - id: Local ID (default: generated UUID string)
+    ///   - gmailAttachmentId: Gmail attachment ID (default: generated UUID string)
+    ///   - filename: Filename (default: "document.pdf")
+    ///   - mimeType: MIME type (default: "application/pdf")
+    ///   - size: File size in bytes (default: 1024)
+    /// - Returns: A configured Attachment
+    static func makeAttachment(
+        id: String = UUID().uuidString,
+        gmailAttachmentId: String = UUID().uuidString,
+        filename: String = "document.pdf",
+        mimeType: String = "application/pdf",
+        size: Int64 = 1024
+    ) -> Attachment {
+        Attachment(
+            id: id,
+            gmailAttachmentId: gmailAttachmentId,
+            filename: filename,
+            mimeType: mimeType,
+            size: size
+        )
+    }
+
+    // MARK: - Label Fixtures
+
+    /// Creates a test Label with optional customization.
+    /// - Parameters:
+    ///   - gmailLabelId: Gmail label ID (default: "INBOX")
+    ///   - name: Display name (default: "Inbox")
+    ///   - type: Label type (default: .system)
+    ///   - messageListVisibility: Message list visibility (default: .show)
+    ///   - labelListVisibility: Label list visibility (default: .show)
+    /// - Returns: A configured Label
+    static func makeLabel(
+        gmailLabelId: String = "INBOX",
+        name: String = "Inbox",
+        type: LabelType = .system,
+        messageListVisibility: LabelVisibility = .show,
+        labelListVisibility: LabelVisibility = .show
+    ) -> Label {
+        Label(
+            gmailLabelId: gmailLabelId,
+            name: name,
+            type: type,
+            messageListVisibility: messageListVisibility,
+            labelListVisibility: labelListVisibility
+        )
+    }
+
+    // MARK: - SyncState Fixtures
+
+    /// Creates a test SyncState with optional customization.
+    /// - Parameters:
+    ///   - accountId: Account ID (default: new UUID)
+    /// - Returns: A configured SyncState
+    static func makeSyncState(
+        accountId: UUID = UUID()
+    ) -> SyncState {
+        SyncState(accountId: accountId)
     }
 
     // MARK: - Error Fixtures
@@ -108,7 +228,7 @@ enum TestFixtures {
 extension TestFixtures {
 
     /// Creates a date relative to now.
-    /// - Parameter daysAgo: Number of days in the past
+    /// - Parameter days: Number of days in the past (positive = past)
     /// - Returns: A Date
     static func dateAgo(days: Int) -> Date {
         Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
@@ -124,5 +244,71 @@ extension TestFixtures {
         components.hour = hour
         components.minute = minute
         return Calendar.current.date(from: components) ?? Date()
+    }
+}
+
+// MARK: - Gmail DTO Fixtures
+
+extension TestFixtures {
+
+    /// Creates a test GmailMessageDTO with optional customization.
+    /// - Parameters:
+    ///   - id: Message ID (default: generated)
+    ///   - threadId: Thread ID (default: generated)
+    ///   - labelIds: Label IDs (default: ["INBOX"])
+    ///   - snippet: Preview snippet (default: "Test message...")
+    /// - Returns: A configured GmailMessageDTO
+    static func makeGmailMessageDTO(
+        id: String = UUID().uuidString,
+        threadId: String = UUID().uuidString,
+        labelIds: [String]? = ["INBOX"],
+        snippet: String? = "Test message..."
+    ) -> GmailMessageDTO {
+        GmailMessageDTO(
+            id: id,
+            threadId: threadId,
+            labelIds: labelIds,
+            snippet: snippet,
+            internalDate: String(Int(Date().timeIntervalSince1970 * 1000)),
+            payload: makePayloadDTO()
+        )
+    }
+
+    /// Creates a test PayloadDTO with default headers.
+    /// - Returns: A configured PayloadDTO
+    static func makePayloadDTO() -> PayloadDTO {
+        PayloadDTO(
+            headers: [
+                HeaderDTO(name: "From", value: "sender@gmail.com"),
+                HeaderDTO(name: "To", value: "recipient@gmail.com"),
+                HeaderDTO(name: "Subject", value: "Test Subject")
+            ],
+            body: BodyDTO(size: 100, data: nil, attachmentId: nil),
+            parts: nil,
+            mimeType: "text/plain"
+        )
+    }
+
+    /// Creates a test GmailLabelDTO with optional customization.
+    /// - Parameters:
+    ///   - id: Label ID (default: "INBOX")
+    ///   - name: Label name (default: "Inbox")
+    ///   - type: Label type string (default: "system")
+    /// - Returns: A configured GmailLabelDTO
+    static func makeGmailLabelDTO(
+        id: String = "INBOX",
+        name: String = "Inbox",
+        type: String? = "system"
+    ) -> GmailLabelDTO {
+        GmailLabelDTO(
+            id: id,
+            name: name,
+            type: type,
+            messageListVisibility: "show",
+            labelListVisibility: "labelShow",
+            color: nil,
+            messagesTotal: 100,
+            messagesUnread: 10
+        )
     }
 }
