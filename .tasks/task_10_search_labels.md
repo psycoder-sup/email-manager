@@ -81,46 +81,15 @@ Features/Labels/
 
 When searching "All Accounts" (filters.accountIds is nil):
 
-```swift
-func searchAllAccounts(query: String, filters: SearchFilters) async throws -> [Email] {
-    let accounts = await accountRepository.fetchAll()
-
-    // Local search across all accounts
-    var localResults: [Email] = []
-    for account in accounts {
-        let results = try await emailRepository.search(query: query, account: account)
-        localResults.append(contentsOf: results)
-    }
-
-    // Dedupe and sort by date
-    localResults = localResults
-        .unique(by: \.gmailId)
-        .sorted { $0.date > $1.date }
-
-    // Server search if needed (parallel across accounts)
-    if shouldTriggerServerSearch(localCount: localResults.count, query: query) {
-        let serverResults = try await withThrowingTaskGroup(of: [Email].self) { group in
-            for account in accounts {
-                group.addTask {
-                    try await self.gmailService.searchMessages(account: account, query: query)
-                }
-            }
-            var all: [Email] = []
-            for try await results in group {
-                all.append(contentsOf: results)
-            }
-            return all
-        }
-
-        // Merge server results with local, dedupe
-        localResults = (localResults + serverResults)
-            .unique(by: \.gmailId)
-            .sorted { $0.date > $1.date }
-    }
-
-    return Array(localResults.prefix(100))  // Cap at 100 results
-}
-```
+**Multi-Account Search Flow**:
+1. Fetch all accounts from repository
+2. Local search: Loop through accounts, search each, collect results
+3. Deduplicate by gmailId and sort by date (newest first)
+4. If server search needed (based on local count and query type):
+   - Use TaskGroup to search accounts in parallel
+   - Merge server results with local
+   - Deduplicate and sort again
+5. Cap results at 100 items
 
 **Account Badge in Results**:
 - When searching all accounts, show AccountBadge on each result
@@ -407,6 +376,101 @@ label:{name}        - Has label
 
 ---
 
+### Search History & Suggestions
+
+**Purpose**: Remember recent searches and provide quick access
+
+**SearchHistoryService**:
+- Max 20 history items stored in UserDefaults
+- `addSearch(_:filters:)`: Remove existing duplicate, insert at front, trim to max
+- `clearHistory()`: Reset to empty array
+- SearchHistoryItem: Codable struct with id (UUID), query, filters, date
+
+**Search Suggestions View**:
+- Binding for searchQuery, history array, onSelect callback
+- "Recent Searches" section (if history not empty):
+  - Clock icon, query text, relative date
+  - TapGesture to select, swipe-to-delete support
+- "Search Tips" section with Gmail operator examples
+- Filter history by current query (case-insensitive contains)
+
+**Keyboard Navigation**:
+- Arrow keys navigate suggestions
+- Enter selects highlighted suggestion
+- Escape dismisses suggestions
+
+**Persistence**:
+- Store in UserDefaults as JSON
+- Limit to 20 most recent searches
+- Include filters with each search for full restoration
+
+---
+
+### "Load More from Server" UX
+
+**Purpose**: Allow users to explicitly fetch more results from Gmail API
+
+**Trigger Points**:
+| Scenario | Behavior |
+|----------|----------|
+| Local results < 10 | Auto-trigger server search |
+| Local results ≥ 10, user scrolls to bottom | Show "Load more" button |
+| User clicks "Search server" | Force server search |
+| Query uses Gmail-only operators | Auto-trigger server search |
+
+**UI Implementation**:
+- Track `hasSearchedServer` and `isLoadingMore` state
+- Show "Load more" button when local results >= 10 and haven't searched server
+  - Button shows ProgressView while loading, cloud icon otherwise
+- After server search, show "Searched all emails on server" with checkmark
+- `loadMoreFromServer()`: Set loading state, call searchService, merge results
+
+**Result Merging**:
+- Start with local results
+- Create Set of local gmailIds
+- Add server results not already in local
+- Sort merged results by date (newest first)
+
+**Loading State**:
+- Show inline progress indicator in the "Load more" button
+- Disable button while loading
+- Replace with "Searched all emails" when complete
+
+**Error Handling**:
+- Network error: "Couldn't search server. Check connection."
+- Rate limited: "Too many searches. Try again in {N} seconds."
+- Quota exceeded: "Search limit reached. Try again later."
+
+---
+
+### Label Display Order
+
+**Purpose**: Display user labels in consistent, user-friendly order
+
+**Default Sort Order**:
+1. System labels (fixed order): Inbox, Starred, Sent, Drafts, Spam, Trash
+2. User labels: Alphabetical by name
+
+**Label Ordering Service**:
+- System label order: INBOX, STARRED, SENT, DRAFT, SPAM, TRASH
+- `sortLabels()` method:
+  - Filter system labels, sort by predefined order (use index in array, Int.max if not found)
+  - Filter user labels, sort alphabetically (case-insensitive)
+  - Return system labels followed by user labels
+
+**Future Enhancement** (v2):
+- User-defined label order via drag-and-drop
+- Favorite/pinned labels
+- Nested label display (Gmail's hierarchical labels: "Parent/Child")
+
+**Nested Label Display**:
+- Gmail uses "/" for nested labels (e.g., "Work/Projects/Alpha")
+- Split label name by "/" separator
+- Indent level = number of components - 1
+- Display name = last component only
+
+---
+
 ### Key Considerations
 
 - **Search Scope**: Search subject, sender, snippet locally
@@ -415,6 +479,9 @@ label:{name}        - Has label
 - **System vs User Labels**: Only show user labels in picker
 - **Batch Label Operations**: Support applying labels to multiple emails (future)
 - **Debouncing**: Debounce search input to avoid excessive queries
+- **Search History**: Persist recent searches for quick access
+- **Server Search UX**: Clear indication when searching local vs server
+- **Label Ordering**: Consistent, predictable label display order
 
 ## Acceptance Criteria
 
@@ -441,6 +508,17 @@ label:{name}        - Has label
 - [ ] Search is debounced to avoid excessive queries
 - [ ] Empty state shows when no results
 - [ ] Search can be cleared
+- [ ] **Recent searches** displayed as suggestions
+- [ ] **Search history** persists across app launches
+- [ ] **Delete search** from history via swipe
+- [ ] **Clear all history** option available
+- [ ] **Search tips** shown (from:, has:, is: operators)
+- [ ] **"Load more from server"** button appears when local results ≥ 10
+- [ ] **Server search indicator** shows when searching remotely
+- [ ] **"Searched all emails"** confirmation after server search
+- [ ] **Merged results** deduplicated and sorted by date
+- [ ] **Labels sorted** with system labels first, then alphabetical user labels
+- [ ] **Nested labels** (Parent/Child) display with proper indentation
 
 ## References
 

@@ -124,6 +124,53 @@ Core/Services/
 
 **Note**: `sendMessage` is for user-confirmed sends only. AI/MCP can only use `createDraft`.
 
+---
+
+### Sending vs Draft Flow (Security Boundary)
+
+**Purpose**: Enforce PRD requirement that AI cannot send emails directly
+
+**Draft Creation Flow** (AI/MCP allowed):
+```
+MCP Tool (create_draft)
+    → GmailAPIService.createDraft()
+    → Gmail API POST /drafts
+    → Returns draft ID
+    → User sees draft in Drafts folder
+    → User manually reviews and clicks Send
+```
+
+**Direct Send Flow** (User-only, NOT exposed to MCP):
+```
+ComposeView "Send" button (user click)
+    → ComposeViewModel.send()
+    → GmailAPIService.sendMessage()
+    → Gmail API POST /messages/send
+    → Email sent immediately
+```
+
+**Enforcement Points**:
+1. MCP `create_draft` tool calls `createDraft()` only - no send capability
+2. `sendMessage()` is NEVER called from MCP layer
+3. UI confirmation required: user must physically click Send button
+4. Draft review: user sees full email before sending
+
+**Draft-to-Send User Flow**:
+1. AI creates draft via MCP
+2. User receives notification: "Draft created: {subject}"
+3. User opens Drafts folder in Cluademail
+4. User reviews email content, recipients, attachments
+5. User clicks "Send" button
+6. App calls `sendMessage()` with draft content
+7. Optionally: delete draft after successful send
+
+**DraftServiceProtocol Methods**:
+- `createDraft(...)` - Creates draft, available to MCP
+- `sendDraft(draftId:account:)` - UI only, NOT exposed to MCP
+- `deleteDraft(draftId:account:)` - Discards draft
+
+---
+
 **Attachments**:
 - `getAttachment(account:messageId:attachmentId:) async throws -> Data`
 
@@ -153,6 +200,42 @@ Core/Services/
 - 429: Extract Retry-After header, throw rateLimited
 - 403: Throw quotaExceeded
 - 5xx: Throw serverError with status code
+
+---
+
+### Error Retry Decision Matrix
+
+**Purpose**: Comprehensive retry logic for all error scenarios
+
+| HTTP Status | Error Type | Retryable | Max Retries | Backoff | Action |
+|-------------|------------|-----------|-------------|---------|--------|
+| 400 | Bad Request | No | 0 | N/A | Log error, surface to user |
+| 401 | Unauthorized | Yes (once) | 1 | None | Refresh token, retry once |
+| 403 (quotaExceeded) | Quota Exceeded | No | 0 | N/A | Switch to IMAP fallback |
+| 403 (forbidden) | Permission Denied | No | 0 | N/A | Check OAuth scopes |
+| 404 | Not Found | No | 0 | N/A | Resource deleted, skip |
+| 408 | Request Timeout | Yes | 3 | Exponential | Retry with backoff |
+| 429 | Rate Limited | Yes | 5 | Retry-After header | Wait, then retry |
+| 500 | Internal Error | Yes | 3 | Exponential | Retry with backoff |
+| 502 | Bad Gateway | Yes | 3 | Exponential | Retry with backoff |
+| 503 | Service Unavailable | Yes | 5 | Exponential | Retry with backoff |
+| 504 | Gateway Timeout | Yes | 3 | Exponential | Retry with backoff |
+| Network Error | Connection Failed | Yes | 3 | Exponential | Check connectivity |
+| DNS Error | Resolution Failed | Yes | 2 | Linear (5s) | May need IMAP fallback |
+| SSL Error | Certificate Issue | No | 0 | N/A | Log, alert user |
+| Timeout | Request Timeout | Yes | 2 | Linear (10s) | Increase timeout on retry |
+
+**Exponential Backoff Formula**:
+- Calculate delay: `baseDelay * pow(2.0, attempt - 1)`
+- Add jitter: ±10% randomization to prevent thundering herd
+- Cap maximum delay at 60 seconds
+
+**Retry Implementation Guidelines**:
+- Loop through attempts up to `maxAttempts`
+- On error, check if `isRetryable` - throw immediately if not
+- Calculate delay using backoff formula or use `retryDelay` from error (e.g., Retry-After header)
+- Sleep for calculated delay before retry
+- After exhausting attempts, throw the last error
 
 **Message Fetching**:
 - `listMessages` returns minimal info (id, threadId only)
@@ -230,23 +313,45 @@ Core/Services/
 - Gmail API endpoint unreachable (network timeout after 30s, 3 attempts)
 - Explicit user preference toggle in Settings (future)
 
-**Library Decision: MailCore2 via SPM**
+**Library Decision: MailCore2 via CocoaPods or Manual Integration**
 
 **Rationale**:
 - Native `Network` framework lacks IMAP protocol implementation
-- MailCore2 is mature, actively maintained, supports XOAUTH2
-- Available via SPM: `https://github.com/nicklockwood/MailCore2`
+- MailCore2 is mature, supports XOAUTH2 authentication
+- Official repository: `https://github.com/MailCore/mailcore2`
 
-**SPM Integration**:
-```swift
-// Package.swift or Xcode SPM
-.package(url: "https://github.com/nicklockwood/MailCore2", from: "0.6.0")
+**Integration Options** (in order of preference):
+
+**Option 1: CocoaPods (Recommended)**:
+```ruby
+# Podfile
+platform :osx, '14.0'
+use_frameworks!
+
+target 'Cluademail' do
+  pod 'MailCore2-osx'
+end
+```
+
+**Option 2: Manual Framework Integration**:
+1. Download prebuilt framework from MailCore2 releases
+2. Add `MailCore.framework` to project
+3. Embed & Sign in target settings
+4. Add to Framework Search Paths
+
+**Option 3: Build from Source**:
+```bash
+git clone https://github.com/MailCore/mailcore2.git
+cd mailcore2/build-mac
+./build.sh
+# Output: mailcore2/build-mac/MailCore.framework
 ```
 
 **Build Configuration**:
-- Add MailCore2 to app target dependencies
-- Link `libMailCore2.a` framework
-- Add required system frameworks: Security, CFNetwork
+- Link `MailCore.framework`
+- Add required system frameworks: Security, CFNetwork, CoreServices
+- Set `CLANG_CXX_LANGUAGE_STANDARD` to `gnu++17`
+- Add `-lc++` to Other Linker Flags
 
 **IMAPService**:
 - Server: `imap.gmail.com:993` (SSL)
@@ -278,43 +383,18 @@ base64("user=" + email + "\x01auth=Bearer " + accessToken + "\x01\x01")
 ```
 
 **XOAUTH2Helper Implementation**:
-```swift
-struct XOAUTH2Helper {
-    /// Generate XOAUTH2 SASL token for IMAP/SMTP authentication
-    static func generateToken(email: String, accessToken: String) -> String {
-        let authString = "user=\(email)\u{01}auth=Bearer \(accessToken)\u{01}\u{01}"
-        return Data(authString.utf8).base64EncodedString()
-    }
-}
-```
+- Generate SASL token by concatenating: `user={email}\x01auth=Bearer {accessToken}\x01\x01`
+- Base64 encode the concatenated string
 
 **MailCore2 IMAP Session Setup**:
-```swift
-func createIMAPSession(account: Account, accessToken: String) -> MCOIMAPSession {
-    let session = MCOIMAPSession()
-    session.hostname = "imap.gmail.com"
-    session.port = 993
-    session.username = account.email
-    session.connectionType = .TLS
-    session.authType = .xoAuth2
-    session.oAuth2Token = accessToken  // MailCore2 handles XOAUTH2 formatting
-    return session
-}
-```
+- Create MCOIMAPSession with hostname `imap.gmail.com`, port 993
+- Set connectionType to TLS, authType to xoAuth2
+- Pass accessToken to oAuth2Token property (MailCore2 handles XOAUTH2 formatting)
 
 **MailCore2 SMTP Session Setup**:
-```swift
-func createSMTPSession(account: Account, accessToken: String) -> MCOSMTPSession {
-    let session = MCOSMTPSession()
-    session.hostname = "smtp.gmail.com"
-    session.port = 587
-    session.username = account.email
-    session.connectionType = .startTLS
-    session.authType = .xoAuth2
-    session.oAuth2Token = accessToken
-    return session
-}
-```
+- Create MCOSMTPSession with hostname `smtp.gmail.com`, port 587
+- Set connectionType to startTLS, authType to xoAuth2
+- Pass accessToken to oAuth2Token property
 
 ---
 
@@ -337,21 +417,9 @@ func createSMTPSession(account: Account, accessToken: String) -> MCOSMTPSession 
 - Parse multipart response, handle partial failures
 
 **BatchResult Type**:
-```swift
-struct BatchResult<T> {
-    let succeeded: [T]
-    let failed: [BatchFailure]
-
-    var hasFailures: Bool { !failed.isEmpty }
-}
-
-struct BatchFailure {
-    let requestIndex: Int
-    let messageId: String
-    let statusCode: Int
-    let error: GmailAPIError
-}
-```
+- Generic struct `BatchResult<T>` with `succeeded: [T]` and `failed: [BatchFailure]`
+- Computed property `hasFailures` returns true if any failures exist
+- `BatchFailure` contains: requestIndex, messageId, statusCode, error (GmailAPIError)
 
 **Partial Failure Handling**:
 1. Parse each part of multipart response independently
@@ -370,16 +438,29 @@ struct BatchFailure {
 | Other 4xx | Skip (permanent failure), log error |
 
 **Batch Response Parsing**:
-```swift
-func parseBatchResponse(_ data: Data, boundary: String) -> [BatchPartResult] {
-    // Split by boundary
-    // For each part:
-    //   1. Extract HTTP status line (e.g., "HTTP/1.1 200 OK")
-    //   2. Extract headers
-    //   3. Extract JSON body
-    //   4. Return (index, statusCode, body) tuple
-}
-```
+
+**Response Format**: Multipart response with boundary markers. Each part contains:
+- Outer headers (Content-Type, Content-ID)
+- Inner HTTP response (status line, headers, JSON body)
+
+**BatchPartResult**: Struct containing index, statusCode, headers dictionary, and body Data
+
+**Parser Implementation Guidelines**:
+1. Convert response data to string (UTF-8)
+2. Split by boundary marker (`--{boundary}`)
+3. Filter out empty parts and closing boundary
+4. For each part:
+   - Split by double CRLF to separate headers from body
+   - Extract outer headers (Content-Type, Content-ID)
+   - Parse HTTP status line to get status code (e.g., "HTTP/1.1 200 OK" → 200)
+   - Parse inner response headers
+   - Extract JSON body (everything after inner headers)
+5. Return array of BatchPartResult
+
+**Content-ID Correlation**:
+- Request Content-ID: `<request-{index}>`
+- Response Content-ID: `response-{index}`
+- Use index to correlate request message ID with response
 
 ---
 
@@ -478,6 +559,13 @@ func parseBatchResponse(_ data: Data, boundary: String) -> [BatchPartResult] {
 - [ ] **Quota tracking** implemented with backoff strategy
 - [ ] **Draft CRUD** - createDraft, updateDraft, deleteDraft, getDraft all implemented
 - [ ] Large emails (>5MB) lazy-load body content
+- [ ] **Error retry matrix** implemented with correct retry/skip decisions
+- [ ] **401 errors** trigger token refresh and single retry
+- [ ] **Sending flow** separated: MCP can only createDraft, UI can sendMessage
+- [ ] **DraftService** enforces security boundary between AI and direct sending
+- [ ] **Batch parsing** correctly handles Content-ID correlation
+- [ ] **Batch parsing** extracts status code from nested HTTP response
+- [ ] **MailCore2** integrated via CocoaPods or manual framework
 
 ## References
 

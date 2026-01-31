@@ -157,6 +157,215 @@ blockquote {
 
 ---
 
+### Malformed HTML Handling
+
+**Purpose**: Gracefully handle broken or unusual HTML in emails
+
+**Common Issues**:
+| Issue | Detection | Solution |
+|-------|-----------|----------|
+| Missing closing tags | HTML parsing errors | Use HTML5 parser (tolerant) |
+| Invalid encoding | Mojibake characters | Detect charset, re-decode |
+| Nested tables (newsletters) | Deep nesting | Limit nesting, simplify |
+| Inline styles overflow | CSS causes horizontal scroll | Wrap in container, constrain width |
+| Script tags (blocked) | `<script>` present | Already stripped, log attempt |
+| Broken image refs | 404 errors | Replace with placeholder |
+| Giant fonts | Font-size > 48px | Cap at reasonable size |
+
+**HTML Sanitization Pipeline**:
+1. Fix encoding issues - detect charset from meta tag, handle mojibake patterns
+2. Remove dangerous elements (script, iframe, object, embed)
+3. Sanitize inline styles - constrain widths, handle overflow
+4. Fix broken tags using HTML5 tolerant parser
+5. Wrap in responsive container with style constraints
+
+**Encoding Detection**:
+- Extract charset from meta tag if present
+- Check for mojibake patterns (garbled characters)
+- Try common encodings (ISO-8859-1, Windows-1252) if UTF-8 fails
+
+**Style Constraints**:
+```css
+/* Injected into email wrapper */
+.email-content * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+.email-content table {
+    table-layout: fixed !important;
+    width: 100% !important;
+}
+.email-content img {
+    max-width: 100% !important;
+    height: auto !important;
+}
+.email-content pre, .email-content code {
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+}
+```
+
+**Fallback Chain**:
+1. Try rendering sanitized HTML
+2. If WebView crashes or hangs (5s timeout): show plain text
+3. If no plain text: show snippet with "Unable to display email" message
+4. Offer "View raw source" option for debugging
+
+**Error Reporting**:
+- Log malformed HTML issues (anonymized)
+- Track which senders produce broken emails
+- Consider reporting to user: "This email may not display correctly"
+
+---
+
+### Inline Images (CID Attachments)
+
+**Purpose**: Display images embedded in email body via Content-ID references
+
+**CID Format**:
+```html
+<!-- In HTML body -->
+<img src="cid:image001.png@01D12345.ABCDEF00">
+
+<!-- Corresponding attachment header -->
+Content-Type: image/png
+Content-ID: <image001.png@01D12345.ABCDEF00>
+Content-Disposition: inline
+```
+
+**CID Resolution**:
+- CIDResolver struct takes array of attachments
+- `resolveHTML()` method:
+  - Find all `cid:` references using regex pattern `src=["']cid:([^"']+)["']`
+  - For each match, find attachment by Content-ID
+  - Replace CID reference with data URL (`data:{mimeType};base64,{base64data}`)
+- `createDataURL()`: Convert attachment data to base64 data URL
+- Return empty placeholder if attachment data is nil
+
+**Lazy Loading CID Images**:
+1. Initially render HTML with placeholder for CID images
+2. When email displayed, fetch attachment data for inline images only
+3. Inject data URLs and refresh WebView
+
+**CID vs External Images**:
+- CID images are part of the email—always display them
+- External images are remote—apply ExternalImagePolicy
+- Don't block CID images even when external images are blocked
+
+---
+
+### Print Support
+
+**Purpose**: Allow users to print email content
+
+**Print Flow**:
+1. User clicks Print (Cmd+P) or File > Print
+2. Generate print-optimized HTML
+3. Pass to system print dialog
+
+**Implementation**:
+- `printEmail()` method:
+  1. Generate print-optimized HTML with header fields and body
+  2. Write to temporary file in temporaryDirectory
+  3. Load into WKWebView (A4 size: 595x842)
+  4. After short delay for load, call `printOperation(with:).run()`
+
+**Print-Optimized HTML Guidelines**:
+- Use `@page { margin: 1in; }` for proper print margins
+- Serif font (Georgia) at 12pt for readability
+- Header section with border-bottom containing From, To, Date, Subject fields
+- Body section with 1.6 line-height
+- `@media print` rule to show link URLs after anchor text
+- Constrain images to max-width: 100%
+
+**Menu Integration**:
+- Add to app menu: File > Print (Cmd+P)
+- Only enabled when email is selected
+- Include "Print Thread" option for conversation view
+
+**Attachment Handling in Print**:
+- List attachment names at bottom of print
+- Don't embed large attachments
+- Optional: print attachment previews for images/PDFs
+
+---
+
+### Quote Detection & Collapsing
+
+**Purpose**: Collapse lengthy quoted replies for better readability
+
+**Quote Patterns**:
+| Pattern | Example |
+|---------|---------|
+| Gmail style | `<div class="gmail_quote">` |
+| Outlook style | `<div id="divRplyFwdMsg">` |
+| Plain text | Lines starting with `>` |
+| Date line | "On {date}, {name} wrote:" |
+| Separator | "---------- Forwarded message ----------" |
+
+**Quote Detection**:
+- QuoteDetector with static selectors:
+  - Gmail: `.gmail_quote`
+  - Outlook: `#divRplyFwdMsg, .MsoNormal`
+  - Plain text: Lines starting with `>`
+  - "wrote" pattern: `On .+, .+ wrote:$`
+- `detectQuotes(in:)` method returns array of QuoteRange identifying quote blocks
+
+**Collapsible Quote UI**:
+- Track `isExpanded` state (default false)
+- Toggle button with chevron icon and "Show/Hide quoted text" label
+- When expanded, show HTMLContentView with max height 300pt
+- Visual indicator: 3pt wide secondary color bar on leading edge
+
+**Quote Trimming Strategy**:
+1. Detect quote blocks in HTML
+2. If quote is > 5 lines, collapse by default
+3. Show preview of first 2 lines
+4. "..." ellipsis button to expand
+5. Remember expansion state per email (session only)
+
+**Plain Text Quote Handling**:
+- Process text line by line
+- Lines starting with `>` styled as quotes:
+  - Secondary foreground color
+  - Italic font
+- Non-quote lines use default styling
+- Return AttributedString with appropriate formatting
+
+---
+
+### Signature Handling
+
+**Purpose**: Handle existing Gmail signatures in replies/forwards
+
+**Note**: Per PRD, per-account signature configuration is out of scope for v1. However, we must handle existing signatures properly.
+
+**Detection of Existing Signatures**:
+- SignatureDetector with common signature patterns:
+  - Standard delimiter: `--` followed by whitespace
+  - Gmail signature div: `<div class="gmail_signature">`
+  - Outlook style: `<div id="Signature">`
+  - Mobile signatures: "Sent from my iPhone", "Get Outlook for iOS"
+- `detectSignature(in:)` returns range of signature block if found
+
+**Reply/Forward Behavior**:
+1. When replying, preserve user's Gmail signature if present in original
+2. Don't duplicate signatures
+3. Place cursor before signature if present
+
+**Compose Signature Handling**:
+- In setupReply, start with blank lines for user input
+- Add quoted original message below
+- Gmail adds signature on send if configured in Gmail settings
+- Don't add signature ourselves in v1
+
+**Future Consideration** (v2):
+- Add signature management in Settings
+- Per-account signature configuration
+- Rich text signature support
+
+---
+
 ### External Image Policy (Privacy)
 
 **Purpose**: Control loading of remote images to prevent tracking
@@ -492,6 +701,18 @@ func openComposeWindow(mode: ComposeMode, account: Account?) -> UUID
 - [ ] **Unsaved changes warning** on window close
 - [ ] **Multiple compose windows** can be opened simultaneously
 - [ ] Cmd+N opens new compose window
+- [ ] **Malformed HTML** displays gracefully with fallback to plain text
+- [ ] **Encoding issues** (mojibake) detected and fixed
+- [ ] **Oversized inline styles** constrained to viewport width
+- [ ] **CID inline images** resolved and displayed correctly
+- [ ] **CID images** not blocked by external image policy
+- [ ] **Print** (Cmd+P) generates print-optimized layout
+- [ ] **Print** includes email header (from, to, date, subject)
+- [ ] **Quote detection** identifies Gmail and Outlook quote styles
+- [ ] **Long quotes** (>5 lines) collapsed by default
+- [ ] **Quote expansion** works via click/tap
+- [ ] **Signatures** detected and preserved in replies
+- [ ] **Cursor placement** in replies is before signature
 
 ## References
 

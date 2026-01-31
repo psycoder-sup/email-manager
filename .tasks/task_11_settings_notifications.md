@@ -26,6 +26,7 @@ Build the Settings UI for account management, sync configuration, and MCP server
 ```
 Features/Settings/
 ├── SettingsView.swift
+├── GeneralSettingsView.swift
 ├── AccountsSettingsView.swift
 ├── SyncSettingsView.swift
 ├── MCPSettingsView.swift
@@ -43,13 +44,42 @@ Core/Services/
 **Type**: SwiftUI View
 
 **Tabs**:
-1. Accounts (person.2 icon)
-2. Sync (arrow.triangle.2.circlepath icon)
-3. Notifications (bell icon)
-4. MCP Server (network icon)
+1. General (gear icon)
+2. Accounts (person.2 icon)
+3. Sync (arrow.triangle.2.circlepath icon)
+4. Notifications (bell icon)
+5. MCP Server (network icon)
 
 **Configuration**:
 - Frame: 500x400
+- Appearance: Follows system appearance (no custom dark mode toggle)
+
+---
+
+### GeneralSettingsView
+
+**Purpose**: App version info and general settings
+**Type**: SwiftUI View
+
+**Layout**:
+- About section with app icon, name, version
+- Copyright notice
+
+**About Section**:
+- App icon (64x64)
+- App name: "Cluademail"
+- Version: Read from Bundle.main.infoDictionary (CFBundleShortVersionString)
+- Build number: Read from Bundle.main.infoDictionary (CFBundleVersion)
+- Copyright: "© 2024 Your Name. All rights reserved."
+
+**Links** (optional):
+- "Visit Website" button (if applicable)
+- "View on GitHub" button (if open source)
+
+**Out of Scope**:
+- Dark mode toggle (app follows system appearance automatically)
+- Database/cache size display
+- Data export/backup options
 
 ---
 
@@ -164,7 +194,9 @@ Core/Services/
 **Notification Actions**:
 - MARK_READ: "Mark as Read"
 - ARCHIVE: "Archive"
-- REPLY: Text input action with "Send" button
+- REPLY: Opens compose window with reply pre-filled (does NOT send directly)
+
+**Note**: Reply action opens the app and presents the compose view. This maintains the PRD requirement that users must manually confirm and send all emails.
 
 **Public Interface**:
 - `requestAuthorization() async -> Bool`
@@ -184,7 +216,11 @@ Core/Services/
 
 **Delegate Methods**:
 - `willPresent`: Return [.banner, .sound, .badge] (show in foreground)
-- `didReceive`: Handle action responses (mark read, archive, reply, default tap)
+- `didReceive`: Handle action responses:
+  - MARK_READ: Call Gmail API to remove UNREAD label
+  - ARCHIVE: Call Gmail API to archive
+  - REPLY: Post notification to open compose window with reply context
+  - Default tap: Navigate to email in main window
 
 **Navigation Notification**:
 - Post `Notification.Name.navigateToEmail` on default tap
@@ -206,10 +242,23 @@ Core/Services/
 - **Account Removal**: Clean up tokens from Keychain and data from database
 - **Sync Interval**: Validate and apply to SyncScheduler
 - **MCP Status**: Reflect actual server state
+- **System Appearance**: App automatically follows macOS light/dark mode; no manual toggle needed
+- **Notification Reply**: Must open compose window, never send directly (maintains user control)
+
+### Out of Scope (v1)
+
+- Custom dark mode toggle (follows system)
+- Database/cache size display
+- Data export or backup functionality
+- Per-account default setting
+- Custom notification sounds
 
 ## Acceptance Criteria
 
 - [ ] Settings window opens from menu bar (Cmd+,)
+- [ ] **General tab** shows app name, version, and build number
+- [ ] **General tab** displays copyright notice
+- [ ] App follows system appearance automatically (no manual dark mode toggle)
 - [ ] Accounts tab shows all connected accounts
 - [ ] Can add new Gmail account via OAuth
 - [ ] Can remove account with confirmation
@@ -225,6 +274,7 @@ Core/Services/
 - [ ] Notification sound can be toggled
 - [ ] Dock badge can be toggled
 - [ ] Notification actions work (mark read, archive)
+- [ ] **Notification reply action** opens compose window (does not send directly)
 - [ ] Clicking notification navigates to email
 
 ## References

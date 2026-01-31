@@ -150,27 +150,16 @@ Core/Services/Sync/
 3. Upsert EmailThread record
 
 **ThreadDerivationService**:
-```swift
-actor ThreadDerivationService {
-    func deriveThreads(from emails: [Email], account: Account) -> [EmailThread] {
-        let grouped = Dictionary(grouping: emails) { $0.threadId }
-        return grouped.map { threadId, messages in
-            let sorted = messages.sorted { $0.date < $1.date }
-            return EmailThread(
-                threadId: threadId,
-                subject: sorted.first?.subject ?? "",
-                snippet: sorted.last?.snippet ?? "",
-                lastMessageDate: sorted.last?.date ?? Date(),
-                messageCount: messages.count,
-                participantEmails: Array(Set(messages.flatMap { [$0.fromAddress] + $0.toAddresses })),
-                isRead: messages.allSatisfy { $0.isRead },
-                isStarred: messages.contains { $0.isStarred },
-                account: account
-            )
-        }
-    }
-}
-```
+- Actor that derives EmailThread records from synced emails
+- Group emails by `threadId` using Dictionary grouping
+- For each thread group, sort messages by date and derive:
+  - `subject`: From first message in thread
+  - `snippet`: From latest message
+  - `lastMessageDate`: Max date of all messages
+  - `messageCount`: Count of messages
+  - `participantEmails`: Unique senders/recipients (flatten fromAddress + toAddresses)
+  - `isRead`: True only if all messages are read
+  - `isStarred`: True if any message is starred
 
 **When to Derive**:
 - After full sync completes
@@ -255,51 +244,14 @@ actor ThreadDerivationService {
 | Server error | HTTP 500/502/503 | After 5 retries over 2 minutes |
 
 **FallbackTrigger Implementation**:
-```swift
-actor FallbackTrigger {
-    private var consecutiveFailures: Int = 0
-    private var lastFailureTime: Date?
-    private var isInFallbackMode: Bool = false
-
-    func recordFailure(error: GmailAPIError) async -> Bool {
-        switch error {
-        case .quotaExceeded:
-            // Immediate fallback
-            isInFallbackMode = true
-            return true
-
-        case .rateLimited(let retryAfter):
-            if retryAfter ?? 60 > 300 {  // >5 min wait
-                isInFallbackMode = true
-                return true
-            }
-            return false
-
-        case .networkError, .serverError:
-            consecutiveFailures += 1
-            if consecutiveFailures >= 3 {
-                isInFallbackMode = true
-                return true
-            }
-            return false
-
-        default:
-            return false
-        }
-    }
-
-    func recordSuccess() async {
-        consecutiveFailures = 0
-        // Don't exit fallback mode automatically
-        // User or scheduled check will reset
-    }
-
-    func resetFallbackMode() async {
-        isInFallbackMode = false
-        consecutiveFailures = 0
-    }
-}
-```
+- Actor with properties: `consecutiveFailures` (Int), `lastFailureTime` (Date?), `isInFallbackMode` (Bool)
+- `recordFailure(error:)` method logic:
+  - `quotaExceeded`: Immediate fallback, return true
+  - `rateLimited`: If retryAfter > 300 seconds (5 min), enter fallback
+  - `networkError`/`serverError`: Increment consecutiveFailures, enter fallback at 3 failures
+  - Other errors: Return false, don't trigger fallback
+- `recordSuccess()`: Reset consecutiveFailures to 0 (don't auto-exit fallback mode)
+- `resetFallbackMode()`: Reset both isInFallbackMode and consecutiveFailures
 
 **Fallback Mode Recovery**:
 - After entering fallback mode, attempt API every 15 minutes
@@ -353,49 +305,30 @@ actor FallbackTrigger {
 - Use CONDSTORE extension if available for change detection
 
 **CONDSTORE Fallback**:
-```swift
-func supportsCondstore(session: MCOIMAPSession) async -> Bool {
-    let capabilities = await session.fetchCapabilities()
-    return capabilities.contains("CONDSTORE")
-}
-
-func incrementalSync(session: MCOIMAPSession, folder: String) async throws {
-    if await supportsCondstore(session: session) {
-        // Use CHANGEDSINCE modifier with stored modseq
-        let modseq = syncState.lastModseq ?? 0
-        let changed = await session.fetchChangedSince(folder: folder, modseq: modseq)
-        // Process changed messages
-    } else {
-        // Fallback: fetch all UIDs, compare with local
-        let remoteUIDs = await session.fetchAllUIDs(folder: folder)
-        let localUIDs = await repository.getStoredUIDs(folder: folder)
-        let newUIDs = remoteUIDs.subtracting(localUIDs)
-        let deletedUIDs = localUIDs.subtracting(remoteUIDs)
-        // Fetch new, delete removed
-    }
-}
-```
+- Check if server supports CONDSTORE by fetching capabilities
+- If CONDSTORE supported:
+  - Use CHANGEDSINCE modifier with stored modseq from SyncState
+  - Fetch only messages changed since last sync
+- If CONDSTORE not supported (fallback):
+  - Fetch all UIDs from remote folder
+  - Compare with locally stored UIDs
+  - Calculate newUIDs (remote - local) and deletedUIDs (local - remote)
+  - Fetch new messages, delete removed ones locally
 
 ---
 
 ### Retry Policy & Exponential Backoff
 
 **RetryPolicy Configuration**:
-```swift
-struct RetryPolicy {
-    let maxAttempts: Int = 5
-    let baseDelay: TimeInterval = 1.0
-    let maxDelay: TimeInterval = 60.0
-    let multiplier: Double = 2.0
-    let jitter: Double = 0.1  // ±10% randomization
-}
-```
+- `maxAttempts`: 5 (default)
+- `baseDelay`: 1.0 second
+- `maxDelay`: 60.0 seconds (cap)
+- `multiplier`: 2.0 (exponential)
+- `jitter`: 0.1 (±10% randomization)
 
 **Delay Calculation**:
-```
-delay = min(baseDelay * (multiplier ^ attempt), maxDelay)
-delay = delay * (1 + random(-jitter, jitter))
-```
+- Formula: `min(baseDelay * (multiplier ^ attempt), maxDelay)`
+- Apply jitter: `delay * (1 + random(-jitter, jitter))`
 
 **Retry Sequence** (default policy):
 | Attempt | Base Delay | With Jitter Range |
@@ -450,15 +383,11 @@ delay = delay * (1 + random(-jitter, jitter))
 **Problem**: User triggers manual sync while scheduled sync running
 
 **Solution - SyncLock**:
-```swift
-actor SyncLock {
-    private var activeSyncs: Set<UUID> = []  // account IDs
-
-    func acquireLock(for accountId: UUID) async -> Bool
-    func releaseLock(for accountId: UUID) async
-    func isLocked(_ accountId: UUID) -> Bool
-}
-```
+- Actor with `activeSyncs: Set<UUID>` tracking account IDs currently syncing
+- Methods:
+  - `acquireLock(for:)` - Returns true if lock acquired, false if already locked
+  - `releaseLock(for:)` - Removes account from active syncs
+  - `isLocked(_:)` - Check if account is currently syncing
 
 **Behavior**:
 - Only one sync per account at a time
@@ -513,16 +442,12 @@ actor SyncLock {
    - Otherwise: fetch latest message state once
 4. Apply final state to local database
 
-**Implementation**:
-```swift
-struct MessageDelta {
-    let messageId: String
-    var isDeleted: Bool = false
-    var labelsToAdd: Set<String> = []
-    var labelsToRemove: Set<String> = []
-    var needsFullFetch: Bool = false  // true if messagesAdded
-}
-```
+**MessageDelta Struct**:
+- `messageId`: String identifier
+- `isDeleted`: Bool (default false)
+- `labelsToAdd`: Set<String> for labels to add
+- `labelsToRemove`: Set<String> for labels to remove
+- `needsFullFetch`: Bool (true if messagesAdded event)
 
 ---
 

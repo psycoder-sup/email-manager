@@ -191,6 +191,116 @@ Features/
 
 ---
 
+### Accessibility Support
+
+**Purpose**: Full VoiceOver and keyboard accessibility for all users
+
+**VoiceOver Labels**:
+| Element | Accessibility Label | Hint |
+|---------|---------------------|------|
+| Account row | "{name}, {email}" | "Double tap to select account" |
+| All Accounts | "All Accounts" | "Shows emails from all accounts" |
+| Folder row | "{folder name}, {N} unread" | "Double tap to view folder" |
+| Unread badge | "{N} unread messages" | - |
+| Sync status | "Last synced {time}" or "Syncing" | - |
+| Compose button | "Compose new email" | "Opens compose window" |
+| Refresh button | "Check for new mail" | "Syncs all accounts" |
+
+**Focus Management**:
+- Use `@FocusState` with Column enum (sidebar, list, detail)
+- Apply `.focused()` modifier to each column view
+- Handle Tab key to cycle focus between columns
+- Each column should be focusable for keyboard navigation
+
+**Keyboard Shortcuts**:
+| Key | Action | Context |
+|-----|--------|---------|
+| ↑/↓ | Navigate list items | Sidebar, Email list |
+| ←/→ | Switch columns | Any |
+| Enter | Select/Open | List items |
+| Space | Toggle star | Email selected |
+| Delete | Move to trash | Email selected |
+| Cmd+1-6 | Switch folders | Global |
+| Cmd+[ / ] | Previous/Next email | Email list |
+
+**Reduced Motion Support**:
+- Read `@Environment(\.accessibilityReduceMotion)` to check user preference
+- Skip animations when reduceMotion is true (pass nil to .animation modifier)
+- Apply to all animated state changes (expansion, transitions, etc.)
+
+---
+
+### Window State Restoration
+
+**Purpose**: Persist and restore window state across app launches
+
+**Persisted State** (via `@SceneStorage`):
+- `sidebar.isCollapsed`: Bool (default false)
+- `selectedAccountId`: String? (nil = All Accounts)
+- `selectedFolder`: String (default "inbox")
+- `columnVisibility`: NavigationSplitViewVisibility (default .all)
+
+**Window Frame Restoration**:
+- Use `.defaultPosition(.center)` and `.defaultSize(width: 1200, height: 800)`
+- Use `.windowResizability(.contentSize)` for proper sizing
+- macOS automatically restores window position via NSWindow restoration mechanism
+
+**State Restoration Flow**:
+1. On launch: Read `@SceneStorage` values
+2. Validate stored account ID still exists
+3. Apply stored folder selection
+4. Restore sidebar collapse state
+5. Restore column visibility
+
+**Invalid State Handling**:
+- If stored account was deleted: default to "All Accounts"
+- If stored folder invalid: default to Inbox
+- If window size invalid: use default dimensions
+
+**Last Selected Email**:
+- Store `lastSelectedEmailId` in `@SceneStorage`
+- On appear, check if stored email ID still exists in repository
+- If found, restore selection to that email via NavigationState
+
+---
+
+### Drag and Drop Support
+
+**Purpose**: Support drag-drop for attachments and email organization
+
+**Drop Targets**:
+
+| Target | Accepted Types | Action |
+|--------|----------------|--------|
+| Compose window | Files, URLs | Add as attachment |
+| Folder row | Email items | Move email to folder |
+| Trash folder | Email items | Delete email |
+| Label row | Email items | Apply label |
+
+**Attachment Drop in Compose**:
+- Use `.onDrop(of: [.fileURL, .url])` modifier on compose view
+- For each dropped provider, load file URL data
+- Create AttachmentData with filename (lastPathComponent), mimeType (from UTType), and file data
+- Append to attachments array
+
+**Email Drag to Folder**:
+- Apply `.draggable(email)` modifier to EmailRowView with custom drag preview
+- Apply `.dropDestination(for: Email.self)` to FolderRow
+- On drop, iterate through dropped emails and call emailService.moveToFolder for each
+- Return true to indicate successful handling
+
+**Visual Feedback**:
+- Highlight drop target on hover
+- Show (+) badge when valid drop
+- Show (x) badge when invalid drop
+- Animate email removal from source list
+
+**Multi-Select Drag**:
+- Support dragging multiple selected emails
+- Show count badge on drag preview: "3 emails"
+
+---
+
 ### Key Considerations
 
 - **Window Size**: Set minimum and ideal window dimensions
@@ -198,6 +308,9 @@ Features/
 - **Keyboard Navigation**: Arrow keys navigate folder/email list
 - **Focus Management**: Proper focus handling for list selection
 - **Account Badges**: Use consistent colors derived from email address hash
+- **Accessibility**: Full VoiceOver support with proper labels and hints
+- **State Restoration**: Persist navigation state across launches
+- **Drag and Drop**: Support file drops for attachments, email moves
 
 ## Acceptance Criteria
 
@@ -215,6 +328,18 @@ Features/
 - [ ] Keyboard navigation works (arrow keys)
 - [ ] Account badge shows consistent colors
 - [ ] User labels section appears when account is selected
+- [ ] **VoiceOver** announces all UI elements with proper labels
+- [ ] **Accessibility hints** provided for interactive elements
+- [ ] **Focus state** managed correctly between columns
+- [ ] **Keyboard shortcuts** work (Cmd+1-6 for folders, etc.)
+- [ ] **Reduced motion** respected for animations
+- [ ] **Window state restored** on relaunch (position, size, sidebar state)
+- [ ] **Selected account/folder** persisted via @SceneStorage
+- [ ] **Invalid stored state** handled gracefully (deleted account, etc.)
+- [ ] **Files dropped** on compose window added as attachments
+- [ ] **Emails draggable** to folders for organization
+- [ ] **Drop targets** highlight when valid drop hovering
+- [ ] **Multi-select drag** shows count badge on preview
 
 ## References
 

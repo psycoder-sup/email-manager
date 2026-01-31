@@ -445,29 +445,11 @@ The MCP server runs as a separate command-line tool bundled with the app, not in
 - Copy Files build phase: destination "Executables"
 
 **Database Path Resolution**:
-```swift
-struct MCPConfiguration {
-    /// Shared database location - must match main app
-    static var databaseURL: URL {
-        let appSupport = FileManager.default.urls(
-            for: .applicationSupportDirectory,
-            in: .userDomainMask
-        ).first!
-        return appSupport
-            .appendingPathComponent("Cluademail", isDirectory: true)
-            .appendingPathComponent("Cluademail.store")
-    }
-
-    /// Verify database exists before starting server
-    static func validateDatabaseExists() throws {
-        guard FileManager.default.fileExists(atPath: databaseURL.path) else {
-            throw MCPError.databaseNotFound(
-                "Database not found. Please launch Cluademail app first to initialize."
-            )
-        }
-    }
-}
-```
+- MCPConfiguration struct with static properties
+- `databaseURL`: Computed property returning path to SwiftData store
+  - Location: `~/Library/Application Support/Cluademail/Cluademail.store`
+- `validateDatabaseExists()`: Check if database file exists, throw error if not
+  - Error message: "Database not found. Please launch Cluademail app first to initialize."
 
 **Database Not Found Handling**:
 - If database doesn't exist, return JSON-RPC error:
@@ -535,33 +517,10 @@ Both main app and CLI tool need matching entitlements:
 ```
 
 **KeychainService Update**:
-```swift
-class KeychainService {
-    private let accessGroup = "$(TeamIdentifierPrefix)com.cluademail.shared"
-
-    func save<T: Codable>(_ item: T, forKey key: String) throws {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: "com.cluademail.tokens",
-            kSecAttrAccount as String: key,
-            kSecAttrAccessGroup as String: accessGroup,  // Shared access group
-            kSecValueData as String: try JSONEncoder().encode(item)
-        ]
-        // ... rest of implementation
-    }
-
-    func retrieve<T: Codable>(_ type: T.Type, forKey key: String) throws -> T {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: "com.cluademail.tokens",
-            kSecAttrAccount as String: key,
-            kSecAttrAccessGroup as String: accessGroup,  // Shared access group
-            kSecReturnData as String: true
-        ]
-        // ... rest of implementation
-    }
-}
-```
+- Use shared accessGroup: `$(TeamIdentifierPrefix)com.cluademail.shared`
+- Both save and retrieve methods must include `kSecAttrAccessGroup` in query dictionary
+- Service identifier: `com.cluademail.tokens`
+- This enables the CLI tool to access tokens stored by the main app
 
 **Signing Requirements**:
 - Both binaries MUST be signed with same Team ID
@@ -573,40 +532,14 @@ class KeychainService {
 ### Inter-Process Database Access
 
 **File Coordination for SwiftData**:
-
-SwiftData uses SQLite internally, which has its own locking. However, for safety:
-
-```swift
-actor MCPDatabaseService {
-    private let fileCoordinator = NSFileCoordinator()
-    private let databaseURL: URL
-
-    func performRead<T>(_ operation: (ModelContext) throws -> T) async throws -> T {
-        var result: T?
-        var coordinatorError: NSError?
-
-        fileCoordinator.coordinate(
-            readingItemAt: databaseURL,
-            options: .withoutChanges,
-            error: &coordinatorError
-        ) { url in
-            do {
-                let container = try ModelContainer(for: schema, configurations: config)
-                let context = ModelContext(container)
-                result = try operation(context)
-            } catch {
-                // Handle error
-            }
-        }
-
-        if let error = coordinatorError {
-            throw MCPError.databaseAccessFailed(error.localizedDescription)
-        }
-
-        return result!
-    }
-}
-```
+- SwiftData uses SQLite with WAL mode (concurrent readers, single writer)
+- MCPDatabaseService actor for thread-safe access
+- Use NSFileCoordinator for cross-process safety
+- `performRead()` method:
+  - Coordinate reading with `.withoutChanges` option
+  - Create ModelContainer and ModelContext within coordination block
+  - Execute read operation and return result
+  - Handle coordination errors
 
 **SQLite WAL Mode**:
 - SwiftData uses WAL (Write-Ahead Logging) by default
@@ -634,46 +567,13 @@ actor MCPDatabaseService {
 | Main app running | Normal operation (concurrent access OK) |
 
 **Startup Validation**:
-```swift
-@main
-struct CluademailMCPMain {
-    static func main() async {
-        do {
-            // 1. Validate database exists
-            try MCPConfiguration.validateDatabaseExists()
-
-            // 2. Check for configured accounts
-            let accounts = try await loadAccounts()
-            guard !accounts.isEmpty else {
-                exitWithError(.noAccountsConfigured)
-                return
-            }
-
-            // 3. Validate at least one account has valid tokens
-            var hasValidAccount = false
-            for account in accounts {
-                if let tokens = try? tokenManager.getTokens(for: account.email),
-                   !tokens.isExpired || (try? await refreshToken(for: account)) != nil {
-                    hasValidAccount = true
-                    break
-                }
-            }
-
-            guard hasValidAccount else {
-                exitWithError(.allTokensExpired)
-                return
-            }
-
-            // 4. Start MCP server
-            let server = MCPServer()
-            try await server.run()
-
-        } catch {
-            exitWithError(.initialization(error))
-        }
-    }
-}
-```
+- Main entry point performs sequential checks:
+  1. Validate database exists (throws if not)
+  2. Load accounts, exit if empty with "no accounts configured" error
+  3. Check each account for valid tokens (not expired, or refreshable)
+  4. Exit with "all tokens expired" if no valid account found
+  5. If all checks pass, create MCPServer and run
+- Wrap entire startup in do/catch for initialization errors
 
 **Auth Error Response**:
 ```json
@@ -698,16 +598,12 @@ struct CluademailMCPMain {
 - Each connection has independent state
 - Limit max concurrent connections (default: 5)
 
-**Connection Lifecycle**:
-```swift
-struct MCPConnection {
-    let id: UUID
-    let startTime: Date
-    let transport: StdioTransport
-    var requestCount: Int
-    var isInitialized: Bool
-}
-```
+**MCPConnection Struct**:
+- `id`: UUID for connection identification
+- `startTime`: Date when connection started
+- `transport`: StdioTransport instance
+- `requestCount`: Int tracking requests handled
+- `isInitialized`: Bool tracking MCP initialization state
 
 **Concurrency Handling**:
 - Each `cluademail-mcp` process handles one client
@@ -728,47 +624,16 @@ struct MCPConnection {
 
 **Schema Version Tracking**:
 
-Store schema version in database metadata:
-
-```swift
-// In main app's DatabaseService
-struct DatabaseMetadata {
-    static let currentSchemaVersion = 1
-    static let metadataKey = "cluademail_schema_version"
-}
-
-func initializeDatabase() throws {
-    // Store version on first launch or migration
-    UserDefaults.standard.set(
-        DatabaseMetadata.currentSchemaVersion,
-        forKey: DatabaseMetadata.metadataKey
-    )
-}
-```
+**Schema Version Tracking**:
+- DatabaseMetadata with `currentSchemaVersion` (Int) and `metadataKey` constant
+- Main app stores version in UserDefaults on first launch or migration
 
 **CLI Version Check**:
-```swift
-struct MCPVersionCheck {
-    static let supportedSchemaVersions: ClosedRange<Int> = 1...1  // Update on migrations
-
-    static func validateCompatibility() throws {
-        let storedVersion = UserDefaults.standard.integer(
-            forKey: DatabaseMetadata.metadataKey
-        )
-
-        guard storedVersion > 0 else {
-            throw MCPError.databaseNotInitialized
-        }
-
-        guard supportedSchemaVersions.contains(storedVersion) else {
-            throw MCPError.incompatibleVersion(
-                stored: storedVersion,
-                supported: supportedSchemaVersions
-            )
-        }
-    }
-}
-```
+- MCPVersionCheck with `supportedSchemaVersions` range (update on migrations)
+- `validateCompatibility()` method:
+  - Read stored version from UserDefaults
+  - Throw `databaseNotInitialized` if version is 0 (never set)
+  - Throw `incompatibleVersion` if version outside supported range
 
 **Incompatible Version Response**:
 ```json
@@ -884,15 +749,9 @@ Type: {mimeType}
 **Purpose**: Prevent AI from overwhelming email API
 
 **MCPRateLimiter**:
-```swift
-actor MCPRateLimiter {
-    let maxRequestsPerMinute: Int = 60
-    let maxRequestsPerHour: Int = 500
-
-    func checkLimit() async throws
-    func recordRequest()
-}
-```
+- Actor with configurable limits: `maxRequestsPerMinute` (60), `maxRequestsPerHour` (500)
+- `checkLimit()`: Throws if either limit exceeded
+- `recordRequest()`: Increment request counters with timestamp tracking
 
 **Limits** (per MCP process):
 | Window | Limit | Action on Exceed |
