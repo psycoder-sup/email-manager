@@ -189,6 +189,58 @@ enum TestFixtures {
         SyncState(accountId: accountId)
     }
 
+    // MARK: - OAuth Fixtures
+
+    /// Creates a test OAuthTokens with optional customization.
+    /// - Parameters:
+    ///   - accessToken: Access token (default: "test_access_token")
+    ///   - refreshToken: Refresh token (default: "test_refresh_token")
+    ///   - expiresAt: Expiration date (default: 1 hour from now)
+    ///   - scope: OAuth scopes (default: standard Gmail scopes)
+    /// - Returns: A configured OAuthTokens
+    static func makeOAuthTokens(
+        accessToken: String = "test_access_token",
+        refreshToken: String = "test_refresh_token",
+        expiresAt: Date = Date().addingTimeInterval(3600),
+        scope: String = "email profile https://www.googleapis.com/auth/gmail.readonly"
+    ) -> OAuthTokens {
+        OAuthTokens(
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            expiresAt: expiresAt,
+            scope: scope
+        )
+    }
+
+    /// Creates expired test OAuthTokens.
+    /// - Returns: OAuthTokens with an expiration date in the past
+    static func makeExpiredOAuthTokens() -> OAuthTokens {
+        OAuthTokens(
+            accessToken: "expired_access_token",
+            refreshToken: "test_refresh_token",
+            expiresAt: Date().addingTimeInterval(-3600), // 1 hour ago
+            scope: "email profile"
+        )
+    }
+
+    /// Creates a test GoogleUserProfile with optional customization.
+    /// - Parameters:
+    ///   - email: Email address (default: "test@gmail.com")
+    ///   - name: Display name (default: "Test User")
+    ///   - picture: Profile picture URL (default: nil)
+    /// - Returns: A configured GoogleUserProfile
+    static func makeGoogleUserProfile(
+        email: String = "test@gmail.com",
+        name: String = "Test User",
+        picture: String? = nil
+    ) -> GoogleUserProfile {
+        GoogleUserProfile(
+            email: email,
+            name: name,
+            picture: picture
+        )
+    }
+
     // MARK: - Error Fixtures
 
     /// Sample auth errors for testing
@@ -199,6 +251,27 @@ enum TestFixtures {
         .tokenRefreshFailed(nil),
         .keychainError(nil),
         .networkError(nil)
+    ]
+
+    /// Sample authentication errors for testing
+    static let sampleAuthenticationErrors: [AuthenticationError] = [
+        .userCancelled,
+        .invalidResponse,
+        .tokenExchangeFailed("Invalid code"),
+        .tokenExpired,
+        .refreshFailed(nil),
+        .networkError(NSError(domain: "test", code: -1)),
+        .accountAlreadyExists("test@gmail.com"),
+        .invalidGrant
+    ]
+
+    /// Sample keychain errors for testing
+    static let sampleKeychainErrors: [KeychainError] = [
+        .itemNotFound,
+        .duplicateItem,
+        .unexpectedStatus(errSecInternalError),
+        .encodingError(NSError(domain: "test", code: -1)),
+        .decodingError(NSError(domain: "test", code: -1))
     ]
 
     /// Sample sync errors for testing

@@ -2,9 +2,14 @@
 // This file contains production-specific settings
 
 // Google OAuth Client ID for production
-// IMPORTANT: Set this via environment variable or CI/CD secrets
-// Do NOT commit actual production credentials to version control
-GOOGLE_CLIENT_ID = $(GOOGLE_CLIENT_ID_PROD)
+// Set via environment variable: export GOOGLE_CLIENT_ID="your-id.apps.googleusercontent.com"
+// For CI/CD, use secrets management
+GOOGLE_CLIENT_ID = $(GOOGLE_CLIENT_ID)
+
+// Google OAuth Client Secret for production
+// Set via environment variable: export GOOGLE_CLIENT_SECRET="your-secret"
+// For CI/CD, use secrets management
+GOOGLE_CLIENT_SECRET = $(GOOGLE_CLIENT_SECRET)
 
 // Environment identifier
 APP_ENVIRONMENT = production

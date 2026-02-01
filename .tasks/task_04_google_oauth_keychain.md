@@ -24,11 +24,18 @@ Implement Google OAuth 2.0 authentication flow for Gmail access and secure token
 
 ### File Organization
 ```
-Core/Services/
-├── AuthenticationService.swift
-├── KeychainService.swift
-├── TokenManager.swift
-└── GoogleOAuthClient.swift
+Core/Services/Authentication/
+├── AuthenticationProtocols.swift   # Protocol definitions for testability
+├── AuthenticationService.swift     # Main authentication orchestrator
+├── GoogleOAuthClient.swift         # Google OAuth API client
+├── GoogleUserProfile.swift         # User profile model
+├── KeychainService.swift           # Keychain wrapper
+├── OAuthTokens.swift               # Token model
+└── TokenManager.swift              # Token lifecycle manager
+
+Core/Errors/
+├── AuthenticationError.swift       # OAuth error types
+└── KeychainError.swift             # Keychain error types
 ```
 
 ## Implementation Details
@@ -36,7 +43,7 @@ Core/Services/
 ### KeychainService
 
 **Purpose**: Generic Keychain wrapper for secure storage
-**Type**: Singleton class
+**Type**: Singleton class conforming to `KeychainServiceProtocol, @unchecked Sendable`
 
 **Public Interface**:
 - `save<T: Codable>(_:forKey:) throws` - Serialize and store item
@@ -46,6 +53,8 @@ Core/Services/
 **Key Behaviors**:
 - Service identifier: `com.cluademail.tokens`
 - Delete existing item before save (upsert behavior)
+- Thread-safe using `NSLock`
+- Keychain accessibility: `kSecAttrAccessibleAfterFirstUnlock`
 - Throw `KeychainError` for failures: itemNotFound, duplicateItem, unexpectedStatus, encodingError, decodingError
 
 ---
@@ -53,7 +62,7 @@ Core/Services/
 ### OAuthTokens Model
 
 **Purpose**: Store OAuth token data
-**Type**: Struct conforming to `Codable`
+**Type**: Struct conforming to `Codable, Sendable, Equatable`
 
 **Properties**:
 - `accessToken`: String
@@ -62,66 +71,83 @@ Core/Services/
 - `scope`: String
 
 **Computed Properties**:
-- `isExpired`: Bool - Returns true if current time >= expiresAt minus 5 minute buffer
+- `isExpired`: Bool - Returns true if current time >= expiresAt minus 5 minute buffer (300 seconds)
+
+**Initializers**:
+- `init(accessToken:refreshToken:expiresIn:scope:)` - Creates tokens from token response (calculates expiresAt)
+- `init(accessToken:refreshToken:expiresAt:scope:)` - Creates tokens with explicit expiration date
 
 ---
 
 ### TokenManager
 
 **Purpose**: Manage OAuth tokens per account
-**Type**: Class with KeychainService dependency
+**Type**: Actor with KeychainService and OAuthClient dependencies (thread-safe)
 
 **Public Interface**:
-- `saveTokens(_:for:) throws` - Store tokens for account email
-- `getTokens(for:) throws -> OAuthTokens` - Retrieve tokens
-- `deleteTokens(for:) throws` - Remove tokens
+- `saveTokens(_:for:) async throws` - Store tokens for account email
+- `getTokens(for:) async throws -> OAuthTokens` - Retrieve tokens
+- `deleteTokens(for:) async throws` - Remove tokens (silent on not found)
 - `getValidAccessToken(for:) async throws -> String` - Get token, refreshing if needed
+- `hasTokens(for:) async -> Bool` - Check if tokens exist without throwing
 
 **Key Behaviors**:
 - Token key format: `oauth_tokens_{email}`
 - Automatically refresh expired tokens via GoogleOAuthClient
 - Save refreshed tokens back to Keychain
+- Delete stale tokens on invalid_grant error
+- Dependency injection via init for testing
 
 ---
 
 ### AuthenticationService
 
 **Purpose**: Orchestrate complete OAuth flow
-**Type**: `@Observable` class
+**Type**: `@Observable @MainActor` class extending `NSObject`
 
 **Properties**:
-- `isAuthenticating`: Bool
-- `authenticatedAccounts`: [Account]
+- `isAuthenticating`: Bool (read-only)
+
+**Dependencies** (injected via init):
+- `oauthClient: OAuthClientProtocol`
+- `tokenManager: TokenManagerProtocol`
+- `accountRepository: AccountRepositoryProtocol`
 
 **Public Interface**:
-- `signIn(presentingFrom:) async throws -> Account`
-- `signOut(_:) async throws`
+- `signIn(presentingFrom:context:) async throws -> Account`
+- `signOut(_:context:) async throws`
 - `getAccessToken(for:) async throws -> String`
+- `loadAuthenticatedAccounts(context:) async throws -> [Account]`
 
 **Sign-In Flow**:
-1. Build authorization URL with GoogleOAuthClient
+1. Build authorization URL with PKCE via GoogleOAuthClient
 2. Present `ASWebAuthenticationSession` with callback scheme `cluademail`
-3. Extract authorization code from callback URL
+3. Extract authorization code and state from callback URL
 4. Exchange code for tokens via GoogleOAuthClient
 5. Fetch user profile (email, name, picture)
-6. Check if account exists - update tokens if yes, create new if no
+6. Check for existing account:
+   - If account exists with tokens: throw `accountAlreadyExists`
+   - If account exists without tokens: update and re-authenticate
+   - If new account: create and save
 7. Save tokens to Keychain
 8. Return Account
 
 **Sign-Out Flow**:
-1. Delete tokens from Keychain
-2. Delete account from repository
+1. Revoke tokens via OAuth client (fire and forget)
+2. Delete tokens from Keychain
+3. Delete account from repository
 
 **Presentation Context**:
-- Implement `ASWebAuthenticationPresentationContextProviding`
-- Use keyWindow or provided anchor for presentation
+- Implements `ASWebAuthenticationPresentationContextProviding`
+- Handles both main thread and background thread calls
+- Uses keyWindow or provided anchor for presentation
 
 ---
 
 ### GoogleOAuthClient
 
 **Purpose**: Handle Google OAuth API calls
-**Type**: Singleton class
+**Type**: Singleton class conforming to `OAuthClientProtocol, @unchecked Sendable`
 
 **Configuration** (from AppConfiguration):
 - Client ID: Loaded from Info.plist
@@ -139,10 +165,16 @@ https://www.googleapis.com/auth/userinfo.profile
 ```
 
 **Public Interface**:
-- `buildAuthorizationURL() -> URL`
+- `buildAuthorizationURL() async -> URL?`
+- `extractAuthorizationCode(from:) throws -> AuthorizationResult`
 - `exchangeCodeForTokens(_:) async throws -> OAuthTokens`
 - `refreshToken(_:) async throws -> OAuthTokens`
 - `getUserProfile(accessToken:) async throws -> GoogleUserProfile`
+- `revokeToken(_:) async throws`
+
+**AuthorizationResult** (returned from extractAuthorizationCode):
+- `code: String` - Authorization code
+- `state: String` - State parameter for CSRF verification
 
 **OAuth Endpoints**:
 - Authorization: `https://accounts.google.com/o/oauth2/v2/auth`
@@ -194,42 +226,99 @@ https://www.googleapis.com/auth/userinfo.profile
 ### GoogleUserProfile
 
 **Purpose**: User profile from Google API
-**Type**: Struct conforming to `Codable`
+**Type**: Struct conforming to `Codable, Sendable, Equatable`
 
 **Properties**:
 - `email`: String
 - `name`: String
-- `pictureURL`: String? (coded as "picture")
+- `picture`: String? (URL to profile picture)
 
 ---
 
 ### Error Types
 
-**KeychainError**:
-- itemNotFound, duplicateItem, unexpectedStatus(OSStatus), encodingError, decodingError
+**KeychainError** (conforms to `AppError`):
+- `itemNotFound` - KEYCHAIN_001
+- `duplicateItem` - KEYCHAIN_002
+- `unexpectedStatus(OSStatus)` - KEYCHAIN_003
+- `encodingError(Error)` - KEYCHAIN_004
+- `decodingError(Error)` - KEYCHAIN_005
 
-**AuthenticationError**:
-- userCancelled, invalidResponse, tokenExchangeFailed, networkError(Error), accountAlreadyExists
-- tokenExpired, refreshFailed, tokenRevoked, rateLimited(retryAfter: TimeInterval)
+**AuthenticationError** (conforms to `AppError`):
+- `userCancelled` - OAUTH_001
+- `invalidResponse` - OAUTH_002
+- `tokenExchangeFailed(String?)` - OAUTH_003
+- `tokenExpired` - OAUTH_004
+- `refreshFailed(Error?)` - OAUTH_005
+- `tokenRevoked` - OAUTH_006
+- `rateLimited(retryAfter: TimeInterval)` - OAUTH_007
+- `networkError(Error)` - OAUTH_008
+- `accountAlreadyExists(String)` - OAUTH_009
+- `invalidGrant` - OAUTH_010
+- `missingConfiguration(String)` - OAUTH_011
+- `invalidCallbackURL` - OAUTH_012
 
 ## Acceptance Criteria
 
-- [ ] `KeychainService` can save, retrieve, and delete Codable items
-- [ ] `TokenManager` stores OAuth tokens securely in Keychain
-- [ ] `TokenManager` automatically refreshes expired tokens
-- [ ] `AuthenticationService` presents OAuth flow via `ASWebAuthenticationSession`
-- [ ] OAuth callback URL scheme (`cluademail://`) is properly registered
-- [ ] User can sign in with Google account
-- [ ] User profile (email, name, picture) is fetched after authentication
-- [ ] Tokens persist across app restarts
-- [ ] Sign out removes tokens from Keychain and account from database
-- [ ] Error handling covers cancelled auth, network errors, invalid responses
-- [ ] Multiple accounts can be authenticated simultaneously
-- [ ] **PKCE flow implemented** with code_verifier and code_challenge
-- [ ] **Client secret** included in token exchange and refresh requests
-- [ ] **Token revocation** called on sign-out for clean invalidation
-- [ ] **Rate limiting** handled with exponential backoff on token endpoints
-- [ ] **Expired refresh token** (invalid_grant) triggers re-authentication prompt
+- [x] `KeychainService` can save, retrieve, and delete Codable items
+- [x] `TokenManager` stores OAuth tokens securely in Keychain
+- [x] `TokenManager` automatically refreshes expired tokens
+- [x] `AuthenticationService` presents OAuth flow via `ASWebAuthenticationSession`
+- [x] OAuth callback URL scheme (`cluademail://`) is properly registered
+- [x] User can sign in with Google account
+- [x] User profile (email, name, picture) is fetched after authentication
+- [x] Tokens persist across app restarts
+- [x] Sign out removes tokens from Keychain and account from database
+- [x] Error handling covers cancelled auth, network errors, invalid responses
+- [x] Multiple accounts can be authenticated simultaneously
+- [x] **PKCE flow implemented** with code_verifier and code_challenge
+- [x] **Client secret** included in token exchange and refresh requests
+- [x] **Token revocation** called on sign-out for clean invalidation
+- [x] **Rate limiting** handled with exponential backoff on token endpoints
+- [x] **Expired refresh token** (invalid_grant) triggers re-authentication prompt
+
+## Implementation Notes
+
+### Protocols for Testability
+
+Three protocols were created to enable dependency injection and testing:
+
+- `KeychainServiceProtocol` - Abstracts Keychain operations
+- `OAuthClientProtocol` - Abstracts OAuth provider-specific details
+- `TokenManagerProtocol` - Abstracts token lifecycle management
+
+### State Management
+
+- `GoogleOAuthClient` uses state parameter to correlate PKCE code_verifier with callback
+- Pending auth flows expire after 5 minutes for security
+- Thread-safe access using `NSLock`
+
+### Testing Infrastructure
+
+**Mock Objects Created**:
+- `MockKeychainService` - In-memory keychain simulation
+- `MockOAuthClient` - Configurable OAuth responses
+- `MockTokenManager` - Token storage simulation
+
+**Test Files Created**:
+- `AuthenticationErrorTests.swift` - Error code and description tests
+- `KeychainServiceTests.swift` - Keychain CRUD operation tests
+- `OAuthTokensTests.swift` - Token model and expiration tests
+- `TokenManagerTests.swift` - Token management flow tests
+- `GoogleOAuthClientTests.swift` - OAuth client tests
+
+### Configuration Updates
+
+- `AppConfiguration` extended with `googleClientSecret` and `oauthCallbackScheme`
+- OAuth scopes extended to include `userinfo.email` and `userinfo.profile`
+- xcconfig files updated to use environment variables for secrets
+- `Info.plist` updated to include `GOOGLE_CLIENT_SECRET`
+
+### Additional Error Cases
+
+Beyond the spec, the following error cases were added:
+- `missingConfiguration` - For missing OAuth configuration
+- `invalidCallbackURL` - For malformed callback URLs
 
 ## References
 

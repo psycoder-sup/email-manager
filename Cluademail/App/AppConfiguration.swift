@@ -36,22 +36,39 @@ enum AppConfiguration {
     static let googleClientId: String = {
         guard let clientId = Bundle.main.infoDictionary?["GOOGLE_CLIENT_ID"] as? String,
               !clientId.isEmpty,
-              clientId != "YOUR_CLIENT_ID_HERE" else {
+              !clientId.hasPrefix("YOUR_") else {
             Logger.auth.fault("GOOGLE_CLIENT_ID not configured in Info.plist")
             fatalError("GOOGLE_CLIENT_ID must be configured. See README for setup instructions.")
         }
         return clientId
     }()
 
+    /// Google OAuth Client Secret loaded from Info.plist
+    /// Required for installed apps (desktop/mobile) OAuth flow
+    static let googleClientSecret: String = {
+        guard let clientSecret = Bundle.main.infoDictionary?["GOOGLE_CLIENT_SECRET"] as? String,
+              !clientSecret.isEmpty,
+              !clientSecret.hasPrefix("YOUR_") else {
+            Logger.auth.fault("GOOGLE_CLIENT_SECRET not configured in Info.plist")
+            fatalError("GOOGLE_CLIENT_SECRET must be configured. See README for setup instructions.")
+        }
+        return clientSecret
+    }()
+
     /// OAuth redirect URI for handling callbacks
     static let oauthRedirectURI = "cluademail://oauth/callback"
 
-    /// OAuth scopes required for Gmail access
+    /// OAuth callback scheme (without ://)
+    static let oauthCallbackScheme = "cluademail"
+
+    /// OAuth scopes required for Gmail access and user profile
     static let oauthScopes = [
         "https://www.googleapis.com/auth/gmail.readonly",
         "https://www.googleapis.com/auth/gmail.compose",
         "https://www.googleapis.com/auth/gmail.modify",
-        "https://www.googleapis.com/auth/gmail.labels"
+        "https://www.googleapis.com/auth/gmail.labels",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/userinfo.profile"
     ]
 
     // MARK: - Logging

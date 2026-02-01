@@ -2,8 +2,12 @@
 // This file contains development-specific settings
 
 // Google OAuth Client ID for development
-// Replace with your actual development client ID from Google Cloud Console
-GOOGLE_CLIENT_ID = YOUR_DEV_CLIENT_ID_HERE.apps.googleusercontent.com
+// Set via environment variable: export GOOGLE_CLIENT_ID="your-id.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = $(GOOGLE_CLIENT_ID)
+
+// Google OAuth Client Secret for development
+// Set via environment variable: export GOOGLE_CLIENT_SECRET="your-secret"
+GOOGLE_CLIENT_SECRET = $(GOOGLE_CLIENT_SECRET)
 
 // Environment identifier
 APP_ENVIRONMENT = development
