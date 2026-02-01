@@ -43,11 +43,24 @@ enum AppConfiguration {
         return clientId
     }()
 
-    /// OAuth redirect URI for handling callbacks
-    static let oauthRedirectURI = "cluademail://oauth/callback"
+    /// OAuth callback scheme derived from client ID (reversed client ID format for iOS OAuth clients)
+    static var oauthCallbackScheme: String {
+        // Google iOS OAuth clients require the reversed client ID as URL scheme
+        // Format: com.googleusercontent.apps.{CLIENT_ID_PREFIX}
+        let suffix = ".apps.googleusercontent.com"
+        guard googleClientId.hasSuffix(suffix) else {
+            Logger.auth.fault("Invalid Google Client ID format - must end with \(suffix)")
+            fatalError("Invalid Google Client ID format")
+        }
+        let clientIdPrefix = String(googleClientId.dropLast(suffix.count))
+        return "com.googleusercontent.apps.\(clientIdPrefix)"
+    }
 
-    /// OAuth callback scheme (without ://)
-    static let oauthCallbackScheme = "cluademail"
+    /// OAuth redirect URI for handling callbacks
+    /// Format: com.googleusercontent.apps.{CLIENT_ID_PREFIX}:/oauth2redirect
+    static var oauthRedirectURI: String {
+        "\(oauthCallbackScheme):/oauth2redirect"
+    }
 
     /// OAuth scopes required for Gmail access and user profile
     static let oauthScopes = [

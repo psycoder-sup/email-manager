@@ -6,6 +6,11 @@
 // Note: iOS OAuth clients don't require a client secret (PKCE is used instead)
 GOOGLE_CLIENT_ID = $(GOOGLE_CLIENT_ID)
 
+// Google OAuth Reversed Client ID (URL scheme for OAuth callback)
+// Format: com.googleusercontent.apps.{CLIENT_ID_PREFIX}
+// This is set in the Xcode project build settings
+GOOGLE_REVERSED_CLIENT_ID = $(GOOGLE_REVERSED_CLIENT_ID)
+
 // Environment identifier
 APP_ENVIRONMENT = development
 
