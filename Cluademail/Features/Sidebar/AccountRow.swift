@@ -4,7 +4,6 @@ import SwiftUI
 /// Pass `nil` for account to display the "All Accounts" row.
 struct AccountRow: View {
     let account: Account?
-    let isSelected: Bool
 
     var body: some View {
         HStack(spacing: 12) {
@@ -13,7 +12,6 @@ struct AccountRow: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(account?.displayName ?? "All Accounts")
-                    .fontWeight(isSelected ? .semibold : .regular)
 
                 if let account {
                     Text(account.email)
@@ -67,14 +65,12 @@ struct AccountRow: View {
 
 #Preview {
     List {
-        AccountRow(account: nil, isSelected: true)
+        AccountRow(account: nil)
         AccountRow(
-            account: Account(email: "john@gmail.com", displayName: "John Doe"),
-            isSelected: false
+            account: Account(email: "john@gmail.com", displayName: "John Doe")
         )
         AccountRow(
-            account: Account(email: "jane@gmail.com", displayName: "Jane Smith"),
-            isSelected: false
+            account: Account(email: "jane@gmail.com", displayName: "Jane Smith")
         )
     }
     .listStyle(.sidebar)

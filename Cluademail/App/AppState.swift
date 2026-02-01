@@ -2,6 +2,15 @@ import Foundation
 import Observation
 import os.log
 
+// MARK: - SidebarItem
+
+/// Represents a selectable item in the sidebar for native List selection binding.
+enum SidebarItem: Hashable {
+    case allAccounts
+    case account(UUID)
+    case folder(Folder)
+}
+
 /// Global application state observable by all views.
 /// Marked @MainActor to ensure all state mutations occur on the main thread.
 @Observable

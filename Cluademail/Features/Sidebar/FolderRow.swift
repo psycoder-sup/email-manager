@@ -6,7 +6,6 @@ import os.log
 struct FolderRow: View {
     let folder: Folder
     let account: Account?
-    let isSelected: Bool
 
     @Environment(DatabaseService.self) private var databaseService
     @State private var unreadCount: Int = 0
@@ -15,7 +14,6 @@ struct FolderRow: View {
         HStack {
             SwiftUI.Label {
                 Text(folder.displayName)
-                    .fontWeight(isSelected ? .semibold : .regular)
             } icon: {
                 Image(systemName: folder.systemImage)
             }
@@ -53,11 +51,11 @@ struct FolderRow: View {
 
 #Preview {
     List {
-        FolderRow(folder: .inbox, account: nil, isSelected: true)
-        FolderRow(folder: .sent, account: nil, isSelected: false)
-        FolderRow(folder: .drafts, account: nil, isSelected: false)
-        FolderRow(folder: .starred, account: nil, isSelected: false)
-        FolderRow(folder: .trash, account: nil, isSelected: false)
+        FolderRow(folder: .inbox, account: nil)
+        FolderRow(folder: .sent, account: nil)
+        FolderRow(folder: .drafts, account: nil)
+        FolderRow(folder: .starred, account: nil)
+        FolderRow(folder: .trash, account: nil)
     }
     .listStyle(.sidebar)
     .frame(width: 250)
