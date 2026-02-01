@@ -142,16 +142,76 @@ Core/Services/
 
 ## Acceptance Criteria
 
-- [ ] `DatabaseService` creates and configures `ModelContainer` correctly
-- [ ] All repository protocols are defined with clear interfaces
-- [ ] `AccountRepository` implements all CRUD operations
-- [ ] `EmailRepository` supports filtering by account, folder, read status
-- [ ] `EmailRepository.search()` searches across subject, sender, and snippet
-- [ ] `EmailRepository.deleteOldest()` enforces the 1000 email limit
-- [ ] Unread count queries work for both global and per-account/folder
-- [ ] Background context creation works for sync operations
-- [ ] All repositories handle errors appropriately
-- [ ] Unit tests cover repository operations with in-memory database
+- [x] `DatabaseService` creates and configures `ModelContainer` correctly
+- [x] All repository protocols are defined with clear interfaces
+- [x] `AccountRepository` implements all CRUD operations
+- [x] `EmailRepository` supports filtering by account, folder, read status
+- [x] `EmailRepository.search()` searches across subject, sender, and snippet
+- [x] `EmailRepository.deleteOldest()` enforces the 1000 email limit
+- [x] Unread count queries work for both global and per-account/folder
+- [x] Background context creation works for sync operations
+- [x] All repositories handle errors appropriately
+- [x] Unit tests cover repository operations with in-memory database
+
+## Completion Summary
+
+**Status:** COMPLETED
+
+**Date:** 2026-01-31
+
+**Implementation Notes:**
+
+1. **Architecture**: Clean architecture with generic `BaseRepository<T>` providing common CRUD operations
+   - Protocol-based design for testability and mockability
+   - Per-method `ModelContext` parameter for flexibility with main/background contexts
+   - `@Observable` `DatabaseService` for SwiftUI environment injection
+
+2. **Files Created** (8 source files):
+   - `Core/Errors/DatabaseError.swift` - Typed errors (DB_001-DB_004) conforming to AppError
+   - `Core/Services/DatabaseService.swift` - ModelContainer management, context factory
+   - `Core/Repositories/RepositoryProtocols.swift` - Protocol definitions for all repositories
+   - `Core/Repositories/BaseRepository.swift` - Generic base class with fetch, save, delete, count
+   - `Core/Repositories/AccountRepository.swift` - Account CRUD operations
+   - `Core/Repositories/EmailRepository.swift` - Complex filtering, search, batch operations
+   - `Core/Repositories/LabelRepository.swift` - Label CRUD operations
+   - `Core/Repositories/SyncStateRepository.swift` - Sync state and historyId management
+
+3. **Test Files Created** (5 files, 55 new tests):
+   - `CluademailTests/Unit/Repositories/AccountRepositoryTests.swift` - 8 tests
+   - `CluademailTests/Unit/Repositories/EmailRepositoryTests.swift` - 25 tests
+   - `CluademailTests/Unit/Repositories/LabelRepositoryTests.swift` - 9 tests
+   - `CluademailTests/Unit/Repositories/SyncStateRepositoryTests.swift` - 7 tests
+   - `CluademailTests/Unit/Repositories/DatabaseServiceTests.swift` - 6 tests
+
+4. **Files Modified**:
+   - `App/CluademailApp.swift` - Replaced inline ModelContainer with DatabaseService
+
+5. **Test Results**: 70 unit tests passing, 8 UI tests passing (78 total)
+
+6. **Key Design Decisions**:
+   - `BaseRepository<T>` marked `@unchecked Sendable` (stateless, thread-safe)
+   - SwiftData predicates built explicitly for each filter combination (compile-time requirement)
+   - `DatabaseError` enum with 4 cases: fetchFailed, saveFailed, deleteFailed, notFound
+   - Background contexts created with `autosaveEnabled = false` for manual transaction control
+   - Search uses `localizedStandardContains` for case-insensitive matching
+
+7. **EmailRepository Features**:
+   - Dynamic predicate building via `buildPredicate()` helper
+   - Search across subject, fromAddress, snippet (limited to 100 results)
+   - `deleteOldest()` enforces 1000 email limit per account
+   - Separate `count()` and `unreadCount()` methods using `fetchCount()`
+
+8. **Code Simplification** (2026-01-31):
+   - Removed redundant MARK comments and verbose documentation
+   - Used Swift 5.9+ implicit returns in switch expressions
+   - Simplified predicates with shorthand closure syntax (`$0.property`)
+   - Used `if let` shorthand syntax throughout
+   - Replaced `for` loops with `forEach` where appropriate
+   - Removed unnecessary debug logging (kept error logging)
+   - Removed unused imports
+   - Net reduction: ~100 lines of code removed while preserving all functionality
+
+9. **Next Steps**: Task 04 (Google OAuth & Keychain) can now begin
 
 ## References
 

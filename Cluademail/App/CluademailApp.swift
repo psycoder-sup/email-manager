@@ -8,36 +8,17 @@ struct CluademailApp: App {
 
     @State private var appState = AppState()
     @State private var errorHandler = ErrorHandler()
-
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Account.self,
-            Email.self,
-            EmailThread.self,
-            Attachment.self,
-            Label.self,
-            SyncState.self
-        ])
-        let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false
-        )
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    @State private var databaseService = DatabaseService()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environment(appState)
                 .environment(errorHandler)
+                .environment(databaseService)
                 .modifier(ErrorAlertModifier(errorHandler: errorHandler))
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(databaseService.container)
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("New Message") {
