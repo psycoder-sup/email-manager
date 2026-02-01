@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 import os.log
 
 // MARK: - Sync Scheduler
@@ -6,6 +7,7 @@ import os.log
 /// Background sync scheduler with configurable interval.
 /// Auto-starts on app launch and runs periodic sync.
 /// Marked @MainActor for thread-safe state access.
+@Observable
 @MainActor
 final class SyncScheduler {
 
