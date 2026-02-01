@@ -10,6 +10,12 @@ struct CluademailApp: App {
     @State private var errorHandler = ErrorHandler()
     @State private var databaseService = DatabaseService()
 
+    /// Sync coordinator for managing email sync across accounts
+    @State private var syncCoordinator: SyncCoordinator?
+
+    /// Background sync scheduler
+    @State private var syncScheduler: SyncScheduler?
+
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -17,6 +23,9 @@ struct CluademailApp: App {
                 .environment(errorHandler)
                 .environment(databaseService)
                 .modifier(ErrorAlertModifier(errorHandler: errorHandler))
+                .task {
+                    await setupSyncSystem()
+                }
         }
         .modelContainer(databaseService.container)
         .commands {
@@ -29,9 +38,12 @@ struct CluademailApp: App {
 
             CommandGroup(after: .sidebar) {
                 Button("Check Mail") {
-                    // TODO: Implement in Task 06
+                    Task {
+                        await syncScheduler?.triggerImmediateSync()
+                    }
                 }
                 .keyboardShortcut("R", modifiers: [.command, .shift])
+                .disabled(appState.isSyncing)
             }
         }
 
@@ -40,5 +52,27 @@ struct CluademailApp: App {
                 .environment(appState)
                 .environment(errorHandler)
         }
+    }
+
+    // MARK: - Sync Setup
+
+    /// Sets up the sync system on app launch.
+    @MainActor
+    private func setupSyncSystem() async {
+        // Create sync coordinator if not already created
+        guard syncCoordinator == nil else { return }
+
+        let coordinator = SyncCoordinator(
+            appState: appState,
+            databaseService: databaseService
+        )
+        syncCoordinator = coordinator
+
+        // Create and start scheduler
+        let scheduler = SyncScheduler(coordinator: coordinator)
+        syncScheduler = scheduler
+
+        // Auto-start background sync
+        scheduler.start()
     }
 }

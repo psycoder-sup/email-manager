@@ -429,4 +429,79 @@ extension TestFixtures {
             data: data
         )
     }
+
+    // MARK: - Gmail History DTO Fixtures
+
+    /// Creates a test GmailHistoryDTO with optional customization.
+    /// - Parameters:
+    ///   - id: History ID (default: "12345")
+    ///   - messagesAdded: Messages added in this history record
+    ///   - messagesDeleted: Messages deleted in this history record
+    ///   - labelsAdded: Labels added to messages
+    ///   - labelsRemoved: Labels removed from messages
+    /// - Returns: A configured GmailHistoryDTO
+    static func makeGmailHistoryDTO(
+        id: String = "12345",
+        messagesAdded: [GmailHistoryMessageDTO]? = nil,
+        messagesDeleted: [GmailHistoryMessageDTO]? = nil,
+        labelsAdded: [GmailHistoryLabelDTO]? = nil,
+        labelsRemoved: [GmailHistoryLabelDTO]? = nil
+    ) -> GmailHistoryDTO {
+        GmailHistoryDTO(
+            id: id,
+            messagesAdded: messagesAdded,
+            messagesDeleted: messagesDeleted,
+            labelsAdded: labelsAdded,
+            labelsRemoved: labelsRemoved
+        )
+    }
+
+    /// Creates a test GmailHistoryListDTO with optional customization.
+    /// - Parameters:
+    ///   - history: Array of history records
+    ///   - historyId: Current history ID (default: "99999")
+    ///   - nextPageToken: Token for pagination
+    /// - Returns: A configured GmailHistoryListDTO
+    static func makeGmailHistoryListDTO(
+        history: [GmailHistoryDTO]? = nil,
+        historyId: String = "99999",
+        nextPageToken: String? = nil
+    ) -> GmailHistoryListDTO {
+        GmailHistoryListDTO(
+            history: history,
+            nextPageToken: nextPageToken,
+            historyId: historyId
+        )
+    }
+
+    /// Creates a test GmailHistoryMessageDTO for history records.
+    /// - Parameters:
+    ///   - messageId: Message ID (default: generated UUID)
+    ///   - threadId: Thread ID (default: generated UUID)
+    /// - Returns: A configured GmailHistoryMessageDTO
+    static func makeGmailHistoryMessageDTO(
+        messageId: String = UUID().uuidString,
+        threadId: String = UUID().uuidString
+    ) -> GmailHistoryMessageDTO {
+        GmailHistoryMessageDTO(
+            message: GmailMessageSummaryDTO(id: messageId, threadId: threadId)
+        )
+    }
+
+    /// Creates a test GmailHistoryLabelDTO for label changes in history.
+    /// - Parameters:
+    ///   - messageId: Message ID (default: generated UUID)
+    ///   - threadId: Thread ID (default: generated UUID)
+    ///   - labelIds: Labels that were added/removed (default: ["INBOX"])
+    /// - Returns: A configured GmailHistoryLabelDTO
+    static func makeGmailHistoryLabelDTO(
+        messageId: String = UUID().uuidString,
+        threadId: String = UUID().uuidString,
+        labelIds: [String] = ["INBOX"]
+    ) -> GmailHistoryLabelDTO {
+        GmailHistoryLabelDTO(
+            message: GmailMessageSummaryDTO(id: messageId, threadId: threadId),
+            labelIds: labelIds
+        )
+    }
 }
