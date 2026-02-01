@@ -384,4 +384,49 @@ extension TestFixtures {
             messagesUnread: 10
         )
     }
+
+    /// Creates a test GmailDraftDTO with optional customization.
+    static func makeGmailDraftDTO(
+        id: String = UUID().uuidString,
+        messageId: String = UUID().uuidString
+    ) -> GmailDraftDTO {
+        GmailDraftDTO(
+            id: id,
+            message: makeGmailMessageDTO(id: messageId, labelIds: ["DRAFT"])
+        )
+    }
+
+    /// Creates a test GmailProfileDTO with optional customization.
+    static func makeGmailProfileDTO(
+        emailAddress: String = "test@gmail.com",
+        historyId: String = "12345"
+    ) -> GmailProfileDTO {
+        GmailProfileDTO(
+            emailAddress: emailAddress,
+            messagesTotal: 1000,
+            threadsTotal: 500,
+            historyId: historyId
+        )
+    }
+
+    /// Creates a test BatchResult with customizable success/failure.
+    static func makeBatchResult<T>(
+        succeeded: [T] = [],
+        failed: [BatchFailure] = []
+    ) -> BatchResult<T> {
+        BatchResult(succeeded: succeeded, failed: failed)
+    }
+
+    /// Creates a test AttachmentData for drafts.
+    static func makeAttachmentData(
+        filename: String = "test.pdf",
+        mimeType: String = "application/pdf",
+        data: Data = Data("test content".utf8)
+    ) -> AttachmentData {
+        AttachmentData(
+            filename: filename,
+            mimeType: mimeType,
+            data: data
+        )
+    }
 }

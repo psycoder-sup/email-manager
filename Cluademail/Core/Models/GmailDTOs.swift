@@ -201,3 +201,77 @@ struct GmailAttachmentDTO: Codable, Sendable {
     /// Base64URL encoded attachment data
     let data: String?
 }
+
+// MARK: - Gmail Draft DTOs
+
+/// Gmail draft response from the API.
+struct GmailDraftDTO: Codable, Sendable {
+    /// Draft ID
+    let id: String
+    /// The draft message
+    let message: GmailMessageDTO
+}
+
+/// Response from drafts.list API.
+struct GmailDraftListDTO: Codable, Sendable {
+    /// List of drafts
+    let drafts: [GmailDraftSummaryDTO]?
+    /// Token for next page of results
+    let nextPageToken: String?
+    /// Estimated total results
+    let resultSizeEstimate: Int?
+}
+
+/// Summary draft in list response.
+struct GmailDraftSummaryDTO: Codable, Sendable {
+    /// Draft ID
+    let id: String
+    /// Associated message (may be partial)
+    let message: GmailMessageSummaryDTO?
+}
+
+// MARK: - Gmail Profile DTO
+
+/// User profile response from the API.
+struct GmailProfileDTO: Codable, Sendable {
+    /// User's email address
+    let emailAddress: String
+    /// Total messages in mailbox
+    let messagesTotal: Int?
+    /// Total threads in mailbox
+    let threadsTotal: Int?
+    /// Current history ID for incremental sync
+    let historyId: String?
+}
+
+// MARK: - Request DTOs
+
+/// Request body for modifying message labels.
+struct ModifyMessageRequest: Codable, Sendable {
+    /// Label IDs to add
+    let addLabelIds: [String]?
+    /// Label IDs to remove
+    let removeLabelIds: [String]?
+}
+
+/// Request body for creating/updating drafts.
+struct DraftRequest: Codable, Sendable {
+    /// The message to create as draft
+    let message: DraftMessageRequest
+}
+
+/// Message content for draft creation.
+struct DraftMessageRequest: Codable, Sendable {
+    /// Base64URL encoded raw RFC 2822 message
+    let raw: String
+    /// Thread ID for replies
+    let threadId: String?
+}
+
+/// Request body for sending messages.
+struct SendMessageRequest: Codable, Sendable {
+    /// Base64URL encoded raw RFC 2822 message
+    let raw: String
+    /// Thread ID for replies
+    let threadId: String?
+}
