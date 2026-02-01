@@ -255,27 +255,27 @@ Core/Services/
 
 ## Acceptance Criteria
 
-- [ ] Settings window opens from menu bar (Cmd+,)
-- [ ] **General tab** shows app name, version, and build number
-- [ ] **General tab** displays copyright notice
-- [ ] App follows system appearance automatically (no manual dark mode toggle)
-- [ ] Accounts tab shows all connected accounts
-- [ ] Can add new Gmail account via OAuth
-- [ ] Can remove account with confirmation
-- [ ] Account removal deletes tokens and local data
-- [ ] Sync interval can be configured
-- [ ] Manual sync button triggers immediate sync
-- [ ] Sync status shows last sync time
-- [ ] MCP server can be enabled/disabled
-- [ ] MCP server status shows running state
-- [ ] Available MCP tools are listed
-- [ ] Notification permissions are requested
-- [ ] Notifications appear for new emails
-- [ ] Notification sound can be toggled
-- [ ] Dock badge can be toggled
-- [ ] Notification actions work (mark read, archive)
-- [ ] **Notification reply action** opens compose window (does not send directly)
-- [ ] Clicking notification navigates to email
+- [x] Settings window opens from menu bar (Cmd+,)
+- [x] **General tab** shows app name, version, and build number
+- [x] **General tab** displays copyright notice
+- [x] App follows system appearance automatically (no manual dark mode toggle)
+- [x] Accounts tab shows all connected accounts
+- [x] Can add new Gmail account via OAuth
+- [x] Can remove account with confirmation
+- [x] Account removal deletes tokens and local data
+- [x] Sync interval can be configured
+- [x] Manual sync button triggers immediate sync
+- [x] Sync status shows last sync time
+- [x] MCP server can be enabled/disabled
+- [x] MCP server status shows running state
+- [x] Available MCP tools are listed
+- [x] Notification permissions are requested
+- [x] Notifications appear for new emails
+- [x] Notification sound can be toggled
+- [x] Dock badge can be toggled
+- [x] Notification actions work (mark read, archive)
+- [x] **Notification reply action** opens compose window (does not send directly)
+- [x] Clicking notification navigates to email
 
 ## References
 
@@ -283,3 +283,66 @@ Core/Services/
 - [User Notifications](https://developer.apple.com/documentation/usernotifications)
 - [macOS Human Interface Guidelines - Settings](https://developer.apple.com/design/human-interface-guidelines/settings)
 - [@AppStorage](https://developer.apple.com/documentation/swiftui/appstorage)
+
+---
+
+## Completion Summary
+
+**Status:** ✅ Complete
+**Completed:** 2026-02-01
+
+### Files Created
+
+| File | Purpose |
+|------|---------|
+| `Core/Services/NotificationService.swift` | macOS notification handling with UNUserNotificationCenter |
+| `Features/Settings/GeneralSettingsView.swift` | App info tab with version and copyright |
+| `Features/Settings/NotificationSettingsView.swift` | Notification preferences UI |
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `Features/Settings/SettingsView.swift` | 5-tab layout, accounts/sync/MCP views expanded |
+| `App/CluademailApp.swift` | Notification service setup, event handlers |
+| `App/AppDelegate.swift` | Notification delegate and categories setup |
+| `Core/Services/Sync/SyncScheduler.swift` | Added `@Observable` for environment injection |
+
+### Features Implemented
+
+1. **Settings Window (5 Tabs)**
+   - General: App icon, name, version, build, copyright
+   - Accounts: List, add via OAuth, remove with confirmation
+   - Sync: Interval picker, manual sync, status display
+   - Notifications: Permission check, sound/badge toggles
+   - MCP: Enable toggle, status, tools list
+
+2. **NotificationService**
+   - Authorization request and status tracking
+   - Notification categories with actions (Mark Read, Archive, Reply)
+   - Badge count management with 99+ cap
+   - Action handlers calling Gmail API
+   - Foundation.Notification posting for navigation/compose
+
+3. **App Integration**
+   - Notification delegate set in AppDelegate
+   - Event observers for `.navigateToEmail` and `.openComposeWithReply`
+   - Environment injection of SyncScheduler and NotificationService
+
+### Code Quality
+
+- Applied code-simplifier refinements:
+  - Extracted `modifyEmailFromNotification` and `postEmailNotification` helpers
+  - Extracted `statusIndicator` and `syncStatusView` computed properties
+  - Extracted `extractEmailContext` helper in CluademailApp
+
+### Test Coverage
+
+- UI tests verify settings window and tab navigation
+- Unit tests cover notification service authorization and badge updates
+
+### Deferred Items
+
+- Per-account notification settings (v2)
+- Custom notification sounds (v2)
+- Database/cache size display (v2)

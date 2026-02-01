@@ -14,7 +14,7 @@
 | 08 | Email List & Threading | ✅ Done | 03, 06, 07 |
 | 09 | Email Detail & Compose | ⏳ Ready | 05, 08 |
 | 10 | Search & Labels | ⏳ Ready | 03, 05, 08 |
-| 11 | Settings & Notifications | ⏳ Ready | 04, 06 |
+| 11 | Settings & Notifications | ✅ Done | 04, 06 |
 | 12 | MCP Server Integration | ⬚ Blocked | 03, 05, **10** |
 
 **Legend:** ✅ Done | ⏳ Ready | ⬚ Blocked (bold = blocking dependency)
@@ -36,15 +36,15 @@
 | Phase | Tasks | Notes |
 |-------|-------|-------|
 | ~~Now~~ | ~~06~~ | ~~Sync Engine - unblocks 08, 11~~ ✅ |
-| ~~Now~~ | ~~08~~ + 11 | ~~Email List~~ ✅ + Settings in progress |
+| ~~Now~~ | ~~08~~ + ~~11~~ | ~~Email List~~ ✅ + ~~Settings~~ ✅ |
 | **Now** | 09 + 10 | Can run in parallel |
 | **After 10** | 12 | Final task |
 
 ## Progress
 
-- **Completed:** 8/12 (67%)
-- **Ready:** 3
-- **Blocked:** 1
+- **Completed:** 9/12 (75%)
+- **Ready:** 2 (Tasks 09, 10)
+- **Blocked:** 1 (Task 12)
 
 ---
 *Last updated: 2026-02-01*
