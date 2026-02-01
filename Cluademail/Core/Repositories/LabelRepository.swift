@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-final class LabelRepository: BaseRepository<Label>, LabelRepositoryProtocol {
+final class LabelRepository: BaseRepository<Label>, LabelRepositoryProtocol, @unchecked Sendable {
 
     func fetchAll(account: Account, context: ModelContext) async throws -> [Label] {
         let accountId = account.id

@@ -1,13 +1,10 @@
 // Development Configuration
 // This file contains development-specific settings
 
-// Google OAuth Client ID for development
+// Google OAuth Client ID for development (iOS OAuth client type)
 // Set via environment variable: export GOOGLE_CLIENT_ID="your-id.apps.googleusercontent.com"
+// Note: iOS OAuth clients don't require a client secret (PKCE is used instead)
 GOOGLE_CLIENT_ID = $(GOOGLE_CLIENT_ID)
-
-// Google OAuth Client Secret for development
-// Set via environment variable: export GOOGLE_CLIENT_SECRET="your-secret"
-GOOGLE_CLIENT_SECRET = $(GOOGLE_CLIENT_SECRET)
 
 // Environment identifier
 APP_ENVIRONMENT = development

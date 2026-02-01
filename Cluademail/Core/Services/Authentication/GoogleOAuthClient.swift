@@ -205,10 +205,10 @@ final class GoogleOAuthClient: OAuthClientProtocol, @unchecked Sendable {
         let codeVerifier = flow.codeVerifier
 
         // Build request body with proper URL encoding
+        // Note: client_secret is not required for iOS OAuth clients using PKCE
         let parameters = [
             "code": result.code,
             "client_id": AppConfiguration.googleClientId,
-            "client_secret": AppConfiguration.googleClientSecret,
             "redirect_uri": AppConfiguration.oauthRedirectURI,
             "grant_type": "authorization_code",
             "code_verifier": codeVerifier
@@ -235,10 +235,10 @@ final class GoogleOAuthClient: OAuthClientProtocol, @unchecked Sendable {
 
     /// Refreshes an expired access token.
     func refreshToken(_ refreshToken: String) async throws -> OAuthTokens {
+        // Note: client_secret is not required for iOS OAuth clients using PKCE
         let parameters = [
             "refresh_token": refreshToken,
             "client_id": AppConfiguration.googleClientId,
-            "client_secret": AppConfiguration.googleClientSecret,
             "grant_type": "refresh_token"
         ]
 

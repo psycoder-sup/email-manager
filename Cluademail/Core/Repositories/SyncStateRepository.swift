@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 import os.log
 
-final class SyncStateRepository: BaseRepository<SyncState>, SyncStateRepositoryProtocol {
+final class SyncStateRepository: BaseRepository<SyncState>, SyncStateRepositoryProtocol, @unchecked Sendable {
 
     func fetch(accountId: UUID, context: ModelContext) async throws -> SyncState? {
         try fetchOne(predicate: #Predicate { $0.accountId == accountId }, context: context)

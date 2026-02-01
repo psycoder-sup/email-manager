@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 import os.log
 
-final class EmailRepository: BaseRepository<Email>, EmailRepositoryProtocol {
+final class EmailRepository: BaseRepository<Email>, EmailRepositoryProtocol, @unchecked Sendable {
 
     func fetch(byGmailId gmailId: String, context: ModelContext) async throws -> Email? {
         try fetchOne(predicate: #Predicate { $0.gmailId == gmailId }, context: context)

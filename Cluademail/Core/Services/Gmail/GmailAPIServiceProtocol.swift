@@ -174,7 +174,7 @@ protocol GmailAPIServiceProtocol: Sendable {
 // MARK: - Batch Result Types
 
 /// Result of a batch operation with partial success support.
-struct BatchResult<T>: Sendable {
+struct BatchResult<T: Sendable>: Sendable {
     /// Successfully processed items
     let succeeded: [T]
 

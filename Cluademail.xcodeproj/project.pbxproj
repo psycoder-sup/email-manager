@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -129,7 +129,7 @@
 		0CA035031CDBDECC562FD292 /* CluademailUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CluademailUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		0D531D2BA485F96B27687C77 /* KeychainError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainError.swift; sourceTree = "<group>"; };
 		104CFBC7A213A34B59692906 /* ErrorHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHandlerTests.swift; sourceTree = "<group>"; };
-		105A8ECA5CFDA420A260FD80 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		105A8ECA5CFDA420A260FD80 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		119128011A10BA888D27DBBC /* EmailListFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailListFormatters.swift; sourceTree = "<group>"; };
 		1B4B46C5B65D8ECAACAFCF7C /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
 		1CFDBE3BB6288C8AB72A0665 /* ThreadRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadRowView.swift; sourceTree = "<group>"; };
@@ -140,7 +140,7 @@
 		268DDD2F18AC59D2B57B4AAA /* SyncStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStatusView.swift; sourceTree = "<group>"; };
 		289BAD253090DBCFBA1C8E90 /* EmailListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailListView.swift; sourceTree = "<group>"; };
 		298A6B814158A0950BF2128D /* MockGmailAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockGmailAPIService.swift; sourceTree = "<group>"; };
-		2A8D6609E880396A0CC37BF3 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		2A8D6609E880396A0CC37BF3 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		2C022D36E2E2196F8D84A4B0 /* CluademailUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CluademailUITests.swift; sourceTree = "<group>"; };
 		2EECDBB18D726153D366B5E6 /* SyncStateRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStateRepository.swift; sourceTree = "<group>"; };
 		30C157AACFEE656609A00AC7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -173,7 +173,7 @@
 		5A30A697D90D675569B375EF /* GmailEndpoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailEndpoints.swift; sourceTree = "<group>"; };
 		5C6911A2D9791C5D3A71ACCF /* LabelRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelRepositoryTests.swift; sourceTree = "<group>"; };
 		5F9DA7BF54ABE70B5F8A6184 /* AccountRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountRepository.swift; sourceTree = "<group>"; };
-		6960B4F7F2C0913B2DC5593E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		6960B4F7F2C0913B2DC5593E /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		6AB3436657D3A0C15E8901A9 /* GmailDTOsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailDTOsTests.swift; sourceTree = "<group>"; };
 		6BF8CBC97A005E47AA7DC209 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6EAB9E61108A7F0C732B2818 /* Cluademail.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cluademail.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -197,10 +197,10 @@
 		94F102DEB2A5EF10CC0E686B /* GoogleUserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleUserProfile.swift; sourceTree = "<group>"; };
 		966179F817AD174555AC17AE /* GmailModelMapperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailModelMapperTests.swift; sourceTree = "<group>"; };
 		9743CC82674D4EE6DEB9C4BD /* AppStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
-		987016A011314ADC70583BD8 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		987016A011314ADC70583BD8 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		9A6481F2D2309A3F8DDF2C8E /* TestFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestFixtures.swift; sourceTree = "<group>"; };
 		9BB5F85BBB3220D69D52559F /* DataBase64URLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataBase64URLTests.swift; sourceTree = "<group>"; };
-		9C72D71C20E70727C71272EE /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		9C72D71C20E70727C71272EE /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		9D3FF4BE75EB7F63409372E4 /* MockOAuthClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockOAuthClient.swift; sourceTree = "<group>"; };
 		9E052CCB0802E3FAE9524F52 /* GmailDTOs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailDTOs.swift; sourceTree = "<group>"; };
 		A0D8E54CA16998A45A8E889E /* DatabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseService.swift; sourceTree = "<group>"; };
@@ -210,21 +210,21 @@
 		A7EF62B4CAF3FE0A850F707A /* TokenManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenManagerTests.swift; sourceTree = "<group>"; };
 		A9461B5815DC33F328E49CBD /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainServiceTests.swift; sourceTree = "<group>"; };
 		AC2EECEA96D4D256C9A28F07 /* AccountRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountRepositoryTests.swift; sourceTree = "<group>"; };
-		AC66E440378DDF981F7F95EC /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		AC66E440378DDF981F7F95EC /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		AD436874AC3F4454B5995878 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		AFEC8A67003A8E8E27FB62E4 /* Label.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Label.swift; sourceTree = "<group>"; };
 		B0F11BB99A2872F15CF13283 /* AttachmentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentTests.swift; sourceTree = "<group>"; };
 		B71FA77FD882522B8C3DB728 /* EmailRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailRowView.swift; sourceTree = "<group>"; };
-		B97EB1C9A806F9C4D683B5F5 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		B97EB1C9A806F9C4D683B5F5 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		BD3D300B9C700FFE1AC5D905 /* Production.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Production.xcconfig; sourceTree = "<group>"; };
 		BEBC9353E9E11CBC955E4CDE /* Data+Base64URL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Base64URL.swift"; sourceTree = "<group>"; };
 		C55CE7C313929B9D96E9FFA4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		C89FFBA5DECB84802D6F2FFC /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		C89FFBA5DECB84802D6F2FFC /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		CA733F8F65150D0002B16D66 /* CluademailApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CluademailApp.swift; sourceTree = "<group>"; };
 		CAB7373673CE62819DBB2C89 /* MockErrorHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockErrorHandler.swift; sourceTree = "<group>"; };
 		CBCAAC030732F5D59FCCECC7 /* AppError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppError.swift; sourceTree = "<group>"; };
-		CF31137F9BF2159C9220AF0A /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
-		D03F65D2D6D8D02AB5797EF0 /* CluademailTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CluademailTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CF31137F9BF2159C9220AF0A /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		D03F65D2D6D8D02AB5797EF0 /* Cluademail.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Cluademail.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA445E64003F01D603B9644C /* GoogleOAuthClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleOAuthClient.swift; sourceTree = "<group>"; };
 		DC1435B81504AE98DC91E9C7 /* UnreadCountBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnreadCountBadge.swift; sourceTree = "<group>"; };
 		DC60EFE150494BB055812FAF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -238,10 +238,10 @@
 		EA16230336B76D31A48C1BCC /* GmailAPIServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailAPIServiceProtocol.swift; sourceTree = "<group>"; };
 		F412728C3AB80553882F5657 /* DatabaseError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseError.swift; sourceTree = "<group>"; };
 		F686E47F167852587CF96FE6 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
-		FADC604581589681D5387934 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		FADC604581589681D5387934 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		FB6B3E327B44702BE4C9448A /* XCTestCase+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+Extensions.swift"; sourceTree = "<group>"; };
 		FB89B4E28E6824D836211BC5 /* Logger+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+Extensions.swift"; sourceTree = "<group>"; };
-		FD7A8B09E9E6DC340183A13B /* CluademailUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CluademailUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FD7A8B09E9E6DC340183A13B /* Cluademail.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Cluademail.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -418,8 +418,8 @@
 			isa = PBXGroup;
 			children = (
 				6EAB9E61108A7F0C732B2818 /* Cluademail.app */,
-				D03F65D2D6D8D02AB5797EF0 /* CluademailTests.xctest */,
-				FD7A8B09E9E6DC340183A13B /* CluademailUITests.xctest */,
+				D03F65D2D6D8D02AB5797EF0 /* Cluademail.xctest */,
+				FD7A8B09E9E6DC340183A13B /* Cluademail.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -733,7 +733,7 @@
 			packageProductDependencies = (
 			);
 			productName = CluademailUITests;
-			productReference = FD7A8B09E9E6DC340183A13B /* CluademailUITests.xctest */;
+			productReference = FD7A8B09E9E6DC340183A13B /* Cluademail.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 		4C3D04C0E278114705EC5FC1 /* CluademailTests */ = {
@@ -751,7 +751,7 @@
 			packageProductDependencies = (
 			);
 			productName = CluademailTests;
-			productReference = D03F65D2D6D8D02AB5797EF0 /* CluademailTests.xctest */;
+			productReference = D03F65D2D6D8D02AB5797EF0 /* Cluademail.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -761,7 +761,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					1D83F4DAF83049B6943F21A4 = {
 						ProvisioningStyle = Automatic;
@@ -781,7 +781,6 @@
 			);
 			mainGroup = 6FF686FE4739DC7349C09D1E;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -943,6 +942,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				INFOPLIST_FILE = CluademailTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -961,6 +961,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				INFOPLIST_FILE = CluademailTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -981,7 +982,12 @@
 				CODE_SIGN_ENTITLEMENTS = Cluademail/Supporting/Cluademail.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readwrite;
+				GOOGLE_CLIENT_ID = "745260212298-1174gk9b2u37h6e7p77u7ur9ikhapp0h.apps.googleusercontent.com";
 				INFOPLIST_FILE = Cluademail/Supporting/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -997,6 +1003,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				INFOPLIST_FILE = CluademailUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1015,6 +1022,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				INFOPLIST_FILE = CluademailUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1064,9 +1072,11 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1075,12 +1085,14 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				GOOGLE_CLIENT_ID = "745260212298-e59afp5voo9f53arm4qfa6oogn09gbkh.apps.googleusercontent.com";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = Cluademail;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_VERSION = 5.9;
 			};
@@ -1094,7 +1106,12 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readwrite;
+				GOOGLE_CLIENT_ID = "745260212298-1174gk9b2u37h6e7p77u7ur9ikhapp0h.apps.googleusercontent.com";
 				INFOPLIST_FILE = Cluademail/Supporting/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1141,9 +1158,11 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -1158,6 +1177,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				GOOGLE_CLIENT_ID = "745260212298-e59afp5voo9f53arm4qfa6oogn09gbkh.apps.googleusercontent.com";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -1165,6 +1185,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = Cluademail;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.9;

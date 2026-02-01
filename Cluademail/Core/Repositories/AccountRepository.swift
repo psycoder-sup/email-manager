@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-final class AccountRepository: BaseRepository<Account>, AccountRepositoryProtocol {
+final class AccountRepository: BaseRepository<Account>, AccountRepositoryProtocol, @unchecked Sendable {
 
     func fetchAll(context: ModelContext) async throws -> [Account] {
         try fetch(sortBy: [SortDescriptor(\.email)], context: context)
