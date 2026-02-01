@@ -16,13 +16,31 @@ final class EmailRepository: BaseRepository<Email>, EmailRepositoryProtocol {
         offset: Int?,
         context: ModelContext
     ) async throws -> [Email] {
-        try fetch(
-            predicate: buildPredicate(account: account, folder: folder, isRead: isRead),
+        // Fetch without folder filter (SwiftData can't translate array.contains() to SQLite)
+        var emails = try fetch(
+            predicate: buildPredicate(account: account, isRead: isRead),
             sortBy: [SortDescriptor(\.date, order: .reverse)],
-            limit: limit,
-            offset: offset,
+            limit: folder == nil ? limit : nil,  // Only apply limit at DB level if no folder filter
+            offset: folder == nil ? offset : nil,
             context: context
         )
+
+        // Apply folder filter in-memory
+        if let folder {
+            emails = emails.filter { $0.labelIds.contains(folder) }
+        }
+
+        // Apply offset and limit after folder filtering
+        if folder != nil {
+            if let offset, offset > 0 {
+                emails = Array(emails.dropFirst(offset))
+            }
+            if let limit {
+                emails = Array(emails.prefix(limit))
+            }
+        }
+
+        return emails
     }
 
     func fetchThreads(
@@ -111,38 +129,49 @@ final class EmailRepository: BaseRepository<Email>, EmailRepositoryProtocol {
     }
 
     func count(account: Account?, folder: String?, context: ModelContext) async throws -> Int {
-        try count(predicate: buildPredicate(account: account, folder: folder, isRead: nil), context: context)
+        // Fetch without folder filter, then filter in-memory
+        let emails = try fetch(
+            predicate: buildPredicate(account: account, isRead: nil),
+            sortBy: [],
+            context: context
+        )
+
+        if let folder {
+            return emails.filter { $0.labelIds.contains(folder) }.count
+        }
+        return emails.count
     }
 
     func unreadCount(account: Account?, folder: String?, context: ModelContext) async throws -> Int {
-        try count(predicate: buildPredicate(account: account, folder: folder, isRead: false), context: context)
+        // Fetch unread emails without folder filter, then filter in-memory
+        let emails = try fetch(
+            predicate: buildPredicate(account: account, isRead: false),
+            sortBy: [],
+            context: context
+        )
+
+        if let folder {
+            return emails.filter { $0.labelIds.contains(folder) }.count
+        }
+        return emails.count
     }
 
     // MARK: - Private
 
-    private func buildPredicate(account: Account?, folder: String?, isRead: Bool?) -> Predicate<Email>? {
-        switch (account, folder, isRead) {
-        case (.some(let acc), .some(let fld), .some(let read)):
-            let accountId = acc.id
-            return #Predicate<Email> {
-                $0.account?.id == accountId && $0.labelIds.contains(fld) && $0.isRead == read
-            }
-        case (.some(let acc), .some(let fld), .none):
-            let accountId = acc.id
-            return #Predicate<Email> { $0.account?.id == accountId && $0.labelIds.contains(fld) }
-        case (.some(let acc), .none, .some(let read)):
+    /// Builds a predicate for account and isRead filters only.
+    /// Folder filtering is handled in-memory because SwiftData cannot translate
+    /// array.contains() to SQLite queries.
+    private func buildPredicate(account: Account?, isRead: Bool?) -> Predicate<Email>? {
+        switch (account, isRead) {
+        case (.some(let acc), .some(let read)):
             let accountId = acc.id
             return #Predicate<Email> { $0.account?.id == accountId && $0.isRead == read }
-        case (.some(let acc), .none, .none):
+        case (.some(let acc), .none):
             let accountId = acc.id
             return #Predicate<Email> { $0.account?.id == accountId }
-        case (.none, .some(let fld), .some(let read)):
-            return #Predicate<Email> { $0.labelIds.contains(fld) && $0.isRead == read }
-        case (.none, .some(let fld), .none):
-            return #Predicate<Email> { $0.labelIds.contains(fld) }
-        case (.none, .none, .some(let read)):
+        case (.none, .some(let read)):
             return #Predicate<Email> { $0.isRead == read }
-        case (.none, .none, .none):
+        case (.none, .none):
             return nil
         }
     }
