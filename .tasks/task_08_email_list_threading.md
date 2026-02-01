@@ -381,3 +381,51 @@ Features/EmailList/
 - [Swipe Actions](https://developer.apple.com/documentation/swiftui/view/swipeactions(edge:allowsfullswipe:content:))
 - [Context Menus](https://developer.apple.com/documentation/swiftui/view/contextmenu(menuitems:))
 - [SwiftData @Query](https://developer.apple.com/documentation/swiftdata/query)
+
+---
+
+## Completion Summary
+
+**Status:** ✅ Complete
+**Completed:** 2026-02-01
+**Commit:** `5a11c90` - ✨ feat(EmailList): implement Task 08 Email List & Threading
+
+### Implementation Notes
+
+**Architecture:** Pragmatic Hybrid approach with ViewModel + 5 view components (no separate service layer).
+
+**Files Created:**
+| File | Lines | Purpose |
+|------|-------|---------|
+| `EmailListViewModel.swift` | ~440 | Observable view model with data loading, selection, pagination, actions |
+| `EmailListView.swift` | ~400 | Main list container with toolbar, keyboard handlers, bulk actions |
+| `EmailRowView.swift` | ~113 | Single email row display |
+| `ThreadRowView.swift` | ~110 | Thread/conversation summary row |
+| `EmptyStateView.swift` | ~89 | Folder-specific empty state messages |
+| `Shared/EmailListFormatters.swift` | ~40 | Centralized date/name formatting utilities |
+| `Shared/UnreadStarIndicator.swift` | ~50 | Reusable unread circle + star button component |
+
+**Key Implementation Decisions:**
+- Direct GmailAPIService calls from ViewModel (no action service layer)
+- Basic local search filtering (subject/sender/snippet) - deferred server-side search to Task 10
+- Deferred compose shortcuts (R/A/F) to Task 09
+- Used `SwiftUI.Label<Text, Image>` typealias to avoid naming conflict with SwiftData Label model
+- Thread actions disabled with TODOs (thread operations require batch API work)
+
+**Features Implemented:**
+- ✅ Email/Thread list display with visual indicators (unread, starred)
+- ✅ Multi-select (Cmd+Click, Shift+Click, Cmd+A, Escape)
+- ✅ Keyboard navigation (J/K, arrows) and action keys (S, U, E, Delete)
+- ✅ Swipe actions (delete, archive, read/unread toggle)
+- ✅ Context menus with full action set
+- ✅ Pagination (50 at a time, up to 1000 emails)
+- ✅ Local search filtering
+- ✅ Display modes (Messages vs Conversations)
+- ✅ Sort menu (Date newest/oldest, Sender, Subject)
+- ✅ Bulk action toolbar for multi-select
+- ✅ Account badge in aggregated view
+
+**Deferred to Future Tasks:**
+- Server-side search (Task 10)
+- Compose shortcuts R/A/F (Task 09)
+- Thread-level bulk operations (needs batch API)
