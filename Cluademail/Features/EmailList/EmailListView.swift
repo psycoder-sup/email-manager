@@ -38,6 +38,14 @@ struct EmailListView: View {
         .onChange(of: searchText) { _, newValue in
             viewModel?.searchQuery = newValue
         }
+        .onChange(of: appState.isSyncing) { oldValue, newValue in
+            // Reload data when sync completes (isSyncing changes from true to false)
+            if oldValue && !newValue {
+                Task {
+                    await viewModel?.loadData(account: appState.selectedAccount, folder: appState.selectedFolder)
+                }
+            }
+        }
         .toolbar {
             toolbarContent
         }

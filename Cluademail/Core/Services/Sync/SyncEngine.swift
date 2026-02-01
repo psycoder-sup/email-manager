@@ -56,12 +56,19 @@ actor SyncEngine: SyncEngineProtocol {
 
         let context = await databaseService.newBackgroundContext()
 
+        // Fetch the account from the background context to avoid cross-context issues
+        let accountRepository = AccountRepository()
+        guard let contextAccount = try await accountRepository.fetch(byId: account.id, context: context) else {
+            Logger.sync.error("Account not found in background context")
+            throw SyncError.databaseError(NSError(domain: "SyncEngine", code: -1, userInfo: [NSLocalizedDescriptionKey: "Account not found"]))
+        }
+
         // Get or create sync state (avoid force unwrapping)
         let syncState: SyncState
-        if let existing = try await syncStateRepository.fetch(accountId: account.id, context: context) {
+        if let existing = try await syncStateRepository.fetch(accountId: contextAccount.id, context: context) {
             syncState = existing
         } else {
-            let newState = SyncState(accountId: account.id)
+            let newState = SyncState(accountId: contextAccount.id)
             try await syncStateRepository.save(newState, context: context)
             syncState = newState
         }
@@ -72,7 +79,7 @@ actor SyncEngine: SyncEngineProtocol {
 
         do {
             // Sync labels first
-            try await syncLabels(context: context)
+            try await syncLabels(account: contextAccount, context: context)
 
             // Determine sync strategy
             let result: SyncResult
@@ -80,17 +87,18 @@ actor SyncEngine: SyncEngineProtocol {
                 // Try incremental sync
                 do {
                     result = try await performIncrementalSync(
+                        account: contextAccount,
                         startHistoryId: historyId,
                         context: context
                     )
                 } catch APIError.notFound {
                     // History expired, fall back to full sync
                     Logger.sync.warning("History expired, falling back to full sync")
-                    result = try await performFullSync(context: context)
+                    result = try await performFullSync(account: contextAccount, context: context)
                 }
             } else {
                 // No history ID, perform full sync (progressive)
-                result = try await performFullSync(context: context)
+                result = try await performFullSync(account: contextAccount, context: context)
             }
 
             // Update sync state on success

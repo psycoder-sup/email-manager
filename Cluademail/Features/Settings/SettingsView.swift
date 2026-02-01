@@ -56,6 +56,7 @@ struct AccountsSettingsView: View {
     @Environment(AppState.self) private var appState
     @Environment(DatabaseService.self) private var databaseService
     @Environment(ErrorHandler.self) private var errorHandler
+    @Environment(SyncScheduler.self) private var syncScheduler
 
     @State private var authService = AuthenticationService()
     @State private var isAddingAccount = false
@@ -144,6 +145,9 @@ struct AccountsSettingsView: View {
             )
             appState.accounts.append(account)
             Logger.ui.info("Account added successfully")
+
+            // Trigger immediate sync to fetch emails for the new account
+            await syncScheduler.triggerImmediateSync()
         } catch let error as AuthenticationError {
             if case .userCancelled = error {
                 // User cancelled, no error needed
