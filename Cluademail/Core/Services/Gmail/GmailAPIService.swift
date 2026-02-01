@@ -633,8 +633,19 @@ final class GmailAPIService: GmailAPIServiceProtocol, @unchecked Sendable {
             throw APIError.invalidResponse
         }
 
+        // Extract boundary from response Content-Type header (Google uses its own boundary, not ours)
+        let responseBoundary: String
+        if let contentType = httpResponse.value(forHTTPHeaderField: "Content-Type"),
+           let boundaryRange = contentType.range(of: "boundary=") {
+            responseBoundary = String(contentType[boundaryRange.upperBound...])
+        } else {
+            // Fallback to sent boundary (shouldn't happen)
+            responseBoundary = boundary
+            Logger.api.warning("Could not extract boundary from batch response, using sent boundary")
+        }
+
         // Parse batch response
-        return parseBatchResponse(data: data, boundary: boundary, messageIds: messageIds, baseIndex: baseIndex)
+        return parseBatchResponse(data: data, boundary: responseBoundary, messageIds: messageIds, baseIndex: baseIndex)
     }
 
     /// Parses a multipart batch response.
@@ -672,7 +683,8 @@ final class GmailAPIService: GmailAPIServiceProtocol, @unchecked Sendable {
             }
 
             // Extract Content-ID to get index
-            guard let contentIdRange = part.range(of: "Content-ID: <response-"),
+            // Google batch API returns Content-ID: <response-request-{index}> format
+            guard let contentIdRange = part.range(of: "Content-ID: <response-request-"),
                   let endRange = part.range(of: ">", range: contentIdRange.upperBound..<part.endIndex),
                   let index = Int(part[contentIdRange.upperBound..<endRange.lowerBound]) else {
                 continue

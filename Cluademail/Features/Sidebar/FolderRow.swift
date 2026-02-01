@@ -34,6 +34,7 @@ struct FolderRow: View {
         "\(account?.id.uuidString ?? "all")-\(folder.rawValue)"
     }
 
+    @MainActor
     private func loadUnreadCount() async {
         let repository = EmailRepository()
         do {

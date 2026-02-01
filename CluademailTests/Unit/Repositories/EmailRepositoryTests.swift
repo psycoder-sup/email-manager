@@ -68,7 +68,6 @@ final class EmailRepositoryTests: XCTestCase {
         // When
         let fetched = try await repository.fetch(
             account: nil,
-            folder: nil,
             isRead: nil,
             limit: nil,
             offset: nil,
@@ -98,7 +97,6 @@ final class EmailRepositoryTests: XCTestCase {
         // When
         let fetched = try await repository.fetch(
             account: account,
-            folder: nil,
             isRead: nil,
             limit: nil,
             offset: nil,
@@ -148,7 +146,6 @@ final class EmailRepositoryTests: XCTestCase {
         // When
         let fetched = try await repository.fetch(
             account: nil,
-            folder: nil,
             isRead: false,
             limit: nil,
             offset: nil,
@@ -170,7 +167,6 @@ final class EmailRepositoryTests: XCTestCase {
         // When
         let fetched = try await repository.fetch(
             account: nil,
-            folder: nil,
             isRead: nil,
             limit: 5,
             offset: nil,
@@ -196,7 +192,6 @@ final class EmailRepositoryTests: XCTestCase {
         // When
         let fetched = try await repository.fetch(
             account: nil,
-            folder: nil,
             isRead: nil,
             limit: nil,
             offset: nil,
@@ -299,7 +294,6 @@ final class EmailRepositoryTests: XCTestCase {
         // Then
         let fetched = try await repository.fetch(
             account: nil,
-            folder: nil,
             isRead: nil,
             limit: nil,
             offset: nil,
@@ -332,7 +326,6 @@ final class EmailRepositoryTests: XCTestCase {
         // Then
         let remaining = try await repository.fetch(
             account: account,
-            folder: nil,
             isRead: nil,
             limit: nil,
             offset: nil,
@@ -388,7 +381,6 @@ final class EmailRepositoryTests: XCTestCase {
         // Then
         let remaining = try await repository.fetch(
             account: account,
-            folder: nil,
             isRead: nil,
             limit: nil,
             offset: nil,
@@ -401,13 +393,18 @@ final class EmailRepositoryTests: XCTestCase {
 
     func testCountReturnsCorrectCount() async throws {
         // Given
+        let account = TestFixtures.makeAccount()
+        context.insert(account)
+
         for i in 0..<5 {
-            context.insert(TestFixtures.makeEmail(gmailId: "email-\(i)"))
+            let email = TestFixtures.makeEmail(gmailId: "email-\(i)")
+            email.account = account
+            context.insert(email)
         }
         try context.save()
 
         // When
-        let count = try await repository.count(account: nil, folder: nil, context: context)
+        let count = try await repository.count(account: account, context: context)
 
         // Then
         XCTAssertEqual(count, 5)
@@ -415,11 +412,19 @@ final class EmailRepositoryTests: XCTestCase {
 
     func testUnreadCountReturnsOnlyUnreadEmails() async throws {
         // Given
-        let read1 = TestFixtures.makeEmail(gmailId: "1", isRead: true)
-        let read2 = TestFixtures.makeEmail(gmailId: "2", isRead: true)
-        let unread1 = TestFixtures.makeEmail(gmailId: "3", isRead: false)
-        let unread2 = TestFixtures.makeEmail(gmailId: "4", isRead: false)
-        let unread3 = TestFixtures.makeEmail(gmailId: "5", isRead: false)
+        let account = TestFixtures.makeAccount()
+        context.insert(account)
+
+        let read1 = TestFixtures.makeEmail(gmailId: "1", isRead: true, labelIds: ["INBOX"])
+        read1.account = account
+        let read2 = TestFixtures.makeEmail(gmailId: "2", isRead: true, labelIds: ["INBOX"])
+        read2.account = account
+        let unread1 = TestFixtures.makeEmail(gmailId: "3", isRead: false, labelIds: ["INBOX"])
+        unread1.account = account
+        let unread2 = TestFixtures.makeEmail(gmailId: "4", isRead: false, labelIds: ["INBOX"])
+        unread2.account = account
+        let unread3 = TestFixtures.makeEmail(gmailId: "5", isRead: false, labelIds: ["INBOX"])
+        unread3.account = account
 
         context.insert(read1)
         context.insert(read2)
@@ -429,7 +434,7 @@ final class EmailRepositoryTests: XCTestCase {
         try context.save()
 
         // When
-        let count = try await repository.unreadCount(account: nil, folder: nil, context: context)
+        let count = try await repository.unreadCount(account: account, folder: "INBOX", context: context)
 
         // Then
         XCTAssertEqual(count, 3)

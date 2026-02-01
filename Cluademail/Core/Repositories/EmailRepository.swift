@@ -8,9 +8,12 @@ final class EmailRepository: BaseRepository<Email>, EmailRepositoryProtocol, @un
         try fetchOne(predicate: #Predicate { $0.gmailId == gmailId }, context: context)
     }
 
+    /// Fetches emails with folder filtering.
+    /// - Important: This method performs in-memory filtering and must be called from the MainActor.
+    @MainActor
     func fetch(
         account: Account?,
-        folder: String?,
+        folder: String,
         isRead: Bool?,
         limit: Int?,
         offset: Int?,
@@ -20,27 +23,38 @@ final class EmailRepository: BaseRepository<Email>, EmailRepositoryProtocol, @un
         var emails = try fetch(
             predicate: buildPredicate(account: account, isRead: isRead),
             sortBy: [SortDescriptor(\.date, order: .reverse)],
-            limit: folder == nil ? limit : nil,  // Only apply limit at DB level if no folder filter
-            offset: folder == nil ? offset : nil,
             context: context
         )
 
-        // Apply folder filter in-memory
-        if let folder {
-            emails = emails.filter { $0.labelIds.contains(folder) }
-        }
+        // Apply folder filter in-memory (must be on main actor for mainContext models)
+        emails = emails.filter { $0.labelIds.contains(folder) }
 
         // Apply offset and limit after folder filtering
-        if folder != nil {
-            if let offset, offset > 0 {
-                emails = Array(emails.dropFirst(offset))
-            }
-            if let limit {
-                emails = Array(emails.prefix(limit))
-            }
+        if let offset, offset > 0 {
+            emails = Array(emails.dropFirst(offset))
+        }
+        if let limit {
+            emails = Array(emails.prefix(limit))
         }
 
         return emails
+    }
+
+    /// Fetches emails without folder filtering.
+    func fetch(
+        account: Account?,
+        isRead: Bool?,
+        limit: Int?,
+        offset: Int?,
+        context: ModelContext
+    ) async throws -> [Email] {
+        try fetch(
+            predicate: buildPredicate(account: account, isRead: isRead),
+            sortBy: [SortDescriptor(\.date, order: .reverse)],
+            limit: limit,
+            offset: offset,
+            context: context
+        )
     }
 
     func fetchThreads(
@@ -128,32 +142,34 @@ final class EmailRepository: BaseRepository<Email>, EmailRepositoryProtocol, @un
         }
     }
 
-    func count(account: Account?, folder: String?, context: ModelContext) async throws -> Int {
-        // Fetch without folder filter, then filter in-memory
+    /// Counts emails with folder filtering.
+    /// - Important: This method performs in-memory filtering and must be called from the MainActor.
+    @MainActor
+    func count(account: Account?, folder: String, context: ModelContext) async throws -> Int {
         let emails = try fetch(
             predicate: buildPredicate(account: account, isRead: nil),
             sortBy: [],
             context: context
         )
-
-        if let folder {
-            return emails.filter { $0.labelIds.contains(folder) }.count
-        }
-        return emails.count
+        return emails.filter { $0.labelIds.contains(folder) }.count
     }
 
-    func unreadCount(account: Account?, folder: String?, context: ModelContext) async throws -> Int {
-        // Fetch unread emails without folder filter, then filter in-memory
+    /// Counts all emails without folder filtering.
+    func count(account: Account, context: ModelContext) async throws -> Int {
+        let accountId = account.id
+        return try count(predicate: #Predicate<Email> { $0.account?.id == accountId }, context: context)
+    }
+
+    /// Counts unread emails with folder filtering.
+    /// - Important: This method performs in-memory filtering and must be called from the MainActor.
+    @MainActor
+    func unreadCount(account: Account?, folder: String, context: ModelContext) async throws -> Int {
         let emails = try fetch(
             predicate: buildPredicate(account: account, isRead: false),
             sortBy: [],
             context: context
         )
-
-        if let folder {
-            return emails.filter { $0.labelIds.contains(folder) }.count
-        }
-        return emails.count
+        return emails.filter { $0.labelIds.contains(folder) }.count
     }
 
     // MARK: - Private

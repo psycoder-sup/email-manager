@@ -125,6 +125,7 @@ struct AccountsSettingsView: View {
         }
     }
 
+    @MainActor
     private func loadAccounts() async {
         let repository = AccountRepository()
         do {

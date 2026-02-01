@@ -58,6 +58,7 @@ struct SidebarView: View {
         }
     }
 
+    @MainActor
     private func loadAccounts() async {
         let repository = AccountRepository()
         do {

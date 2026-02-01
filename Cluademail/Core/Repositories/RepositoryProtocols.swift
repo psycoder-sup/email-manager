@@ -16,9 +16,20 @@ protocol AccountRepositoryProtocol: Sendable {
 protocol EmailRepositoryProtocol: Sendable {
     func fetch(byGmailId gmailId: String, context: ModelContext) async throws -> Email?
 
+    /// Fetches emails with folder filtering (requires MainActor).
+    @MainActor
     func fetch(
         account: Account?,
-        folder: String?,
+        folder: String,
+        isRead: Bool?,
+        limit: Int?,
+        offset: Int?,
+        context: ModelContext
+    ) async throws -> [Email]
+
+    /// Fetches emails without folder filtering.
+    func fetch(
+        account: Account?,
         isRead: Bool?,
         limit: Int?,
         offset: Int?,
@@ -37,8 +48,17 @@ protocol EmailRepositoryProtocol: Sendable {
     func saveAll(_ emails: [Email], context: ModelContext) async throws
     func delete(_ email: Email, context: ModelContext) async throws
     func deleteOldest(account: Account, keepCount: Int, context: ModelContext) async throws
-    func count(account: Account?, folder: String?, context: ModelContext) async throws -> Int
-    func unreadCount(account: Account?, folder: String?, context: ModelContext) async throws -> Int
+
+    /// Counts emails with folder filtering (requires MainActor).
+    @MainActor
+    func count(account: Account?, folder: String, context: ModelContext) async throws -> Int
+
+    /// Counts all emails for an account.
+    func count(account: Account, context: ModelContext) async throws -> Int
+
+    /// Counts unread emails with folder filtering (requires MainActor).
+    @MainActor
+    func unreadCount(account: Account?, folder: String, context: ModelContext) async throws -> Int
 }
 
 // MARK: - LabelRepositoryProtocol

@@ -134,7 +134,7 @@ actor SyncEngine: SyncEngineProtocol {
 
     // MARK: - Full Sync
 
-    private func performFullSync(context: ModelContext) async throws -> SyncResult {
+    private func performFullSync(account: Account, context: ModelContext) async throws -> SyncResult {
         Logger.sync.debug("Performing full sync")
 
         var totalNewCount = 0
@@ -144,6 +144,7 @@ actor SyncEngine: SyncEngineProtocol {
 
         // Phase 1: Fetch first batch quickly (100 emails)
         let phase1Result = try await fetchEmailBatch(
+            account: account,
             maxCount: quickSyncCount,
             pageToken: nil,
             context: context
@@ -162,6 +163,7 @@ actor SyncEngine: SyncEngineProtocol {
 
             let remaining = maxEmailsPerAccount - allEmails.count
             let batchResult = try await fetchEmailBatch(
+                account: account,
                 maxCount: min(100, remaining),
                 pageToken: pageToken,
                 context: context
@@ -176,7 +178,7 @@ actor SyncEngine: SyncEngineProtocol {
         }
 
         // Enforce email limit
-        try await enforceEmailLimit(context: context)
+        try await enforceEmailLimit(account: account, context: context)
 
         // Derive threads from synced emails
         try await deriveThreads(from: allEmails, context: context)
@@ -189,7 +191,7 @@ actor SyncEngine: SyncEngineProtocol {
 
         // Update email count in sync state (use actual count after limit enforcement)
         if let syncState = try await syncStateRepository.fetch(accountId: account.id, context: context) {
-            let actualCount = try await emailRepository.count(account: account, folder: nil, context: context)
+            let actualCount = try await emailRepository.count(account: account, context: context)
             syncState.emailCount = actualCount
             try context.save()
         }
@@ -200,6 +202,7 @@ actor SyncEngine: SyncEngineProtocol {
     // MARK: - Incremental Sync
 
     private func performIncrementalSync(
+        account: Account,
         startHistoryId: String,
         context: ModelContext
     ) async throws -> SyncResult {
@@ -306,7 +309,7 @@ actor SyncEngine: SyncEngineProtocol {
         }
 
         // Enforce email limit
-        try await enforceEmailLimit(context: context)
+        try await enforceEmailLimit(account: account, context: context)
 
         // Update threads for affected emails
         if !affectedEmails.isEmpty {
@@ -323,7 +326,7 @@ actor SyncEngine: SyncEngineProtocol {
 
     // MARK: - Label Sync
 
-    private func syncLabels(context: ModelContext) async throws {
+    private func syncLabels(account: Account, context: ModelContext) async throws {
         Logger.sync.debug("Syncing labels")
 
         let labelDTOs = try await apiService.listLabels(accountEmail: account.email)
@@ -423,7 +426,7 @@ actor SyncEngine: SyncEngineProtocol {
 
     // MARK: - Email Limit Enforcement
 
-    private func enforceEmailLimit(context: ModelContext) async throws {
+    private func enforceEmailLimit(account: Account, context: ModelContext) async throws {
         try await emailRepository.deleteOldest(
             account: account,
             keepCount: maxEmailsPerAccount,
@@ -441,10 +444,13 @@ actor SyncEngine: SyncEngineProtocol {
     }
 
     private func fetchEmailBatch(
+        account: Account,
         maxCount: Int,
         pageToken: String?,
         context: ModelContext
     ) async throws -> BatchResult {
+        Logger.sync.debug("Fetching email batch, maxCount: \(maxCount)")
+
         // List messages
         let (messageSummaries, nextToken) = try await apiService.listMessages(
             accountEmail: account.email,
@@ -455,6 +461,7 @@ actor SyncEngine: SyncEngineProtocol {
         )
 
         guard !messageSummaries.isEmpty else {
+            Logger.sync.debug("No messages returned from API")
             return BatchResult(emails: [], newCount: 0, updatedCount: 0, nextPageToken: nil)
         }
 
@@ -471,22 +478,26 @@ actor SyncEngine: SyncEngineProtocol {
         var updatedCount = 0
 
         for dto in batchResult.succeeded {
-            let email = try GmailModelMapper.mapToEmail(dto, account: account)
+            do {
+                let email = try GmailModelMapper.mapToEmail(dto, account: account)
 
-            // Check if email exists
-            if let existing = try await emailRepository.fetch(byGmailId: dto.id, context: context) {
-                // Update existing email
-                existing.labelIds = email.labelIds
-                existing.isRead = email.isRead
-                existing.isStarred = email.isStarred
-                existing.snippet = email.snippet
-                updatedCount += 1
-                emails.append(existing)
-            } else {
-                // Save new email
-                try await emailRepository.save(email, context: context)
-                newCount += 1
-                emails.append(email)
+                // Check if email exists
+                if let existing = try await emailRepository.fetch(byGmailId: dto.id, context: context) {
+                    // Update existing email
+                    existing.labelIds = email.labelIds
+                    existing.isRead = email.isRead
+                    existing.isStarred = email.isStarred
+                    existing.snippet = email.snippet
+                    updatedCount += 1
+                    emails.append(existing)
+                } else {
+                    // Save new email
+                    try await emailRepository.save(email, context: context)
+                    newCount += 1
+                    emails.append(email)
+                }
+            } catch {
+                Logger.sync.error("Error processing email \(dto.id): \(error.localizedDescription)")
             }
         }
 
