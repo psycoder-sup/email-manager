@@ -539,7 +539,12 @@ Core/Services/Sync/
    - History deduplication optimization
    - Partial failure recovery manager
 
-6. **Next Steps**: Tasks 08 (Email List & Threading) and 11 (Settings & Notifications) are now unblocked
+6. **Bug Fix - SwiftData Threading** (2026-02-02):
+   - Updated `SyncEngine` to use new non-filtered `count(account:context:)` method
+   - Background sync now correctly uses repository methods without MainActor requirement
+   - See `docs/swiftdata_threading_crash.md` for full context
+
+7. **Next Steps**: Tasks 08 (Email List & Threading) and 11 (Settings & Notifications) are now unblocked
 
 ## References
 

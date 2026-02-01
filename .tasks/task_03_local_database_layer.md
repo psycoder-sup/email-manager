@@ -211,7 +211,16 @@ Core/Services/
    - Removed unused imports
    - Net reduction: ~100 lines of code removed while preserving all functionality
 
-9. **Next Steps**: Task 04 (Google OAuth & Keychain) can now begin
+9. **Bug Fix - SwiftData Threading Crash** (2026-02-02):
+   - **Issue**: App crashed on launch with `EXC_BAD_ACCESS` when SwiftData models fetched from `mainContext` were accessed from background threads (via SwiftUI `.task` modifiers)
+   - **Fix**: Split `EmailRepository` methods into two variants:
+     - Folder-filtered methods (`@MainActor`) - require non-optional folder, safe for UI use
+     - Non-filtered methods (non-isolated) - for background sync operations
+   - Updated `count()` and `unreadCount()` with same pattern
+   - Updated `RepositoryProtocols.swift` to reflect new API
+   - See `docs/swiftdata_threading_crash.md` for full details
+
+10. **Next Steps**: Task 04 (Google OAuth & Keychain) can now begin
 
 ## References
 
