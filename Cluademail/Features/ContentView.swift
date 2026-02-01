@@ -11,7 +11,7 @@ struct ContentView: View {
             SidebarView()
                 .navigationSplitViewColumnWidth(min: 200, ideal: 250, max: 300)
         } content: {
-            EmailListPlaceholderView()
+            EmailListView()
                 .navigationSplitViewColumnWidth(min: 300, ideal: 400, max: 500)
         } detail: {
             EmailDetailPlaceholderView()
@@ -43,24 +43,6 @@ struct ContentView: View {
 }
 
 // MARK: - Placeholder Views
-
-/// Placeholder email list view (Task 08)
-struct EmailListPlaceholderView: View {
-    var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "envelope")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-            Text("No emails")
-                .font(.title2)
-                .foregroundStyle(.secondary)
-            Text("Add an account in Settings to get started")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-        }
-        .frame(minWidth: 300)
-    }
-}
 
 /// Placeholder email detail view (Task 09)
 struct EmailDetailPlaceholderView: View {

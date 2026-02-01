@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		004539B7DBFECDB58397F3EC /* EmailListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289BAD253090DBCFBA1C8E90 /* EmailListView.swift */; };
 		014D57A63A38468FE91B4626 /* AuthenticationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 731AD9CA27F07F025A6BF2FE /* AuthenticationService.swift */; };
 		02CC95933DCB41B816B99A42 /* AccountRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38C506858CFE1A79D918C804 /* AccountRow.swift */; };
 		04FD278D0E0F1CE13BD11A89 /* EmailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72EDE91236E30219EC135D9B /* EmailTests.swift */; };
@@ -14,9 +15,11 @@
 		0BC1D8120958714FC874DA7D /* AuthenticationErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03D13DF4EFA0C13C68375FCB /* AuthenticationErrorTests.swift */; };
 		0E7E70654D6EA092B3105B42 /* RetryHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92B038C1D5467E5F1079B1FA /* RetryHelper.swift */; };
 		1825BE9F43D1EE8A54770132 /* TokenManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7EF62B4CAF3FE0A850F707A /* TokenManagerTests.swift */; };
+		1CBF0772DC5DFCE7B64828CF /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5522EB7E0BED1C5E78F81D0B /* NotificationSettingsView.swift */; };
 		24755258941657D0B935EEE5 /* TokenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D287256242FC0AD37A57B3 /* TokenManager.swift */; };
 		2789906515CE28C160811F49 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30C157AACFEE656609A00AC7 /* SettingsView.swift */; };
 		27E1EE1AF7AB31608F17BD40 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC60EFE150494BB055812FAF /* Assets.xcassets */; };
+		290D2672F2958BA4C2432D16 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD436874AC3F4454B5995878 /* NotificationService.swift */; };
 		2A916EAD78021AF31AC8AEFB /* MockDatabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7446CC5E5815F20F542BE3E1 /* MockDatabaseService.swift */; };
 		2FA220C7E220A06974A73F86 /* ErrorHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C7D8310C3620C35F8B5BD /* ErrorHandler.swift */; };
 		33FD7AC6BCF0AFB3DD1AA57B /* DatabaseError.swift in Sources */ = {isa = PBXBuildFile; fileRef = F412728C3AB80553882F5657 /* DatabaseError.swift */; };
@@ -30,6 +33,7 @@
 		48B2266F0574F4EFD7149BD7 /* SyncSchedulerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFD65D0F9D304711A9FD103 /* SyncSchedulerTests.swift */; };
 		49719336365774100D705BF6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72CA77249561968D27292B08 /* ContentView.swift */; };
 		4D34E7AF5083DE9504C942CF /* Data+Base64URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBC9353E9E11CBC955E4CDE /* Data+Base64URL.swift */; };
+		53FDF38612F9DA6C06E6308A /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5F6BA32DE1F694F25FE9AD /* GeneralSettingsView.swift */; };
 		57C035D7700DB87DC8C9E2A1 /* GmailEndpoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A30A697D90D675569B375EF /* GmailEndpoints.swift */; };
 		57EAB9D2043DB319C192AE74 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A2F028C7875FF4C33BC9A6 /* AppState.swift */; };
 		5A39550A110249F00D3BC1C7 /* GmailModelMapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966179F817AD174555AC17AE /* GmailModelMapperTests.swift */; };
@@ -43,7 +47,10 @@
 		78F697F98FB3E90B62B41655 /* LabelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3500B8EA33E3FE16DB73E3D9 /* LabelTests.swift */; };
 		7BE089CEED0D916F30A0D0C6 /* EmailRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4F9993B00138BE076D922B /* EmailRepositoryTests.swift */; };
 		7D32D8F037E2563DC9D7DE1B /* SyncEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C815F426E80EBFE2122FFD /* SyncEngineTests.swift */; };
+		7DFBD2CB964B07AB5A5F6581 /* EmailRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B71FA77FD882522B8C3DB728 /* EmailRowView.swift */; };
 		7EE9CE47AF647514A00D6B5A /* Attachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9262E2262442758CF9A5142F /* Attachment.swift */; };
+		7F4ED4116D89CF0229CDAF9A /* EmailListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DB6CF3361859088DFD1A9CB /* EmailListViewModel.swift */; };
+		7F8D22930F28AEB4554D4F8A /* EmailListFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 119128011A10BA888D27DBBC /* EmailListFormatters.swift */; };
 		82538CDDD4B5D083C1BB9703 /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBCAAC030732F5D59FCCECC7 /* AppError.swift */; };
 		858E4CE55435D4D6CAE11D93 /* MockKeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D89558DED2FAD9B45907417 /* MockKeychainService.swift */; };
 		8C79469144CF7BAEF0FFB313 /* SyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4147D49D6795B0CC525E768A /* SyncCoordinator.swift */; };
@@ -63,6 +70,7 @@
 		A3CBDFA93569B62116D08232 /* GmailAPIServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA16230336B76D31A48C1BCC /* GmailAPIServiceProtocol.swift */; };
 		A47A1535F14D0907748DE398 /* Logger+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB89B4E28E6824D836211BC5 /* Logger+Extensions.swift */; };
 		AB281FA24C2611CA8588608A /* EmailRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B2488D502125AFA101A80DC /* EmailRepository.swift */; };
+		AB3D0D2FFE5E9CB615487701 /* UnreadStarIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E17EBE5432D578E8320312 /* UnreadStarIndicator.swift */; };
 		AFA1120DA8E5A7E86C654951 /* SyncCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2335BA8A8CE87CE762A6F59F /* SyncCoordinatorTests.swift */; };
 		AFFABDBF3C8B14B1E4DAE348 /* TestFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A6481F2D2309A3F8DDF2C8E /* TestFixtures.swift */; };
 		B378B8160049310A8CC455CD /* DataBase64URLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB5F85BBB3220D69D52559F /* DataBase64URLTests.swift */; };
@@ -81,6 +89,7 @@
 		CB252B7542C92B9AD0E7878A /* Email.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB109320E26495222878598 /* Email.swift */; };
 		D1A916AA2024E4483F8D5161 /* CluademailUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CA035031CDBDECC562FD292 /* CluademailUITestsLaunchTests.swift */; };
 		D1F72804BE5B2BDFF4E4A93F /* AccountRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F9DA7BF54ABE70B5F8A6184 /* AccountRepository.swift */; };
+		D50B191D8E70525628AC1332 /* ThreadRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CFDBE3BB6288C8AB72A0665 /* ThreadRowView.swift */; };
 		D557F3DC5F953C44BF723FE4 /* MIMEMessageBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA61481628B62AA4A6584CA /* MIMEMessageBuilder.swift */; };
 		D687FF139A3013B289BC65B1 /* BaseRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D3F962164C025745526F01 /* BaseRepository.swift */; };
 		D8DCA81DA56BEB46100DD526 /* SyncStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414274C8B38BD503C5915828 /* SyncStateTests.swift */; };
@@ -90,6 +99,7 @@
 		E13B297944579CB569957DE1 /* SyncState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FEE532897B7EB8084D76878 /* SyncState.swift */; };
 		E5266441B1EB9CD8912FE24E /* UnreadCountBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1435B81504AE98DC91E9C7 /* UnreadCountBadge.swift */; };
 		E56F8ADCD7E180BE9722E1FF /* GoogleOAuthClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E21C4526054C29B72E709DDB /* GoogleOAuthClientTests.swift */; };
+		E8AA4868DB16E4ADDE10BC52 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30FE36F81E5FDCA6A617F85D /* EmptyStateView.swift */; };
 		EF1FC471BA163293D8D3211A /* SyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B4B46C5B65D8ECAACAFCF7C /* SyncEngine.swift */; };
 		EFD5DD5588F8910329588F65 /* LabelRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CA3DD8A8A8AAAF625AAB015 /* LabelRepository.swift */; };
 		F797B1AB64085CBB9A95B830 /* SyncStateRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EECDBB18D726153D366B5E6 /* SyncStateRepository.swift */; };
@@ -120,17 +130,21 @@
 		0D531D2BA485F96B27687C77 /* KeychainError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainError.swift; sourceTree = "<group>"; };
 		104CFBC7A213A34B59692906 /* ErrorHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHandlerTests.swift; sourceTree = "<group>"; };
 		105A8ECA5CFDA420A260FD80 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		119128011A10BA888D27DBBC /* EmailListFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailListFormatters.swift; sourceTree = "<group>"; };
 		1B4B46C5B65D8ECAACAFCF7C /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
+		1CFDBE3BB6288C8AB72A0665 /* ThreadRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadRowView.swift; sourceTree = "<group>"; };
 		1D3C9FB81C894147D238D07B /* SyncLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncLockTests.swift; sourceTree = "<group>"; };
 		1DFD65D0F9D304711A9FD103 /* SyncSchedulerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncSchedulerTests.swift; sourceTree = "<group>"; };
 		2335BA8A8CE87CE762A6F59F /* SyncCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncCoordinatorTests.swift; sourceTree = "<group>"; };
 		2397DACF6BA7F233B169CA7A /* Development.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Development.xcconfig; sourceTree = "<group>"; };
 		268DDD2F18AC59D2B57B4AAA /* SyncStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStatusView.swift; sourceTree = "<group>"; };
+		289BAD253090DBCFBA1C8E90 /* EmailListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailListView.swift; sourceTree = "<group>"; };
 		298A6B814158A0950BF2128D /* MockGmailAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockGmailAPIService.swift; sourceTree = "<group>"; };
 		2A8D6609E880396A0CC37BF3 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		2C022D36E2E2196F8D84A4B0 /* CluademailUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CluademailUITests.swift; sourceTree = "<group>"; };
 		2EECDBB18D726153D366B5E6 /* SyncStateRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStateRepository.swift; sourceTree = "<group>"; };
 		30C157AACFEE656609A00AC7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		30FE36F81E5FDCA6A617F85D /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		33B12E1707645B1249F5E712 /* AccountTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTests.swift; sourceTree = "<group>"; };
 		3500B8EA33E3FE16DB73E3D9 /* LabelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelTests.swift; sourceTree = "<group>"; };
 		357652DFFB75539E6FA12EE7 /* SyncProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncProtocols.swift; sourceTree = "<group>"; };
@@ -140,6 +154,7 @@
 		3B9C37AC93DC2066748B6291 /* EmailThread.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailThread.swift; sourceTree = "<group>"; };
 		3CA3DD8A8A8AAAF625AAB015 /* LabelRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelRepository.swift; sourceTree = "<group>"; };
 		3D6D061E6DD7A594CE066314 /* AccountBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBadge.swift; sourceTree = "<group>"; };
+		40E17EBE5432D578E8320312 /* UnreadStarIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnreadStarIndicator.swift; sourceTree = "<group>"; };
 		414274C8B38BD503C5915828 /* SyncStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStateTests.swift; sourceTree = "<group>"; };
 		4147D49D6795B0CC525E768A /* SyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncCoordinator.swift; sourceTree = "<group>"; };
 		41D3F962164C025745526F01 /* BaseRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseRepository.swift; sourceTree = "<group>"; };
@@ -149,10 +164,12 @@
 		4B2488D502125AFA101A80DC /* EmailRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailRepository.swift; sourceTree = "<group>"; };
 		4B9CD5EAE78D318D5414C5A7 /* OAuthTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthTokens.swift; sourceTree = "<group>"; };
 		4CB109320E26495222878598 /* Email.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Email.swift; sourceTree = "<group>"; };
+		4D5F6BA32DE1F694F25FE9AD /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
 		4EA61481628B62AA4A6584CA /* MIMEMessageBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MIMEMessageBuilder.swift; sourceTree = "<group>"; };
 		503A72A83DBAB2D8BA95E8CB /* ErrorAlertModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorAlertModifier.swift; sourceTree = "<group>"; };
 		53DC215186AA9F8D6B150930 /* SyncStateRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStateRepositoryTests.swift; sourceTree = "<group>"; };
 		551B0B4438D418F5EEEA82A3 /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
+		5522EB7E0BED1C5E78F81D0B /* NotificationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
 		5A30A697D90D675569B375EF /* GmailEndpoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GmailEndpoints.swift; sourceTree = "<group>"; };
 		5C6911A2D9791C5D3A71ACCF /* LabelRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelRepositoryTests.swift; sourceTree = "<group>"; };
 		5F9DA7BF54ABE70B5F8A6184 /* AccountRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountRepository.swift; sourceTree = "<group>"; };
@@ -172,6 +189,7 @@
 		7D89558DED2FAD9B45907417 /* MockKeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockKeychainService.swift; sourceTree = "<group>"; };
 		7FEE532897B7EB8084D76878 /* SyncState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncState.swift; sourceTree = "<group>"; };
 		8B62664B645199305AB0495B /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
+		8DB6CF3361859088DFD1A9CB /* EmailListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailListViewModel.swift; sourceTree = "<group>"; };
 		8E4F9993B00138BE076D922B /* EmailRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailRepositoryTests.swift; sourceTree = "<group>"; };
 		8F86B5C4494A755215845E8A /* EmailThreadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailThreadTests.swift; sourceTree = "<group>"; };
 		9262E2262442758CF9A5142F /* Attachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Attachment.swift; sourceTree = "<group>"; };
@@ -193,8 +211,10 @@
 		A9461B5815DC33F328E49CBD /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainServiceTests.swift; sourceTree = "<group>"; };
 		AC2EECEA96D4D256C9A28F07 /* AccountRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountRepositoryTests.swift; sourceTree = "<group>"; };
 		AC66E440378DDF981F7F95EC /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		AD436874AC3F4454B5995878 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		AFEC8A67003A8E8E27FB62E4 /* Label.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Label.swift; sourceTree = "<group>"; };
 		B0F11BB99A2872F15CF13283 /* AttachmentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentTests.swift; sourceTree = "<group>"; };
+		B71FA77FD882522B8C3DB728 /* EmailRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailRowView.swift; sourceTree = "<group>"; };
 		B97EB1C9A806F9C4D683B5F5 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		BD3D300B9C700FFE1AC5D905 /* Production.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Production.xcconfig; sourceTree = "<group>"; };
 		BEBC9353E9E11CBC955E4CDE /* Data+Base64URL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Base64URL.swift"; sourceTree = "<group>"; };
@@ -443,6 +463,8 @@
 		862D7B9467D9667D8C3965F7 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				4D5F6BA32DE1F694F25FE9AD /* GeneralSettingsView.swift */,
+				5522EB7E0BED1C5E78F81D0B /* NotificationSettingsView.swift */,
 				30C157AACFEE656609A00AC7 /* SettingsView.swift */,
 			);
 			path = Settings;
@@ -515,7 +537,13 @@
 		AAC8A096A55122D3A41F3087 /* EmailList */ = {
 			isa = PBXGroup;
 			children = (
+				CC91FA5DE46DE7CE9372E3F8 /* Shared */,
 				987016A011314ADC70583BD8 /* .gitkeep */,
+				289BAD253090DBCFBA1C8E90 /* EmailListView.swift */,
+				8DB6CF3361859088DFD1A9CB /* EmailListViewModel.swift */,
+				B71FA77FD882522B8C3DB728 /* EmailRowView.swift */,
+				30FE36F81E5FDCA6A617F85D /* EmptyStateView.swift */,
+				1CFDBE3BB6288C8AB72A0665 /* ThreadRowView.swift */,
 			);
 			path = EmailList;
 			sourceTree = "<group>";
@@ -528,6 +556,7 @@
 				435901C3CD7239A82411779C /* Sync */,
 				105A8ECA5CFDA420A260FD80 /* .gitkeep */,
 				A0D8E54CA16998A45A8E889E /* DatabaseService.swift */,
+				AD436874AC3F4454B5995878 /* NotificationService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -572,6 +601,15 @@
 				1DFD65D0F9D304711A9FD103 /* SyncSchedulerTests.swift */,
 			);
 			path = Sync;
+			sourceTree = "<group>";
+		};
+		CC91FA5DE46DE7CE9372E3F8 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				119128011A10BA888D27DBBC /* EmailListFormatters.swift */,
+				40E17EBE5432D578E8320312 /* UnreadStarIndicator.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 		CD329C9F181CEEC0D1CF82EA /* Sidebar */ = {
@@ -789,11 +827,17 @@
 				33FD7AC6BCF0AFB3DD1AA57B /* DatabaseError.swift in Sources */,
 				B51478F4C7762A2A858D08CB /* DatabaseService.swift in Sources */,
 				CB252B7542C92B9AD0E7878A /* Email.swift in Sources */,
+				7F8D22930F28AEB4554D4F8A /* EmailListFormatters.swift in Sources */,
+				004539B7DBFECDB58397F3EC /* EmailListView.swift in Sources */,
+				7F4ED4116D89CF0229CDAF9A /* EmailListViewModel.swift in Sources */,
 				AB281FA24C2611CA8588608A /* EmailRepository.swift in Sources */,
+				7DFBD2CB964B07AB5A5F6581 /* EmailRowView.swift in Sources */,
 				B7A605F143D1E421FE715FFE /* EmailThread.swift in Sources */,
+				E8AA4868DB16E4ADDE10BC52 /* EmptyStateView.swift in Sources */,
 				71E58CBF23E4C2DCE8B43BB1 /* ErrorAlertModifier.swift in Sources */,
 				2FA220C7E220A06974A73F86 /* ErrorHandler.swift in Sources */,
 				FFDDCB9A041FB74037297C0E /* FolderRow.swift in Sources */,
+				53FDF38612F9DA6C06E6308A /* GeneralSettingsView.swift in Sources */,
 				3C72978C39ADCD5C34290C74 /* GmailAPIService.swift in Sources */,
 				A3CBDFA93569B62116D08232 /* GmailAPIServiceProtocol.swift in Sources */,
 				5F9D84CA6F39F94B67E5F7A5 /* GmailDTOs.swift in Sources */,
@@ -807,6 +851,8 @@
 				EFD5DD5588F8910329588F65 /* LabelRepository.swift in Sources */,
 				A47A1535F14D0907748DE398 /* Logger+Extensions.swift in Sources */,
 				D557F3DC5F953C44BF723FE4 /* MIMEMessageBuilder.swift in Sources */,
+				290D2672F2958BA4C2432D16 /* NotificationService.swift in Sources */,
+				1CBF0772DC5DFCE7B64828CF /* NotificationSettingsView.swift in Sources */,
 				75BB288B6C0FC76E77053A5B /* OAuthTokens.swift in Sources */,
 				FBDCF626844112D529238A8D /* RepositoryProtocols.swift in Sources */,
 				0E7E70654D6EA092B3105B42 /* RetryHelper.swift in Sources */,
@@ -820,8 +866,10 @@
 				E13B297944579CB569957DE1 /* SyncState.swift in Sources */,
 				F797B1AB64085CBB9A95B830 /* SyncStateRepository.swift in Sources */,
 				931B75E2D1EF7AFDF3770EF5 /* SyncStatusView.swift in Sources */,
+				D50B191D8E70525628AC1332 /* ThreadRowView.swift in Sources */,
 				24755258941657D0B935EEE5 /* TokenManager.swift in Sources */,
 				E5266441B1EB9CD8912FE24E /* UnreadCountBadge.swift in Sources */,
+				AB3D0D2FFE5E9CB615487701 /* UnreadStarIndicator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
