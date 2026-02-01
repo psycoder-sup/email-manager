@@ -1,0 +1,65 @@
+import SwiftUI
+import os.log
+
+/// Displays a folder row with icon and unread count badge.
+/// Loads unread count asynchronously using .task modifier.
+struct FolderRow: View {
+    let folder: Folder
+    let account: Account?
+    let isSelected: Bool
+
+    @Environment(DatabaseService.self) private var databaseService
+    @State private var unreadCount: Int = 0
+
+    var body: some View {
+        HStack {
+            SwiftUI.Label {
+                Text(folder.displayName)
+                    .fontWeight(isSelected ? .semibold : .regular)
+            } icon: {
+                Image(systemName: folder.systemImage)
+            }
+
+            Spacer()
+
+            if unreadCount > 0 {
+                UnreadCountBadge(count: unreadCount)
+            }
+        }
+        .contentShape(Rectangle())
+        .task(id: taskId) {
+            await loadUnreadCount()
+        }
+    }
+
+    private var taskId: String {
+        "\(account?.id.uuidString ?? "all")-\(folder.rawValue)"
+    }
+
+    private func loadUnreadCount() async {
+        let repository = EmailRepository()
+        do {
+            unreadCount = try await repository.unreadCount(
+                account: account,
+                folder: folder.rawValue,
+                context: databaseService.mainContext
+            )
+        } catch {
+            Logger.ui.error("Failed to load unread count for \(folder.displayName): \(error.localizedDescription)")
+            unreadCount = 0
+        }
+    }
+}
+
+#Preview {
+    List {
+        FolderRow(folder: .inbox, account: nil, isSelected: true)
+        FolderRow(folder: .sent, account: nil, isSelected: false)
+        FolderRow(folder: .drafts, account: nil, isSelected: false)
+        FolderRow(folder: .starred, account: nil, isSelected: false)
+        FolderRow(folder: .trash, account: nil, isSelected: false)
+    }
+    .listStyle(.sidebar)
+    .frame(width: 250)
+    .environment(DatabaseService(isStoredInMemoryOnly: true))
+}

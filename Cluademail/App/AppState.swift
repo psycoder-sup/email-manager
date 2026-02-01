@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import os.log
 
 /// Global application state observable by all views.
 /// Marked @MainActor to ensure all state mutations occur on the main thread.
@@ -9,27 +10,52 @@ final class AppState {
 
     // MARK: - Selection State
 
-    /// Currently selected account (nil = all accounts / aggregated view)
+    /// Currently selected account, or nil for aggregated "All Accounts" view
     var selectedAccount: Account?
-
-    /// Currently selected folder
     var selectedFolder: Folder = .inbox
-
-    /// Currently selected email for detail view
     var selectedEmail: Email?
+
+    // MARK: - Data
+
+    var accounts: [Account] = []
 
     // MARK: - Sync State
 
-    /// Whether a sync operation is in progress
     var isSyncing: Bool = false
-
-    /// Last sync date across all accounts
     var lastSyncDate: Date?
 
     // MARK: - MCP State
 
-    /// Whether the MCP server is currently running
     var mcpServerRunning: Bool = false
+
+    // MARK: - Computed Properties
+
+    /// Display title combining folder and account name
+    var displayTitle: String {
+        let folderName = selectedFolder.displayName
+        if let account = selectedAccount {
+            return "\(folderName) — \(account.displayName)"
+        }
+        return folderName
+    }
+
+    // MARK: - Selection Methods
+
+    /// Selects an account and clears email selection.
+    /// - Parameter account: The account to select, or nil for "All Accounts"
+    func selectAccount(_ account: Account?) {
+        selectedAccount = account
+        selectedEmail = nil
+        Logger.ui.info("Selected account: \(account?.email ?? "All Accounts", privacy: .public)")
+    }
+
+    /// Selects a folder and clears email selection.
+    /// - Parameter folder: The folder to select
+    func selectFolder(_ folder: Folder) {
+        selectedFolder = folder
+        selectedEmail = nil
+        Logger.ui.info("Selected folder: \(folder.displayName)")
+    }
 }
 
 // MARK: - Folder Enum

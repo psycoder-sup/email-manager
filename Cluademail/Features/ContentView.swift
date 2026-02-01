@@ -1,4 +1,5 @@
 import SwiftUI
+import os.log
 
 /// Main content view for the application.
 /// This is the root view displayed in the main window.
@@ -8,44 +9,40 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             SidebarView()
+                .navigationSplitViewColumnWidth(min: 200, ideal: 250, max: 300)
         } content: {
             EmailListPlaceholderView()
+                .navigationSplitViewColumnWidth(min: 300, ideal: 400, max: 500)
         } detail: {
             EmailDetailPlaceholderView()
+                .navigationSplitViewColumnWidth(min: 400, ideal: 600)
         }
         .frame(minWidth: 900, minHeight: 600)
-        .navigationTitle(appState.selectedFolder.displayName)
+        .navigationTitle(appState.displayTitle)
+        .toolbar {
+            ToolbarItemGroup(placement: .primaryAction) {
+                Button {
+                    // TODO: Implement in Task 09
+                    Logger.ui.info("Compose button tapped")
+                } label: {
+                    Image(systemName: "square.and.pencil")
+                }
+                .help("Compose new message")
+
+                Button {
+                    // TODO: Implement in Task 06
+                    Logger.ui.info("Refresh button tapped")
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+                .help("Check for new mail")
+                .disabled(appState.isSyncing)
+            }
+        }
     }
 }
 
 // MARK: - Placeholder Views
-
-/// Placeholder sidebar view (Task 07)
-struct SidebarView: View {
-    @Environment(AppState.self) private var appState
-
-    var body: some View {
-        List(selection: Binding(
-            get: { appState.selectedFolder },
-            set: { appState.selectedFolder = $0 }
-        )) {
-            Section("Folders") {
-                ForEach(Folder.allCases) { folder in
-                    SwiftUI.Label(folder.displayName, systemImage: folder.systemImage)
-                        .tag(folder)
-                }
-            }
-
-            Section("Accounts") {
-                Text("No accounts configured")
-                    .foregroundStyle(.secondary)
-                    .font(.caption)
-            }
-        }
-        .listStyle(.sidebar)
-        .frame(minWidth: 200)
-    }
-}
 
 /// Placeholder email list view (Task 08)
 struct EmailListPlaceholderView: View {
@@ -84,4 +81,5 @@ struct EmailDetailPlaceholderView: View {
     ContentView()
         .environment(AppState())
         .environment(ErrorHandler())
+        .environment(DatabaseService(isStoredInMemoryOnly: true))
 }
