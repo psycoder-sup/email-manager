@@ -178,6 +178,7 @@ final class GmailModelMapperTests: XCTestCase {
                         partId: "0",
                         mimeType: "text/plain",
                         filename: nil,
+                        headers: nil,
                         body: BodyDTO(
                             size: plainText.count,
                             data: plainText.data(using: .utf8)!.base64URLEncodedString(),
@@ -189,6 +190,7 @@ final class GmailModelMapperTests: XCTestCase {
                         partId: "1",
                         mimeType: "text/html",
                         filename: nil,
+                        headers: nil,
                         body: BodyDTO(
                             size: htmlText.count,
                             data: htmlText.data(using: .utf8)!.base64URLEncodedString(),
@@ -222,6 +224,7 @@ final class GmailModelMapperTests: XCTestCase {
                         partId: "0",
                         mimeType: "text/plain",
                         filename: nil,
+                        headers: nil,
                         body: BodyDTO(size: 10, data: "dGVzdA", attachmentId: nil),
                         parts: nil
                     ),
@@ -229,6 +232,7 @@ final class GmailModelMapperTests: XCTestCase {
                         partId: "1",
                         mimeType: "application/pdf",
                         filename: "document.pdf",
+                        headers: nil,
                         body: BodyDTO(size: 1024, data: nil, attachmentId: "att123"),
                         parts: nil
                     )

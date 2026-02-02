@@ -25,6 +25,9 @@ final class Attachment: Identifiable {
     /// File size in bytes
     var size: Int64
 
+    /// Content-ID for inline images (CID scheme)
+    var contentId: String?
+
     // MARK: - Download State
 
     /// Local file path after download (nil if not downloaded)

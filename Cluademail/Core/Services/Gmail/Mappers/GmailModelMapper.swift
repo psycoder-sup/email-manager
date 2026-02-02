@@ -312,6 +312,17 @@ enum GmailModelMapper {
                     mimeType: part.mimeType ?? "application/octet-stream",
                     size: Int64(part.body?.size ?? 0)
                 )
+
+                // Extract Content-ID for inline images (CID scheme)
+                if let headers = part.headers {
+                    for header in headers {
+                        if header.name.lowercased() == "content-id" {
+                            attachment.contentId = header.value
+                            break
+                        }
+                    }
+                }
+
                 attachments.append(attachment)
             }
 

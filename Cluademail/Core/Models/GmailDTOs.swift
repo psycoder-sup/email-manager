@@ -56,6 +56,8 @@ struct PartDTO: Codable, Sendable {
     let mimeType: String?
     /// Filename (for attachments)
     let filename: String?
+    /// Part headers (including Content-ID for inline images)
+    let headers: [HeaderDTO]?
     /// Part body content
     let body: BodyDTO?
     /// Nested parts (for multipart/* content types)
