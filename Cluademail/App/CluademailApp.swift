@@ -32,6 +32,7 @@ struct CluademailApp: App {
                 .environment(databaseService)
                 .modifier(ErrorAlertModifier(errorHandler: errorHandler))
                 .task {
+                    repairOrphanedEmailsIfNeeded()
                     await setupSyncSystem()
                     await setupNotifications()
                 }
@@ -43,6 +44,9 @@ struct CluademailApp: App {
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .openComposeWindow)) { notification in
                     handleOpenComposeWindow(notification)
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .syncContextDidSave)) { _ in
+                    databaseService.refreshMainContext()
                 }
         }
         .modelContainer(databaseService.container)
@@ -98,6 +102,18 @@ struct CluademailApp: App {
                 ProgressView("Loading...")
                     .frame(width: 500, height: 400)
             }
+        }
+    }
+
+    // MARK: - Data Repair
+
+    /// Repairs orphaned emails on app launch (one-time fix for corrupted relationships).
+    @MainActor
+    private func repairOrphanedEmailsIfNeeded() {
+        do {
+            try databaseService.repairOrphanedEmails()
+        } catch {
+            Logger.database.error("Failed to repair orphaned emails: \(error.localizedDescription)")
         }
     }
 
@@ -218,15 +234,20 @@ struct ComposeWindowData: Identifiable, Hashable, Codable {
     let emailId: String?  // Gmail ID of original email (nil for .new)
     let accountEmail: String
 
-    // Non-codable fields (reconstructed from stored data)
-    // Note: For email-based modes, the actual mode must be reconstructed in ComposeView
-    // by fetching the email from the database using emailId.
+    /// Returns a placeholder mode - actual reconstruction requires database access.
+    ///
+    /// For email-based modes (reply, replyAll, forward, draft), the full `ComposeMode`
+    /// cannot be reconstructed here because it requires fetching the Email from the database.
+    /// The actual mode reconstruction happens in `ComposeView.reconstructMode()` which has
+    /// access to DatabaseService and can fetch the email using `emailId`.
+    ///
+    /// This property exists only for Codable conformance and initial view setup.
     var mode: ComposeMode {
         // Only .new can be fully reconstructed without database access
         if modeType == "new" || emailId == nil {
             return .new
         }
-        // Return .new as placeholder - actual mode reconstruction happens in ComposeView
+        // Return .new as placeholder - actual mode reconstruction happens in ComposeView.reconstructMode()
         return .new
     }
 

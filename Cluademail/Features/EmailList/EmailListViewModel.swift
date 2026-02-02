@@ -42,6 +42,25 @@ final class EmailListViewModel {
         }
     }
 
+    /// Active search filters
+    var searchFilters = SearchFilters()
+
+    // MARK: - Search State
+
+    /// Search service for coordinating local and server search
+    private(set) var searchService: SearchService?
+
+    /// Whether server search has been performed for current query
+    private(set) var hasSearchedServer: Bool = false
+
+    /// Whether server search is in progress
+    private(set) var isLoadingFromServer: Bool = false
+
+    /// Whether search is currently active
+    var isSearchActive: Bool {
+        !searchQuery.trimmingCharacters(in: .whitespaces).isEmpty || searchFilters.isActive
+    }
+
     // MARK: - Selection State
 
     /// Currently selected email/thread IDs
@@ -93,13 +112,16 @@ final class EmailListViewModel {
     private let emailRepository: EmailRepository
     private let databaseService: DatabaseService
     private let gmailAPIService: GmailAPIService
+    private let appState: AppState
 
     // MARK: - Initialization
 
-    init(databaseService: DatabaseService) {
+    init(databaseService: DatabaseService, appState: AppState) {
         self.databaseService = databaseService
+        self.appState = appState
         self.emailRepository = EmailRepository()
         self.gmailAPIService = GmailAPIService.shared
+        self.searchService = SearchService(databaseService: databaseService)
     }
 
     // MARK: - Data Loading
@@ -192,17 +214,175 @@ final class EmailListViewModel {
     // MARK: - Local Filtering
 
     private func applyLocalFilter() {
-        if searchQuery.isEmpty {
+        if searchQuery.isEmpty && !searchFilters.isActive {
             emails = allEmails
         } else {
             let query = searchQuery.lowercased()
             emails = allEmails.filter { email in
-                email.subject.lowercased().contains(query) ||
-                email.fromAddress.lowercased().contains(query) ||
-                (email.fromName?.lowercased().contains(query) ?? false) ||
-                email.snippet.lowercased().contains(query)
+                // Text query filter
+                let matchesQuery = query.isEmpty || (
+                    email.subject.lowercased().contains(query) ||
+                    email.fromAddress.lowercased().contains(query) ||
+                    (email.fromName?.lowercased().contains(query) ?? false) ||
+                    email.snippet.lowercased().contains(query)
+                )
+
+                // Additional filters
+                let matchesFilters = applySearchFilters(to: email)
+
+                return matchesQuery && matchesFilters
             }
         }
+    }
+
+    /// Applies search filters to a single email.
+    private func applySearchFilters(to email: Email) -> Bool {
+        if let from = searchFilters.from, !from.isEmpty {
+            let fromLower = from.lowercased()
+            guard email.fromAddress.lowercased().contains(fromLower) ||
+                  (email.fromName?.lowercased().contains(fromLower) ?? false) else {
+                return false
+            }
+        }
+
+        if let to = searchFilters.to, !to.isEmpty {
+            let toLower = to.lowercased()
+            guard email.toAddresses.contains(where: { $0.lowercased().contains(toLower) }) else {
+                return false
+            }
+        }
+
+        if let afterDate = searchFilters.afterDate {
+            guard email.date >= afterDate else { return false }
+        }
+
+        if let beforeDate = searchFilters.beforeDate {
+            guard email.date <= beforeDate else { return false }
+        }
+
+        if searchFilters.hasAttachment {
+            guard !email.attachments.isEmpty else { return false }
+        }
+
+        if searchFilters.isUnread {
+            guard !email.isRead else { return false }
+        }
+
+        if !searchFilters.labelIds.isEmpty {
+            guard searchFilters.labelIds.allSatisfy({ email.labelIds.contains($0) }) else {
+                return false
+            }
+        }
+
+        return true
+    }
+
+    // MARK: - Server Search
+
+    /// Loads more results from the server for the current search query.
+    func loadMoreFromServer() async {
+        guard isSearchActive, !hasSearchedServer, !isLoadingFromServer else { return }
+        guard let account = currentAccount else { return }
+
+        isLoadingFromServer = true
+        defer { isLoadingFromServer = false }
+
+        do {
+            let gmailQuery = searchFilters.toGmailQuery(baseQuery: searchQuery)
+
+            // Get message IDs from server search
+            let (messages, _) = try await gmailAPIService.listMessages(
+                accountEmail: account.email,
+                query: gmailQuery.isEmpty ? searchQuery : gmailQuery,
+                labelIds: nil,
+                maxResults: 50,
+                pageToken: nil
+            )
+
+            guard !messages.isEmpty else {
+                hasSearchedServer = true
+                return
+            }
+
+            // Batch fetch full message details
+            let messageIds = messages.map(\.id)
+            let batchResult = try await gmailAPIService.batchGetMessages(
+                accountEmail: account.email,
+                messageIds: messageIds
+            )
+
+            // Map to Email models and merge with local results
+            var serverEmails: [Email] = []
+            let existingIds = Set(emails.map(\.gmailId))
+
+            for messageDTO in batchResult.succeeded {
+                // Skip if already in local results
+                guard !existingIds.contains(messageDTO.id) else { continue }
+
+                do {
+                    // Check if email already exists in database
+                    let descriptor = FetchDescriptor<Email>(predicate: #Predicate { $0.gmailId == messageDTO.id })
+                    if let existing = try? databaseService.mainContext.fetch(descriptor).first {
+                        // Preserve account relationship (fix for orphaned emails)
+                        if existing.account == nil {
+                            existing.account = account
+                        }
+                        serverEmails.append(existing)
+                    } else {
+                        let email = try GmailModelMapper.mapToEmail(messageDTO, account: account)
+                        databaseService.mainContext.insert(email)
+                        serverEmails.append(email)
+                    }
+                } catch {
+                    Logger.api.error("Failed to map message: \(error.localizedDescription)")
+                }
+            }
+
+            // Save persisted emails to database
+            if !serverEmails.isEmpty {
+                saveContext()
+            }
+
+            // Merge with existing results
+            emails.append(contentsOf: serverEmails)
+            emails.sort { $0.date > $1.date }
+
+            hasSearchedServer = true
+            Logger.ui.info("Server search completed: \(serverEmails.count) new results")
+
+        } catch {
+            Logger.ui.error("Server search failed: \(error.localizedDescription)")
+        }
+    }
+
+    /// Clears the search state.
+    func clearSearch() {
+        searchQuery = ""
+        searchFilters.reset()
+        hasSearchedServer = false
+        isLoadingFromServer = false
+        applyLocalFilter()
+    }
+
+    /// Saves the current search to history.
+    func saveSearchToHistory() {
+        guard !searchQuery.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        SearchHistoryService.shared.addSearch(searchQuery, filters: searchFilters)
+    }
+
+    /// Gets search history.
+    func getSearchHistory() -> [SearchHistoryItem] {
+        SearchHistoryService.shared.getHistory()
+    }
+
+    /// Deletes a search from history.
+    func deleteSearchFromHistory(id: UUID) {
+        SearchHistoryService.shared.deleteSearch(id: id)
+    }
+
+    /// Clears all search history.
+    func clearSearchHistory() {
+        SearchHistoryService.shared.clearHistory()
     }
 
     // MARK: - Selection
@@ -275,6 +455,16 @@ final class EmailListViewModel {
         } else if selectedIds.isEmpty, let lastId = ids.last {
             selectedIds = [lastId]
         }
+    }
+
+    // MARK: - UI Refresh
+
+    /// Triggers UI refresh by reassigning the emails array.
+    /// This forces SwiftUI to re-render rows with updated isRead values.
+    func triggerUIRefresh() {
+        // Reassigning triggers @Observable change notification
+        let current = emails
+        emails = current
     }
 
     // MARK: - Email Actions
@@ -392,10 +582,18 @@ final class EmailListViewModel {
         removeLabels: [String],
         localUpdate: (Email) -> Void
     ) async {
-        guard let account = currentAccount else { return }
+        guard let account = currentAccount else {
+            Logger.ui.warning("modifyLabels called with no current account")
+            return
+        }
 
         for emailId in emailIds {
             guard let email = allEmails.first(where: { $0.gmailId == emailId }) else { continue }
+
+            guard email.account != nil else {
+                Logger.ui.warning("Skipping email \(emailId): no account relationship")
+                continue
+            }
 
             do {
                 _ = try await gmailAPIService.modifyMessage(
@@ -406,6 +604,7 @@ final class EmailListViewModel {
                 )
                 localUpdate(email)
                 saveContext()
+                appState.incrementUnreadCountVersion()
                 Logger.ui.info("Modified labels for: \(emailId)")
             } catch {
                 Logger.ui.error("Failed to modify labels: \(error.localizedDescription)")
