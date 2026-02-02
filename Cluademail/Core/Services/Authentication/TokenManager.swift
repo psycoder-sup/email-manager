@@ -8,45 +8,35 @@ actor TokenManager: TokenManagerProtocol {
     /// Shared singleton instance
     static let shared = TokenManager()
 
-    /// Key prefix for storing tokens in Keychain
-    private let tokenKeyPrefix = "oauth_tokens_"
-
-    /// Keychain service for secure storage
-    private let keychainService: any KeychainServiceProtocol
+    /// File-based storage for tokens
+    private let fileStorage: FileTokenStorage
 
     /// OAuth client for token refresh
     private let oauthClient: any OAuthClientProtocol
 
     /// Creates a TokenManager with default dependencies.
     private init() {
-        self.keychainService = KeychainService.shared
+        self.fileStorage = FileTokenStorage.shared
         self.oauthClient = GoogleOAuthClient.shared
     }
 
     /// Creates a TokenManager with custom dependencies (for testing).
-    init(keychainService: any KeychainServiceProtocol, oauthClient: any OAuthClientProtocol) {
-        self.keychainService = keychainService
+    init(fileStorage: FileTokenStorage, oauthClient: any OAuthClientProtocol) {
+        self.fileStorage = fileStorage
         self.oauthClient = oauthClient
     }
 
     // MARK: - TokenManagerProtocol Implementation
 
     /// Saves tokens for an account.
-    /// Also saves to file storage for MCP CLI access.
     func saveTokens(_ tokens: OAuthTokens, for accountEmail: String) async throws {
-        let key = tokenKeyPrefix + accountEmail
-        try keychainService.save(tokens, forKey: key)
-
-        // Also save to file storage for MCP CLI tool access
-        try? FileTokenStorage.shared.saveTokens(tokens, for: accountEmail)
-
+        try fileStorage.saveTokens(tokens, for: accountEmail)
         Logger.auth.info("Saved tokens for account: \(accountEmail, privacy: .private(mask: .hash))")
     }
 
     /// Retrieves tokens for an account.
     func getTokens(for accountEmail: String) async throws -> OAuthTokens {
-        let key = tokenKeyPrefix + accountEmail
-        let tokens = try keychainService.retrieve(OAuthTokens.self, forKey: key)
+        let tokens = try fileStorage.getTokens(for: accountEmail)
         Logger.auth.debug("Retrieved tokens for account: \(accountEmail, privacy: .private(mask: .hash))")
         return tokens
     }
@@ -54,28 +44,13 @@ actor TokenManager: TokenManagerProtocol {
     /// Deletes tokens for an account.
     /// Does not throw if tokens don't exist.
     func deleteTokens(for accountEmail: String) async throws {
-        let key = tokenKeyPrefix + accountEmail
-
-        do {
-            try keychainService.delete(forKey: key)
-            Logger.auth.info("Deleted tokens for account: \(accountEmail, privacy: .private(mask: .hash))")
-        } catch KeychainError.itemNotFound {
-            Logger.auth.debug("No tokens to delete for account: \(accountEmail, privacy: .private(mask: .hash))")
-        }
-
-        // Also delete from file storage
-        try? FileTokenStorage.shared.deleteTokens(for: accountEmail)
+        try fileStorage.deleteTokens(for: accountEmail)
+        Logger.auth.info("Deleted tokens for account: \(accountEmail, privacy: .private(mask: .hash))")
     }
 
     /// Checks if tokens exist for an account without throwing.
     func hasTokens(for accountEmail: String) async -> Bool {
-        let key = tokenKeyPrefix + accountEmail
-        do {
-            _ = try keychainService.retrieve(OAuthTokens.self, forKey: key)
-            return true
-        } catch {
-            return false
-        }
+        return fileStorage.hasTokens(for: accountEmail)
     }
 
     /// Gets a valid access token, refreshing if necessary.

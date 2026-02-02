@@ -1,28 +1,5 @@
 import Foundation
 
-// MARK: - KeychainServiceProtocol
-
-/// Protocol for secure storage operations.
-/// Enables testability and alternative implementations.
-protocol KeychainServiceProtocol: Sendable {
-    /// Saves a Codable item to secure storage.
-    /// - Parameters:
-    ///   - item: The item to save
-    ///   - key: The key to store the item under
-    func save<T: Codable>(_ item: T, forKey key: String) throws
-
-    /// Retrieves a Codable item from secure storage.
-    /// - Parameters:
-    ///   - type: The type of item to retrieve
-    ///   - key: The key the item is stored under
-    /// - Returns: The retrieved item
-    func retrieve<T: Codable>(_ type: T.Type, forKey key: String) throws -> T
-
-    /// Deletes an item from secure storage.
-    /// - Parameter key: The key of the item to delete
-    func delete(forKey key: String) throws
-}
-
 // MARK: - AuthorizationResult
 
 /// Result of extracting authorization code from OAuth callback.
