@@ -45,6 +45,12 @@ targets:
     postBuildScripts:
       - name: Embed and Install MCP Server
         script: |
+          # Skip if xctest bundle exists (test build has different bundle structure)
+          if [ -d "${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/Contents/PlugIns/${PRODUCT_NAME}.xctest" ]; then
+            echo "Skipping MCP server install during test build (xctest detected)"
+            exit 0
+          fi
+
           # Copy app bundle to /Applications first
           rm -rf "/Applications/${PRODUCT_NAME}.app"
           cp -R "${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app" "/Applications/"
@@ -52,8 +58,16 @@ targets:
           # Copy MCP binary into installed app bundle
           cp "${BUILT_PRODUCTS_DIR}/cluademail-mcp" "/Applications/${PRODUCT_NAME}.app/Contents/MacOS/cluademail-mcp"
 
-          # Re-sign the entire app (including MCP binary)
-          codesign --force --deep --sign "${EXPANDED_CODE_SIGN_IDENTITY:-"-"}" "/Applications/${PRODUCT_NAME}.app"
+          # Sign all nested executables first (inside-out signing)
+          for dylib in "/Applications/${PRODUCT_NAME}.app/Contents/MacOS/"*.dylib; do
+            [ -f "$dylib" ] && codesign --force --sign "${EXPANDED_CODE_SIGN_IDENTITY:-"-"}" "$dylib"
+          done
+
+          # Sign MCP binary
+          codesign --force --sign "${EXPANDED_CODE_SIGN_IDENTITY:-"-"}" "/Applications/${PRODUCT_NAME}.app/Contents/MacOS/cluademail-mcp"
+
+          # Sign the main app bundle
+          codesign --force --sign "${EXPANDED_CODE_SIGN_IDENTITY:-"-"}" "/Applications/${PRODUCT_NAME}.app"
         basedOnDependencyAnalysis: false
     settings:
       base:

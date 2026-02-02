@@ -24,7 +24,6 @@
 		1552627B22446EFD134A9701 /* MCPToolProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D97D9086150158CEA849BAB /* MCPToolProtocol.swift */; };
 		156C15EA77972C28A6095BE7 /* RetryHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92B038C1D5467E5F1079B1FA /* RetryHelper.swift */; };
 		1756E84D023CA9A58C808305 /* ListAccountsTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFB14FB62304856E7FD804C2 /* ListAccountsTool.swift */; };
-		1825BE9F43D1EE8A54770132 /* TokenManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7EF62B4CAF3FE0A850F707A /* TokenManagerTests.swift */; };
 		1CBF0772DC5DFCE7B64828CF /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5522EB7E0BED1C5E78F81D0B /* NotificationSettingsView.swift */; };
 		1EC68AB393A336E74488F238 /* AttachmentListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78FED01727FAAEB076CC3939 /* AttachmentListView.swift */; };
 		1FB5BE53496C54E05C401053 /* MCPRateLimiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A95A16B08D838262BAD779 /* MCPRateLimiter.swift */; };
@@ -100,7 +99,6 @@
 		824CD80AB3ACF7A94137782A /* ComposeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA6886A1386746E5F353DFEA /* ComposeViewModel.swift */; };
 		82538CDDD4B5D083C1BB9703 /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBCAAC030732F5D59FCCECC7 /* AppError.swift */; };
 		8309771A23B654D3D01549EA /* TokenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D287256242FC0AD37A57B3 /* TokenManager.swift */; };
-		858E4CE55435D4D6CAE11D93 /* MockKeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D89558DED2FAD9B45907417 /* MockKeychainService.swift */; };
 		8667C2040BD993AECE346578 /* SearchEmailsTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CB15FD3A369DA6C59B36F5E /* SearchEmailsTool.swift */; };
 		874872EBD600E74364C9A74A /* DraftAutoSaveManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E9FC60EC1B2975B00D29CCD /* DraftAutoSaveManager.swift */; };
 		899FA1ED3E8449EEAFD1C1FF /* MCPToolRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D581367B19EFFDB7AD28FC9 /* MCPToolRegistry.swift */; };
@@ -121,7 +119,6 @@
 		93A7DEB80002602F40EB3403 /* SyncLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3C9FB81C894147D238D07B /* SyncLockTests.swift */; };
 		94E1699DB485E2B211CCC80A /* AppStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9743CC82674D4EE6DEB9C4BD /* AppStateTests.swift */; };
 		9654B958B3CD1564D3E5BA16 /* EmailHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990A43B0CDCD29A8AB50E07D /* EmailHeaderView.swift */; };
-		971AD581A3070C7F5D2052C1 /* KeychainServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9461B5815DC33F328E49CBD /* KeychainServiceTests.swift */; };
 		980D9B7DCFCD27941C85F3C5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BF8CBC97A005E47AA7DC209 /* AppDelegate.swift */; };
 		982F500E1D1BFD0C5BCA4597 /* MCPDatabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FBEC554F67DA5437280951E /* MCPDatabaseService.swift */; };
 		995002F112A979FCC7F6AD3F /* SyncStateRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53DC215186AA9F8D6B150930 /* SyncStateRepositoryTests.swift */; };
@@ -185,6 +182,7 @@
 		ED9DF3A717968440D23AC742 /* FileTokenStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2320ABEBADEA2F6C9C28FCAB /* FileTokenStorage.swift */; };
 		EEF2CC3DD3606C7CA07B3129 /* CluademailMCP in Resources */ = {isa = PBXBuildFile; fileRef = 5B21B3F14DDC0F00DF1851F8 /* CluademailMCP */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EF1FC471BA163293D8D3211A /* SyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B4B46C5B65D8ECAACAFCF7C /* SyncEngine.swift */; };
+		EFDF29C1AE427B51E07F7D9E /* SyncEngineDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 748C0EEC7A372B4D13E9CC25 /* SyncEngineDraftTests.swift */; };
 		F411B2BA6D6350AC53867453 /* FilterPickerPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B053B4061FBF046D521D09 /* FilterPickerPopover.swift */; };
 		F6ED99000D658071B7CA3355 /* MCPProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAAE31435FB490C287F91483 /* MCPProtocol.swift */; };
 		F797B1AB64085CBB9A95B830 /* SyncStateRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EECDBB18D726153D366B5E6 /* SyncStateRepository.swift */; };
@@ -295,6 +293,7 @@
 		72EDE91236E30219EC135D9B /* EmailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailTests.swift; sourceTree = "<group>"; };
 		731AD9CA27F07F025A6BF2FE /* AuthenticationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationService.swift; sourceTree = "<group>"; };
 		7446CC5E5815F20F542BE3E1 /* MockDatabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDatabaseService.swift; sourceTree = "<group>"; };
+		748C0EEC7A372B4D13E9CC25 /* SyncEngineDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngineDraftTests.swift; sourceTree = "<group>"; };
 		7613D167D9C280C9005F0DDB /* Cluademail.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Cluademail.entitlements; sourceTree = "<group>"; };
 		78FED01727FAAEB076CC3939 /* AttachmentListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentListView.swift; sourceTree = "<group>"; };
 		7B0C4F530B66135464A74894 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -302,7 +301,6 @@
 		7CB15FD3A369DA6C59B36F5E /* SearchEmailsTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchEmailsTool.swift; sourceTree = "<group>"; };
 		7D4EED2ED924EB72832B5F9F /* EmailDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailDetailView.swift; sourceTree = "<group>"; };
 		7D581367B19EFFDB7AD28FC9 /* MCPToolRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPToolRegistry.swift; sourceTree = "<group>"; };
-		7D89558DED2FAD9B45907417 /* MockKeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockKeychainService.swift; sourceTree = "<group>"; };
 		7FEE532897B7EB8084D76878 /* SyncState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncState.swift; sourceTree = "<group>"; };
 		86D83A33C93690D77883BCF5 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
 		8897A59AD409CAC767FF5668 /* ReadEmailTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadEmailTool.swift; sourceTree = "<group>"; };
@@ -328,8 +326,6 @@
 		A0D8E54CA16998A45A8E889E /* DatabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseService.swift; sourceTree = "<group>"; };
 		A3C815F426E80EBFE2122FFD /* SyncEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngineTests.swift; sourceTree = "<group>"; };
 		A55C7D8310C3620C35F8B5BD /* ErrorHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHandler.swift; sourceTree = "<group>"; };
-		A7EF62B4CAF3FE0A850F707A /* TokenManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenManagerTests.swift; sourceTree = "<group>"; };
-		A9461B5815DC33F328E49CBD /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainServiceTests.swift; sourceTree = "<group>"; };
 		AC2EECEA96D4D256C9A28F07 /* AccountRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountRepositoryTests.swift; sourceTree = "<group>"; };
 		AC66E440378DDF981F7F95EC /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		AD436874AC3F4454B5995878 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
@@ -570,9 +566,7 @@
 				CA2DBD98A44BD386FBA9A873 /* Sync */,
 				03D13DF4EFA0C13C68375FCB /* AuthenticationErrorTests.swift */,
 				E21C4526054C29B72E709DDB /* GoogleOAuthClientTests.swift */,
-				A9461B5815DC33F328E49CBD /* KeychainServiceTests.swift */,
 				3A643E7E09E9FBF4A5B82E2A /* OAuthTokensTests.swift */,
-				A7EF62B4CAF3FE0A850F707A /* TokenManagerTests.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -624,7 +618,6 @@
 				7446CC5E5815F20F542BE3E1 /* MockDatabaseService.swift */,
 				CAB7373673CE62819DBB2C89 /* MockErrorHandler.swift */,
 				298A6B814158A0950BF2128D /* MockGmailAPIService.swift */,
-				7D89558DED2FAD9B45907417 /* MockKeychainService.swift */,
 				9D3FF4BE75EB7F63409372E4 /* MockOAuthClient.swift */,
 				DCBD9F136DD26F7855A38E1F /* MockTokenManager.swift */,
 			);
@@ -774,6 +767,7 @@
 			isa = PBXGroup;
 			children = (
 				2335BA8A8CE87CE762A6F59F /* SyncCoordinatorTests.swift */,
+				748C0EEC7A372B4D13E9CC25 /* SyncEngineDraftTests.swift */,
 				A3C815F426E80EBFE2122FFD /* SyncEngineTests.swift */,
 				1D3C9FB81C894147D238D07B /* SyncLockTests.swift */,
 				1DFD65D0F9D304711A9FD103 /* SyncSchedulerTests.swift */,
@@ -1030,7 +1024,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Copy app bundle to /Applications first\nrm -rf \"/Applications/${PRODUCT_NAME}.app\"\ncp -R \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app\" \"/Applications/\"\n\n# Copy MCP binary into installed app bundle\ncp \"${BUILT_PRODUCTS_DIR}/cluademail-mcp\" \"/Applications/${PRODUCT_NAME}.app/Contents/MacOS/cluademail-mcp\"\n\n# Re-sign the entire app (including MCP binary)\ncodesign --force --deep --sign \"${EXPANDED_CODE_SIGN_IDENTITY:-\"-\"}\" \"/Applications/${PRODUCT_NAME}.app\"\n";
+			shellScript = "# Skip if xctest bundle exists (test build has different bundle structure)\nif [ -d \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/Contents/PlugIns/${PRODUCT_NAME}.xctest\" ]; then\n  echo \"Skipping MCP server install during test build (xctest detected)\"\n  exit 0\nfi\n\n# Copy app bundle to /Applications first\nrm -rf \"/Applications/${PRODUCT_NAME}.app\"\ncp -R \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app\" \"/Applications/\"\n\n# Copy MCP binary into installed app bundle\ncp \"${BUILT_PRODUCTS_DIR}/cluademail-mcp\" \"/Applications/${PRODUCT_NAME}.app/Contents/MacOS/cluademail-mcp\"\n\n# Sign all nested executables first (inside-out signing)\nfor dylib in \"/Applications/${PRODUCT_NAME}.app/Contents/MacOS/\"*.dylib; do\n  [ -f \"$dylib\" ] && codesign --force --sign \"${EXPANDED_CODE_SIGN_IDENTITY:-\"-\"}\" \"$dylib\"\ndone\n\n# Sign MCP binary\ncodesign --force --sign \"${EXPANDED_CODE_SIGN_IDENTITY:-\"-\"}\" \"/Applications/${PRODUCT_NAME}.app/Contents/MacOS/cluademail-mcp\"\n\n# Sign the main app bundle\ncodesign --force --sign \"${EXPANDED_CODE_SIGN_IDENTITY:-\"-\"}\" \"/Applications/${PRODUCT_NAME}.app\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1226,22 +1220,20 @@
 				C0BF69581A1CDBF06524F63A /* GmailDTOsTests.swift in Sources */,
 				5A39550A110249F00D3BC1C7 /* GmailModelMapperTests.swift in Sources */,
 				E56F8ADCD7E180BE9722E1FF /* GoogleOAuthClientTests.swift in Sources */,
-				971AD581A3070C7F5D2052C1 /* KeychainServiceTests.swift in Sources */,
 				2A916EAD78021AF31AC8AEFB /* MockDatabaseService.swift in Sources */,
 				BB1A38FE4D19CCE21B3C4AED /* MockErrorHandler.swift in Sources */,
 				DC093AC621B3E4CD06FE50DF /* MockGmailAPIService.swift in Sources */,
-				858E4CE55435D4D6CAE11D93 /* MockKeychainService.swift in Sources */,
 				66519402E3F649C437EFA432 /* MockOAuthClient.swift in Sources */,
 				48252495AC7D2487219D2F70 /* MockTokenManager.swift in Sources */,
 				C00C514CC24705BEC3652CA0 /* OAuthTokensTests.swift in Sources */,
 				AFA1120DA8E5A7E86C654951 /* SyncCoordinatorTests.swift in Sources */,
+				EFDF29C1AE427B51E07F7D9E /* SyncEngineDraftTests.swift in Sources */,
 				7D32D8F037E2563DC9D7DE1B /* SyncEngineTests.swift in Sources */,
 				93A7DEB80002602F40EB3403 /* SyncLockTests.swift in Sources */,
 				48B2266F0574F4EFD7149BD7 /* SyncSchedulerTests.swift in Sources */,
 				995002F112A979FCC7F6AD3F /* SyncStateRepositoryTests.swift in Sources */,
 				D8DCA81DA56BEB46100DD526 /* SyncStateTests.swift in Sources */,
 				AFFABDBF3C8B14B1E4DAE348 /* TestFixtures.swift in Sources */,
-				1825BE9F43D1EE8A54770132 /* TokenManagerTests.swift in Sources */,
 				3B542D7F96B11D013D49315D /* XCTestCase+Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

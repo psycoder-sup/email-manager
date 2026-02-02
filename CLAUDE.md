@@ -32,7 +32,7 @@ The project uses XcodeGen with `project.yml` for reproducible builds. If you mod
 Cluademail/
 ├── App/           # Entry point, AppState (@Observable), AppConfiguration, AppDelegate
 ├── Core/
-│   ├── Models/    # SwiftData @Model classes (Account, Email, EmailThread, Attachment, Label, SyncState)
+│   ├── Models/    # SwiftData @Model classes (Account, Email, EmailThread, Attachment, SyncState)
 │   ├── Errors/    # AppError protocol + typed errors (AuthError, SyncError, APIError)
 │   ├── Logging/   # Category-based loggers with privacy-aware helpers
 │   ├── Repositories/  # Data access layer (protocol-based)
