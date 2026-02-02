@@ -26,6 +26,9 @@ final class EmailRepository: BaseRepository<Email>, EmailRepositoryProtocol, @un
             context: context
         )
 
+        // Force relationship resolution and repair orphans
+        resolveAccountRelationships(emails, expectedAccount: account, context: context)
+
         // Apply folder filter in-memory (must be on main actor for mainContext models)
         emails = emails.filter { $0.labelIds.contains(folder) }
 
@@ -41,6 +44,7 @@ final class EmailRepository: BaseRepository<Email>, EmailRepositoryProtocol, @un
     }
 
     /// Fetches emails without folder filtering.
+    @MainActor
     func fetch(
         account: Account?,
         isRead: Bool?,
@@ -48,13 +52,18 @@ final class EmailRepository: BaseRepository<Email>, EmailRepositoryProtocol, @un
         offset: Int?,
         context: ModelContext
     ) async throws -> [Email] {
-        try fetch(
+        let emails = try fetch(
             predicate: buildPredicate(account: account, isRead: isRead),
             sortBy: [SortDescriptor(\.date, order: .reverse)],
             limit: limit,
             offset: offset,
             context: context
         )
+
+        // Force relationship resolution and repair orphans
+        resolveAccountRelationships(emails, expectedAccount: account, context: context)
+
+        return emails
     }
 
     func fetchThreads(
@@ -189,6 +198,28 @@ final class EmailRepository: BaseRepository<Email>, EmailRepositoryProtocol, @un
             return #Predicate<Email> { $0.isRead == read }
         case (.none, .none):
             return nil
+        }
+    }
+
+    /// Forces SwiftData to resolve account relationships from persistent store.
+    /// Repairs orphaned emails by assigning the expected account if relationship is nil.
+    @MainActor
+    private func resolveAccountRelationships(_ emails: [Email], expectedAccount: Account?, context: ModelContext) {
+        var repairedCount = 0
+        for email in emails {
+            // Touch relationship to force fault resolution
+            if email.account != nil {
+                let _ = email.account?.id
+            } else if let account = expectedAccount {
+                // Repair orphaned relationship
+                email.account = account
+                repairedCount += 1
+            }
+        }
+
+        if repairedCount > 0 {
+            try? context.save()
+            Logger.database.debug("Repaired \(repairedCount) orphaned emails at fetch time")
         }
     }
 }
