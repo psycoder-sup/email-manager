@@ -15,7 +15,7 @@ struct UnreadCountBadge: View {
             .foregroundStyle(.white)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
-            .background(Color.accentColor, in: Capsule())
+            .glassEffect(.regular.tint(.accentColor), in: .capsule)
     }
 }
 

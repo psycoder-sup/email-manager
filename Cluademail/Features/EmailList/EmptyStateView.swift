@@ -20,6 +20,8 @@ struct EmptyStateView: View {
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
         }
+        .padding(32)
+        .glassEffect(.clear, in: .rect(cornerRadius: 16))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
     }

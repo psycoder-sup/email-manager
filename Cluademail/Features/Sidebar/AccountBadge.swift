@@ -11,7 +11,7 @@ struct AccountBadge: View {
             .foregroundStyle(.white)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
-            .background(badgeColor, in: Capsule())
+            .glassEffect(.regular.tint(badgeColor), in: .capsule)
     }
 
     /// Extracts username portion from email address

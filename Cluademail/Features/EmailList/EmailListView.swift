@@ -309,22 +309,26 @@ struct EmailListView: View {
             Button("Mark Read") {
                 Task { await viewModel.markAsRead(emailIds: viewModel.selectedIds) }
             }
+            .glassEffect(.regular.interactive(), in: .capsule)
 
             Button("Archive") {
                 Task { await viewModel.archive(emailIds: viewModel.selectedIds) }
             }
+            .glassEffect(.regular.interactive(), in: .capsule)
 
             Button("Delete", role: .destructive) {
                 Task { await viewModel.moveToTrash(emailIds: viewModel.selectedIds) }
             }
+            .glassEffect(.regular.interactive(), in: .capsule)
 
             Button("Clear") {
                 viewModel.clearSelection()
             }
+            .glassEffect(.regular.interactive(), in: .capsule)
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
-        .background(.bar)
+        .glassEffect(.regular)
     }
 
     // MARK: - Toolbar

@@ -219,12 +219,7 @@ struct AttachmentItemView: View {
             }
         }
         .padding(12)
-        .background(Color(nsColor: .textBackgroundColor))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
-        )
+        .glassEffect(.clear, in: .rect(cornerRadius: 8))
         .contentShape(Rectangle())
         .onTapGesture(count: 2) {
             if attachment.isDownloaded {

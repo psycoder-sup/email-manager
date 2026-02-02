@@ -78,6 +78,8 @@ struct EmailDetailView: View {
                 .font(.title2)
                 .foregroundStyle(.secondary)
         }
+        .padding(32)
+        .glassEffect(.clear, in: .rect(cornerRadius: 16))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
