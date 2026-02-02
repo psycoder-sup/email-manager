@@ -268,12 +268,6 @@ final class EmailListViewModel {
             guard !email.isRead else { return false }
         }
 
-        if !searchFilters.labelIds.isEmpty {
-            guard searchFilters.labelIds.allSatisfy({ email.labelIds.contains($0) }) else {
-                return false
-            }
-        }
-
         return true
     }
 

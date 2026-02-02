@@ -193,22 +193,6 @@ final class GmailAPIService: GmailAPIServiceProtocol, @unchecked Sendable {
         )
     }
 
-    // MARK: - Labels
-
-    func listLabels(accountEmail: String) async throws -> [GmailLabelDTO] {
-        guard let url = GmailEndpoints.listLabels.url() else {
-            throw APIError.invalidResponse
-        }
-
-        let response: GmailLabelListDTO = try await executeRequest(
-            url: url,
-            method: "GET",
-            accountEmail: accountEmail
-        )
-
-        return response.labels ?? []
-    }
-
     // MARK: - Drafts
 
     func createDraft(

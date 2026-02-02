@@ -81,11 +81,6 @@ protocol GmailAPIServiceProtocol: Sendable {
         threadId: String
     ) async throws -> GmailThreadDTO
 
-    // MARK: - Labels
-
-    /// Lists all labels for the account.
-    func listLabels(accountEmail: String) async throws -> [GmailLabelDTO]
-
     // MARK: - Drafts
 
     /// Creates a new draft.

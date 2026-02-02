@@ -16,7 +16,6 @@ actor MCPDatabaseService {
             Email.self,
             EmailThread.self,
             Attachment.self,
-            Label.self,
             SyncState.self
         ])
 

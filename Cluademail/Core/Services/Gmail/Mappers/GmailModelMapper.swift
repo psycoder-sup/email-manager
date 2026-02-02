@@ -61,41 +61,6 @@ enum GmailModelMapper {
         return email
     }
 
-    // MARK: - Label Mapping
-
-    /// Maps a Gmail label DTO to a Label model.
-    static func mapToLabel(_ dto: GmailLabelDTO, account: Account) -> Label {
-        let label = Label(
-            gmailLabelId: dto.id,
-            name: dto.name,
-            type: dto.type == "system" ? .system : .user,
-            messageListVisibility: parseMessageListVisibility(dto.messageListVisibility),
-            labelListVisibility: parseLabelListVisibility(dto.labelListVisibility)
-        )
-
-        label.textColor = dto.color?.textColor
-        label.backgroundColor = dto.color?.backgroundColor
-        label.account = account
-
-        return label
-    }
-
-    private static func parseMessageListVisibility(_ value: String?) -> LabelVisibility {
-        switch value {
-        case "show": return .show
-        case "hide": return .hide
-        default: return .showIfUnread
-        }
-    }
-
-    private static func parseLabelListVisibility(_ value: String?) -> LabelVisibility {
-        switch value {
-        case "labelShow": return .show
-        case "labelHide": return .hide
-        default: return .showIfUnread
-        }
-    }
-
     // MARK: - Header Parsing
 
     /// Parsed headers from a message.

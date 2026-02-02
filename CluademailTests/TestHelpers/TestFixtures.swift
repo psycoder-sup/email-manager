@@ -151,32 +151,6 @@ enum TestFixtures {
         )
     }
 
-    // MARK: - Label Fixtures
-
-    /// Creates a test Label with optional customization.
-    /// - Parameters:
-    ///   - gmailLabelId: Gmail label ID (default: "INBOX")
-    ///   - name: Display name (default: "Inbox")
-    ///   - type: Label type (default: .system)
-    ///   - messageListVisibility: Message list visibility (default: .show)
-    ///   - labelListVisibility: Label list visibility (default: .show)
-    /// - Returns: A configured Label
-    static func makeLabel(
-        gmailLabelId: String = "INBOX",
-        name: String = "Inbox",
-        type: LabelType = .system,
-        messageListVisibility: LabelVisibility = .show,
-        labelListVisibility: LabelVisibility = .show
-    ) -> Label {
-        Label(
-            gmailLabelId: gmailLabelId,
-            name: name,
-            type: type,
-            messageListVisibility: messageListVisibility,
-            labelListVisibility: labelListVisibility
-        )
-    }
-
     // MARK: - SyncState Fixtures
 
     /// Creates a test SyncState with optional customization.
@@ -362,29 +336,6 @@ extension TestFixtures {
         )
     }
 
-    /// Creates a test GmailLabelDTO with optional customization.
-    /// - Parameters:
-    ///   - id: Label ID (default: "INBOX")
-    ///   - name: Label name (default: "Inbox")
-    ///   - type: Label type string (default: "system")
-    /// - Returns: A configured GmailLabelDTO
-    static func makeGmailLabelDTO(
-        id: String = "INBOX",
-        name: String = "Inbox",
-        type: String? = "system"
-    ) -> GmailLabelDTO {
-        GmailLabelDTO(
-            id: id,
-            name: name,
-            type: type,
-            messageListVisibility: "show",
-            labelListVisibility: "labelShow",
-            color: nil,
-            messagesTotal: 100,
-            messagesUnread: 10
-        )
-    }
-
     /// Creates a test GmailDraftDTO with optional customization.
     static func makeGmailDraftDTO(
         id: String = UUID().uuidString,
@@ -488,20 +439,4 @@ extension TestFixtures {
         )
     }
 
-    /// Creates a test GmailHistoryLabelDTO for label changes in history.
-    /// - Parameters:
-    ///   - messageId: Message ID (default: generated UUID)
-    ///   - threadId: Thread ID (default: generated UUID)
-    ///   - labelIds: Labels that were added/removed (default: ["INBOX"])
-    /// - Returns: A configured GmailHistoryLabelDTO
-    static func makeGmailHistoryLabelDTO(
-        messageId: String = UUID().uuidString,
-        threadId: String = UUID().uuidString,
-        labelIds: [String] = ["INBOX"]
-    ) -> GmailHistoryLabelDTO {
-        GmailHistoryLabelDTO(
-            message: GmailMessageSummaryDTO(id: messageId, threadId: threadId),
-            labelIds: labelIds
-        )
-    }
 }

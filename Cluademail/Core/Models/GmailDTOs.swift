@@ -116,42 +116,6 @@ struct GmailThreadSummaryDTO: Codable, Sendable {
     let historyId: String?
 }
 
-// MARK: - Gmail Label DTOs
-
-/// Gmail label response from the API.
-struct GmailLabelDTO: Codable, Sendable {
-    /// Label ID
-    let id: String
-    /// Label name
-    let name: String
-    /// Label type
-    let type: String?
-    /// Message list visibility
-    let messageListVisibility: String?
-    /// Label list visibility
-    let labelListVisibility: String?
-    /// Label color settings
-    let color: GmailLabelColorDTO?
-    /// Total messages with this label
-    let messagesTotal: Int?
-    /// Unread messages with this label
-    let messagesUnread: Int?
-}
-
-/// Label color settings.
-struct GmailLabelColorDTO: Codable, Sendable {
-    /// Text color in hex format
-    let textColor: String?
-    /// Background color in hex format
-    let backgroundColor: String?
-}
-
-/// Response from labels.list API.
-struct GmailLabelListDTO: Codable, Sendable {
-    /// List of labels
-    let labels: [GmailLabelDTO]?
-}
-
 // MARK: - Gmail History DTOs
 
 /// Response from history.list API for incremental sync.

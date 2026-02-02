@@ -19,7 +19,6 @@ final class AccountRepositoryTests: XCTestCase {
             Email.self,
             EmailThread.self,
             Attachment.self,
-            Label.self,
             SyncState.self
         ])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)

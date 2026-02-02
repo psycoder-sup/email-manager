@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 /// Represents a Gmail account linked to the app.
-/// Manages email and label relationships with cascade delete.
+/// Manages email and thread relationships with cascade delete.
 @Model
 final class Account: Identifiable {
 
@@ -38,10 +38,6 @@ final class Account: Identifiable {
     /// All emails belonging to this account (cascade delete)
     @Relationship(deleteRule: .cascade, inverse: \Email.account)
     var emails: [Email] = []
-
-    /// All labels belonging to this account (cascade delete)
-    @Relationship(deleteRule: .cascade, inverse: \Label.account)
-    var labels: [Label] = []
 
     /// All email threads belonging to this account (cascade delete)
     @Relationship(deleteRule: .cascade, inverse: \EmailThread.account)

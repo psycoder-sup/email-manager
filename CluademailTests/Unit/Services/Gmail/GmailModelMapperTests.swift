@@ -9,7 +9,7 @@ final class GmailModelMapperTests: XCTestCase {
     var account: Account!
 
     override func setUp() async throws {
-        let schema = Schema([Account.self, Email.self, Attachment.self, Label.self])
+        let schema = Schema([Account.self, Email.self, Attachment.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
         container = try ModelContainer(for: schema, configurations: [config])
         context = ModelContext(container)

@@ -358,12 +358,6 @@ final class SearchService {
             filtered = filtered.filter { !$0.isRead }
         }
 
-        if !searchFilters.labelIds.isEmpty {
-            filtered = filtered.filter { email in
-                searchFilters.labelIds.allSatisfy { email.labelIds.contains($0) }
-            }
-        }
-
         return filtered
     }
 

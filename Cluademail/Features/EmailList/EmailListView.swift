@@ -1,9 +1,6 @@
 import SwiftUI
 import os.log
 
-/// Type alias to avoid conflict with Core/Models/Label.swift
-private typealias ActionLabel = SwiftUI.Label<Text, Image>
-
 /// Main email list view displaying emails or threads with selection and actions.
 struct EmailListView: View {
     @Environment(AppState.self) private var appState
@@ -203,13 +200,13 @@ struct EmailListView: View {
                 Button(role: .destructive) {
                     Task { await viewModel.moveToTrash(emailIds: [email.gmailId]) }
                 } label: {
-                    ActionLabel("Delete", systemImage: "trash")
+                    Label("Delete", systemImage: "trash")
                 }
 
                 Button {
                     Task { await viewModel.archive(emailIds: [email.gmailId]) }
                 } label: {
-                    ActionLabel("Archive", systemImage: "archivebox")
+                    Label("Archive", systemImage: "archivebox")
                 }
                 .tint(.blue)
             }
@@ -217,7 +214,7 @@ struct EmailListView: View {
                 Button {
                     Task { await viewModel.toggleReadStatus(emailIds: [email.gmailId]) }
                 } label: {
-                    ActionLabel(
+                    Label(
                         email.isRead ? "Mark Unread" : "Mark Read",
                         systemImage: email.isRead ? "envelope.badge" : "envelope.open"
                     )
@@ -324,13 +321,13 @@ struct EmailListView: View {
         Button {
             Task { await viewModel.toggleStar(emailIds: [email.gmailId]) }
         } label: {
-            ActionLabel(email.isStarred ? "Unstar" : "Star", systemImage: email.isStarred ? "star.fill" : "star")
+            Label(email.isStarred ? "Unstar" : "Star", systemImage: email.isStarred ? "star.fill" : "star")
         }
 
         Button {
             Task { await viewModel.toggleReadStatus(emailIds: [email.gmailId]) }
         } label: {
-            ActionLabel(
+            Label(
                 email.isRead ? "Mark as Unread" : "Mark as Read",
                 systemImage: email.isRead ? "envelope.badge" : "envelope.open"
             )
@@ -341,13 +338,13 @@ struct EmailListView: View {
         Button {
             Logger.ui.info("Reply tapped")
         } label: {
-            ActionLabel("Reply", systemImage: "arrowshape.turn.up.left")
+            Label("Reply", systemImage: "arrowshape.turn.up.left")
         }
 
         Button {
             Logger.ui.info("Forward tapped")
         } label: {
-            ActionLabel("Forward", systemImage: "arrowshape.turn.up.right")
+            Label("Forward", systemImage: "arrowshape.turn.up.right")
         }
 
         Divider()
@@ -355,13 +352,13 @@ struct EmailListView: View {
         Button {
             Task { await viewModel.archive(emailIds: [email.gmailId]) }
         } label: {
-            ActionLabel("Archive", systemImage: "archivebox")
+            Label("Archive", systemImage: "archivebox")
         }
 
         Button(role: .destructive) {
             Task { await viewModel.moveToTrash(emailIds: [email.gmailId]) }
         } label: {
-            ActionLabel("Move to Trash", systemImage: "trash")
+            Label("Move to Trash", systemImage: "trash")
         }
     }
 
@@ -370,7 +367,7 @@ struct EmailListView: View {
         Button {
             Logger.ui.info("Thread star toggle - not implemented")
         } label: {
-            ActionLabel(thread.isStarred ? "Unstar" : "Star", systemImage: thread.isStarred ? "star.fill" : "star")
+            Label(thread.isStarred ? "Unstar" : "Star", systemImage: thread.isStarred ? "star.fill" : "star")
         }
         .disabled(true)
 
@@ -379,14 +376,14 @@ struct EmailListView: View {
         Button {
             Logger.ui.info("Archive thread - not implemented")
         } label: {
-            ActionLabel("Archive", systemImage: "archivebox")
+            Label("Archive", systemImage: "archivebox")
         }
         .disabled(true)
 
         Button(role: .destructive) {
             Logger.ui.info("Delete thread - not implemented")
         } label: {
-            ActionLabel("Move to Trash", systemImage: "trash")
+            Label("Move to Trash", systemImage: "trash")
         }
         .disabled(true)
     }
@@ -436,7 +433,7 @@ struct EmailListView: View {
                     Button {
                         showFilterPicker.toggle()
                     } label: {
-                        ActionLabel("Filters", systemImage: viewModel.searchFilters.isActive ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                        Label("Filters", systemImage: viewModel.searchFilters.isActive ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
                     }
                     .help("Add search filters")
 
@@ -445,7 +442,7 @@ struct EmailListView: View {
                         searchText = ""
                         viewModel.clearSearch()
                     } label: {
-                        ActionLabel("Clear", systemImage: "xmark.circle")
+                        Label("Clear", systemImage: "xmark.circle")
                     }
                     .help("Clear search")
                 }
@@ -483,7 +480,7 @@ struct EmailListView: View {
                 }
             }
         } label: {
-            ActionLabel("Sort", systemImage: "arrow.up.arrow.down")
+            Label("Sort", systemImage: "arrow.up.arrow.down")
         }
     }
 

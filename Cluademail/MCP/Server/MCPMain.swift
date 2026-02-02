@@ -52,7 +52,6 @@ struct MCPMain {
                 ReadEmailTool(databaseService: databaseService),
                 SearchEmailsTool(databaseService: databaseService),
                 CreateDraftTool(databaseService: databaseService, gmailAPI: gmailAPI, tokenStorage: tokenStorage),
-                ManageLabelsTool(databaseService: databaseService, gmailAPI: gmailAPI, tokenStorage: tokenStorage),
                 GetAttachmentTool(databaseService: databaseService, gmailAPI: gmailAPI, tokenStorage: tokenStorage)
             ]
 

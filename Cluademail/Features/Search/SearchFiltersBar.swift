@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// Type alias to avoid conflict with Core/Models/Label.swift
-private typealias ActionLabel = SwiftUI.Label<Text, Image>
 
 /// Displays active search filters as removable chips.
 struct SearchFiltersBar: View {
@@ -18,7 +16,7 @@ struct SearchFiltersBar: View {
                 Button {
                     onAddFilter()
                 } label: {
-                    ActionLabel("Add filter...", systemImage: "plus.circle")
+                    Label("Add filter...", systemImage: "plus.circle")
                         .font(.caption)
                 }
                 .buttonStyle(.plain)
@@ -71,13 +69,6 @@ struct SearchFiltersBar: View {
             chips.append(ChipData(
                 label: "Unread only",
                 onRemove: { filters.isUnread = false }
-            ))
-        }
-
-        for labelId in filters.labelIds {
-            chips.append(ChipData(
-                label: "Label: \(labelId)",
-                onRemove: { filters.labelIds.removeAll { $0 == labelId } }
             ))
         }
 

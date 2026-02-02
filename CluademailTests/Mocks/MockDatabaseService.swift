@@ -26,7 +26,6 @@ final class MockDatabaseService {
             Email.self,
             EmailThread.self,
             Attachment.self,
-            Label.self,
             SyncState.self
         ])
 
@@ -58,7 +57,6 @@ final class MockDatabaseService {
         try mainContext.delete(model: Email.self)
         try mainContext.delete(model: EmailThread.self)
         try mainContext.delete(model: Attachment.self)
-        try mainContext.delete(model: Label.self)
         try mainContext.delete(model: SyncState.self)
         try mainContext.delete(model: Account.self)
         try mainContext.save()

@@ -23,9 +23,6 @@ struct SearchFilters: Codable, Equatable, Hashable {
     /// Filter unread emails only
     var isUnread: Bool = false
 
-    /// Filter by label IDs
-    var labelIds: [String] = []
-
     /// Filter by account IDs (nil = all accounts)
     var accountIds: [UUID]?
 
@@ -39,7 +36,6 @@ struct SearchFilters: Codable, Equatable, Hashable {
         beforeDate != nil ||
         hasAttachment ||
         isUnread ||
-        !labelIds.isEmpty ||
         accountIds != nil
     }
 
@@ -92,10 +88,6 @@ struct SearchFilters: Codable, Equatable, Hashable {
             parts.append("is:unread")
         }
 
-        for labelId in labelIds {
-            parts.append("label:\(labelId)")
-        }
-
         return parts.joined(separator: " ")
     }
 
@@ -109,7 +101,6 @@ struct SearchFilters: Codable, Equatable, Hashable {
         beforeDate = nil
         hasAttachment = false
         isUnread = false
-        labelIds = []
         accountIds = nil
     }
 }

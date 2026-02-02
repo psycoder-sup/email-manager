@@ -68,6 +68,9 @@ Categories: `app`, `auth`, `sync`, `api`, `database`, `mcp`, `ui`
 - OAuth credentials and environment settings in xcconfig files (`Development.xcconfig`, `Production.xcconfig`)
 - Never hardcode credentials; load from `AppConfiguration`
 - Info.plist contains OAuth URL scheme `cluademail://`
+- App data stored in `~/Library/Application Support/Cluademail/`:
+  - `Cluademail.store` - SwiftData database
+  - `tokens.json` - OAuth tokens (file-based storage)
 
 ## Task Specifications
 

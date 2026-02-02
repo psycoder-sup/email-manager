@@ -151,7 +151,6 @@ struct FilterPickerPopover: View {
         useBeforeDate = false
         filters.hasAttachment = false
         filters.isUnread = false
-        filters.labelIds = []
     }
 }
 

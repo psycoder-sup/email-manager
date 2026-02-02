@@ -7,7 +7,6 @@ struct SidebarView: View {
     @Environment(DatabaseService.self) private var databaseService
 
     @State private var selection: SidebarItem?
-    @State private var labelService: LabelService?
 
     var body: some View {
         List(selection: $selection) {
@@ -27,14 +26,6 @@ struct SidebarView: View {
                         .tag(SidebarItem.folder(folder))
                 }
             }
-
-            // Labels section (shown when an account is selected)
-            if let account = appState.selectedAccount, let labelService {
-                Section("Labels") {
-                    UserLabelsSection(account: account, labelService: labelService)
-                }
-                .id(account.id)  // Stabilize identity to prevent recreation on SwiftData relationship updates
-            }
         }
         .listStyle(.sidebar)
         .onChange(of: selection) { _, newValue in
@@ -48,9 +39,6 @@ struct SidebarView: View {
         }
         .frame(minWidth: 200)
         .task {
-            if labelService == nil {
-                labelService = LabelService(databaseService: databaseService)
-            }
             await loadAccounts()
         }
     }

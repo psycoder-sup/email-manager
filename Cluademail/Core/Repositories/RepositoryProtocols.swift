@@ -61,15 +61,6 @@ protocol EmailRepositoryProtocol: Sendable {
     func unreadCount(account: Account?, folder: String, context: ModelContext) async throws -> Int
 }
 
-// MARK: - LabelRepositoryProtocol
-
-protocol LabelRepositoryProtocol: Sendable {
-    func fetchAll(account: Account, context: ModelContext) async throws -> [Label]
-    func fetch(byGmailId gmailLabelId: String, account: Account, context: ModelContext) async throws -> Label?
-    func save(_ label: Label, context: ModelContext) async throws
-    func saveAll(_ labels: [Label], context: ModelContext) async throws
-}
-
 // MARK: - SyncStateRepositoryProtocol
 
 protocol SyncStateRepositoryProtocol: Sendable {

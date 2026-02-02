@@ -25,7 +25,6 @@ actor SyncEngine: SyncEngineProtocol {
     private let apiService: any GmailAPIServiceProtocol
     private let databaseService: DatabaseService
     private let emailRepository: EmailRepository
-    private let labelRepository: LabelRepository
     private let syncStateRepository: SyncStateRepository
 
     // MARK: - State
@@ -43,7 +42,6 @@ actor SyncEngine: SyncEngineProtocol {
         self.apiService = apiService
         self.databaseService = databaseService
         self.emailRepository = EmailRepository()
-        self.labelRepository = LabelRepository()
         self.syncStateRepository = SyncStateRepository()
     }
 
@@ -79,9 +77,6 @@ actor SyncEngine: SyncEngineProtocol {
         await postSyncContextDidSave()
 
         do {
-            // Sync labels first
-            try await syncLabels(account: contextAccount, context: context)
-
             // Determine sync strategy
             let result: SyncResult
             if let historyId = syncState.historyId {
@@ -329,40 +324,6 @@ actor SyncEngine: SyncEngineProtocol {
         Logger.sync.debug("Incremental sync complete: \(newCount) new, \(updatedCount) updated, \(deletedCount) deleted")
 
         return .success(newEmails: newCount, updatedEmails: updatedCount, deletedEmails: deletedCount)
-    }
-
-    // MARK: - Label Sync
-
-    private func syncLabels(account: Account, context: ModelContext) async throws {
-        Logger.sync.debug("Syncing labels")
-
-        let labelDTOs = try await apiService.listLabels(accountEmail: account.email)
-
-        for dto in labelDTOs {
-            let label = GmailModelMapper.mapToLabel(dto, account: account)
-
-            // Check if label exists
-            if let existing = try await labelRepository.fetch(
-                byGmailId: dto.id,
-                account: account,
-                context: context
-            ) {
-                // Update existing label
-                existing.name = label.name
-                existing.type = label.type
-                existing.messageListVisibility = label.messageListVisibility
-                existing.labelListVisibility = label.labelListVisibility
-                existing.textColor = label.textColor
-                existing.backgroundColor = label.backgroundColor
-            } else {
-                // Insert new label
-                try await labelRepository.save(label, context: context)
-            }
-        }
-
-        try context.save()
-        await postSyncContextDidSave()
-        Logger.sync.debug("Synced \(labelDTOs.count) labels")
     }
 
     // MARK: - Thread Derivation
