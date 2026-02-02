@@ -8,11 +8,14 @@ enum GmailModelMapper {
     // MARK: - Email Mapping
 
     /// Maps a Gmail message DTO to an Email model.
+    ///
+    /// - Important: Does NOT set the account relationship to avoid auto-insertion into SwiftData context.
+    ///              The caller must set the account after determining whether to insert or update.
+    ///
     /// - Parameters:
     ///   - dto: The Gmail message DTO
-    ///   - account: The associated account
-    /// - Returns: An Email model
-    static func mapToEmail(_ dto: GmailMessageDTO, account: Account) throws -> Email {
+    /// - Returns: An Email model (account is nil)
+    static func mapToEmail(_ dto: GmailMessageDTO) throws -> Email {
         let headers = extractHeaders(dto.payload?.headers)
 
         // Extract body content from payload
@@ -34,7 +37,7 @@ enum GmailModelMapper {
 
         let email = Email(
             gmailId: dto.id,
-            threadId: dto.threadId,
+            threadId: dto.threadId ?? dto.id,  // Use message ID as fallback for drafts without thread
             subject: headers.subject,
             snippet: dto.snippet ?? "",
             fromAddress: headers.fromAddress,
@@ -52,12 +55,32 @@ enum GmailModelMapper {
         email.bodyText = plainText
         email.bodyHtml = htmlBody
 
-        // Associate with account
-        email.account = account
+        // Note: account is intentionally NOT set to avoid auto-insertion
 
         // Map attachments
         email.attachments = extractAttachments(dto.payload)
 
+        return email
+    }
+
+    // MARK: - Draft Mapping
+
+    /// Maps a Gmail draft DTO to an Email model.
+    /// Sets the draftId field in addition to all message fields.
+    ///
+    /// - Important: Does NOT set the account relationship to avoid auto-insertion into context.
+    ///              The caller must set the account after determining whether to insert or update.
+    ///
+    /// - Parameters:
+    ///   - dto: The Gmail draft DTO
+    /// - Returns: An Email model with draftId set (account is nil)
+    static func mapDraftToEmail(_ dto: GmailDraftDTO) throws -> Email {
+        let email = try mapToEmail(dto.message)
+        email.draftId = dto.id
+        // Ensure DRAFT label is present (Gmail API may not include it in create response)
+        if !email.labelIds.contains("DRAFT") {
+            email.labelIds.append("DRAFT")
+        }
         return email
     }
 

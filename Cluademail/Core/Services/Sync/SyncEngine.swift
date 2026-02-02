@@ -180,6 +180,9 @@ actor SyncEngine: SyncEngineProtocol {
         // Derive threads from synced emails
         try await deriveThreads(from: allEmails, context: context)
 
+        // Sync drafts
+        try await syncDrafts(account: account, context: context)
+
         // Update history ID from profile
         let profile = try await apiService.getProfile(accountEmail: account.email)
         if let historyId = profile.historyId {
@@ -285,7 +288,8 @@ actor SyncEngine: SyncEngineProtocol {
                     accountEmail: account.email,
                     messageId: delta.messageId
                 )
-                let email = try GmailModelMapper.mapToEmail(msgDTO, account: account)
+                let email = try GmailModelMapper.mapToEmail(msgDTO)
+                email.account = account  // Set account before saving
                 try await emailRepository.save(email, context: context)
                 affectedEmails.append(email)
                 newCount += 1
@@ -317,6 +321,9 @@ actor SyncEngine: SyncEngineProtocol {
         if !affectedEmails.isEmpty {
             try await deriveThreads(from: affectedEmails, context: context)
         }
+
+        // Sync drafts
+        try await syncDrafts(account: account, context: context)
 
         // Update history ID
         try await syncStateRepository.updateHistoryId(latestHistoryId, for: account.id, context: context)
@@ -394,6 +401,112 @@ actor SyncEngine: SyncEngineProtocol {
         Logger.sync.debug("Derived \(affectedThreadIds.count) threads")
     }
 
+    // MARK: - Draft Sync
+
+    /// Syncs drafts from Gmail to local database.
+    /// Uses draftId as the stable identifier (message.id changes when drafts are edited).
+    private func syncDrafts(account: Account, context: ModelContext) async throws {
+        Logger.sync.info("Starting draft sync for account: \(account.email, privacy: .private(mask: .hash))")
+
+        do {
+
+        var allDraftIds: Set<String> = []
+        var pageToken: String?
+        var newCount = 0
+        var updatedCount = 0
+
+        // Fetch all drafts from Gmail with pagination
+        repeat {
+            guard !isCancelled else { break }
+
+            let (draftSummaries, nextToken) = try await apiService.listDrafts(
+                accountEmail: account.email,
+                maxResults: 100,
+                pageToken: pageToken
+            )
+
+            Logger.sync.info("Found \(draftSummaries.count) drafts from Gmail API")
+
+            for summary in draftSummaries {
+                allDraftIds.insert(summary.id)
+
+                do {
+                    // Fetch full draft
+                    let fullDraft = try await apiService.getDraft(
+                        accountEmail: account.email,
+                        draftId: summary.id
+                    )
+
+                    // Map to Email with draftId set (does NOT set account to avoid auto-insertion)
+                    let email = try GmailModelMapper.mapDraftToEmail(fullDraft)
+
+                    // Upsert: lookup by draftId first (stable identifier)
+                    if let existing = try await emailRepository.fetch(byDraftId: summary.id, context: context) {
+                        // Update existing draft - gmailId may have changed if edited in Gmail
+                        existing.gmailId = email.gmailId
+                        existing.threadId = email.threadId
+                        existing.subject = email.subject
+                        existing.snippet = email.snippet
+                        existing.bodyText = email.bodyText
+                        existing.bodyHtml = email.bodyHtml
+                        existing.fromAddress = email.fromAddress
+                        existing.fromName = email.fromName
+                        existing.toAddresses = email.toAddresses
+                        existing.ccAddresses = email.ccAddresses
+                        existing.bccAddresses = email.bccAddresses
+                        existing.date = email.date
+                        existing.labelIds = email.labelIds
+                        existing.isRead = email.isRead
+                        existing.isStarred = email.isStarred
+                        existing.account = account
+                        updatedCount += 1
+                    } else if let existing = try await emailRepository.fetch(byGmailId: email.gmailId, context: context) {
+                        // Found by gmailId but no draftId - update with draftId
+                        existing.draftId = email.draftId
+                        existing.subject = email.subject
+                        existing.snippet = email.snippet
+                        existing.bodyText = email.bodyText
+                        existing.bodyHtml = email.bodyHtml
+                        existing.labelIds = email.labelIds
+                        existing.account = account
+                        updatedCount += 1
+                    } else {
+                        // New draft - set account before saving
+                        email.account = account
+                        Logger.sync.info("Saving new draft: id=\(summary.id), subject=\(email.subject), labelIds=\(email.labelIds)")
+                        try await emailRepository.save(email, context: context)
+                        newCount += 1
+                    }
+                } catch {
+                    // Log error but continue with other drafts
+                    Logger.sync.error("Failed to sync draft \(summary.id): \(error.localizedDescription)")
+                }
+            }
+
+            pageToken = nextToken
+        } while pageToken != nil
+
+        // Cleanup: remove local drafts that no longer exist in Gmail
+        // This handles sent or deleted drafts
+        let localDrafts = try await emailRepository.fetchDrafts(account: account, context: context)
+        var deletedCount = 0
+        for localDraft in localDrafts {
+            guard let draftId = localDraft.draftId else { continue }
+            if !allDraftIds.contains(draftId) {
+                try await emailRepository.delete(localDraft, context: context)
+                deletedCount += 1
+            }
+        }
+
+        try context.save()
+        await postSyncContextDidSave()
+        Logger.sync.info("Synced drafts: \(newCount) new, \(updatedCount) updated, \(deletedCount) deleted")
+        } catch {
+            Logger.sync.error("Draft sync failed: \(error.localizedDescription)")
+            throw error
+        }
+    }
+
     // MARK: - Email Limit Enforcement
 
     private func enforceEmailLimit(account: Account, context: ModelContext) async throws {
@@ -449,20 +562,21 @@ actor SyncEngine: SyncEngineProtocol {
 
         for dto in batchResult.succeeded {
             do {
-                let email = try GmailModelMapper.mapToEmail(dto, account: account)
-
-                // Check if email exists
+                // Check if email exists FIRST (before mapping, to avoid auto-insertion)
                 if let existing = try await emailRepository.fetch(byGmailId: dto.id, context: context) {
-                    // Update existing email
-                    existing.labelIds = email.labelIds
-                    existing.isRead = email.isRead
-                    existing.isStarred = email.isStarred
-                    existing.snippet = email.snippet
+                    // Update existing email from DTO
+                    let labelIds = dto.labelIds ?? []
+                    existing.labelIds = labelIds
+                    existing.isRead = !labelIds.contains("UNREAD")
+                    existing.isStarred = labelIds.contains("STARRED")
+                    existing.snippet = dto.snippet ?? ""
                     existing.account = account  // Preserve account relationship
                     updatedCount += 1
                     emails.append(existing)
                 } else {
-                    // Save new email
+                    // Create new email (mapToEmail doesn't set account to avoid auto-insertion)
+                    let email = try GmailModelMapper.mapToEmail(dto)
+                    email.account = account  // Set account before saving
                     try await emailRepository.save(email, context: context)
                     newCount += 1
                     emails.append(email)

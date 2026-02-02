@@ -17,6 +17,10 @@ final class Email: Identifiable {
     /// Gmail thread ID for conversation grouping
     var threadId: String
 
+    /// Gmail draft ID (only set for drafts, nil for regular messages)
+    /// When a draft is edited in Gmail, message.id changes but draft.id remains stable
+    var draftId: String?
+
     // MARK: - Content
 
     /// Email subject line
@@ -106,6 +110,7 @@ final class Email: Identifiable {
     /// - Parameters:
     ///   - gmailId: Gmail message ID
     ///   - threadId: Gmail thread ID
+    ///   - draftId: Gmail draft ID (only for drafts)
     ///   - subject: Email subject
     ///   - snippet: Content preview
     ///   - fromAddress: Sender's email address
@@ -120,6 +125,7 @@ final class Email: Identifiable {
     init(
         gmailId: String,
         threadId: String,
+        draftId: String? = nil,
         subject: String,
         snippet: String,
         fromAddress: String,
@@ -134,6 +140,7 @@ final class Email: Identifiable {
     ) {
         self.gmailId = gmailId
         self.threadId = threadId
+        self.draftId = draftId
         self.subject = subject
         self.snippet = snippet
         self.bodyText = nil

@@ -56,11 +56,14 @@ enum GmailEndpoints: Sendable {
 
     // MARK: - Drafts
 
+    /// List drafts: GET /users/{userId}/drafts
+    case listDrafts
+
     /// Create a draft: POST /users/{userId}/drafts
     case createDraft
 
     /// Get a draft: GET /users/{userId}/drafts/{id}
-    case getDraft(id: String)
+    case getDraft(id: String, format: GmailMessageFormat)
 
     /// Update a draft: PUT /users/{userId}/drafts/{id}
     case updateDraft(id: String)
@@ -106,9 +109,11 @@ enum GmailEndpoints: Sendable {
             return "/labels"
         case .getLabel(let id):
             return "/labels/\(id)"
+        case .listDrafts:
+            return "/drafts"
         case .createDraft:
             return "/drafts"
-        case .getDraft(let id):
+        case .getDraft(let id, _):
             return "/drafts/\(id)"
         case .updateDraft(let id):
             return "/drafts/\(id)"
@@ -127,7 +132,7 @@ enum GmailEndpoints: Sendable {
     var method: String {
         switch self {
         case .listMessages, .getMessage, .listThreads, .getThread,
-             .listLabels, .getLabel, .getDraft, .getAttachment,
+             .listLabels, .getLabel, .listDrafts, .getDraft, .getAttachment,
              .getProfile, .getHistory:
             return "GET"
         case .modifyMessage, .trashMessage, .untrashMessage,
@@ -143,7 +148,7 @@ enum GmailEndpoints: Sendable {
     /// Returns query items for this endpoint.
     var queryItems: [URLQueryItem] {
         switch self {
-        case .getMessage(_, let format), .getThread(_, let format):
+        case .getMessage(_, let format), .getThread(_, let format), .getDraft(_, let format):
             return [URLQueryItem(name: "format", value: format.rawValue)]
         default:
             return []
@@ -229,6 +234,24 @@ extension GmailEndpoints {
         if let labelId {
             items.append(URLQueryItem(name: "labelId", value: labelId))
         }
+
+        if let maxResults {
+            items.append(URLQueryItem(name: "maxResults", value: String(maxResults)))
+        }
+
+        if let pageToken {
+            items.append(URLQueryItem(name: "pageToken", value: pageToken))
+        }
+
+        return items
+    }
+
+    /// Builds query items for listing drafts.
+    static func listDraftsQuery(
+        maxResults: Int? = nil,
+        pageToken: String? = nil
+    ) -> [URLQueryItem] {
+        var items: [URLQueryItem] = []
 
         if let maxResults {
             items.append(URLQueryItem(name: "maxResults", value: String(maxResults)))

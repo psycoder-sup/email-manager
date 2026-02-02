@@ -278,7 +278,7 @@ final class GmailAPIService: GmailAPIServiceProtocol, @unchecked Sendable {
     }
 
     func getDraft(accountEmail: String, draftId: String) async throws -> GmailDraftDTO {
-        guard let url = GmailEndpoints.getDraft(id: draftId).url() else {
+        guard let url = GmailEndpoints.getDraft(id: draftId, format: .full).url() else {
             throw APIError.invalidResponse
         }
 
@@ -287,6 +287,29 @@ final class GmailAPIService: GmailAPIServiceProtocol, @unchecked Sendable {
             method: "GET",
             accountEmail: accountEmail
         )
+    }
+
+    func listDrafts(
+        accountEmail: String,
+        maxResults: Int?,
+        pageToken: String?
+    ) async throws -> (drafts: [GmailDraftSummaryDTO], nextPageToken: String?) {
+        let queryItems = GmailEndpoints.listDraftsQuery(
+            maxResults: maxResults,
+            pageToken: pageToken
+        )
+
+        guard let url = GmailEndpoints.listDrafts.url(additionalQueryItems: queryItems) else {
+            throw APIError.invalidResponse
+        }
+
+        let response: GmailDraftListDTO = try await executeRequest(
+            url: url,
+            method: "GET",
+            accountEmail: accountEmail
+        )
+
+        return (drafts: response.drafts ?? [], nextPageToken: response.nextPageToken)
     }
 
     // MARK: - Sending

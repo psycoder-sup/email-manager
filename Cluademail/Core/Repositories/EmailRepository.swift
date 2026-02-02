@@ -8,6 +8,20 @@ final class EmailRepository: BaseRepository<Email>, EmailRepositoryProtocol, @un
         try fetchOne(predicate: #Predicate { $0.gmailId == gmailId }, context: context)
     }
 
+    func fetch(byDraftId draftId: String, context: ModelContext) async throws -> Email? {
+        try fetchOne(predicate: #Predicate { $0.draftId == draftId }, context: context)
+    }
+
+    /// Fetches all drafts for an account.
+    func fetchDrafts(account: Account, context: ModelContext) async throws -> [Email] {
+        let accountId = account.id
+        return try fetch(
+            predicate: #Predicate<Email> { $0.account?.id == accountId && $0.draftId != nil },
+            sortBy: [SortDescriptor(\.date, order: .reverse)],
+            context: context
+        )
+    }
+
     /// Fetches emails with folder filtering.
     /// - Important: This method performs in-memory filtering and must be called from the MainActor.
     @MainActor

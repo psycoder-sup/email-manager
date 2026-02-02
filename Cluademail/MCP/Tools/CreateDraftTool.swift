@@ -76,10 +76,64 @@ final class CreateDraftTool: MCPToolProtocol, @unchecked Sendable {
             attachments: []
         )
 
+        // Save draft to local database for immediate visibility
+        try await saveDraftLocally(draft: draft, accountEmail: accountEmail)
+
         return formatDraftResult(draft: draft, to: toAddresses, cc: ccAddresses, subject: subject)
     }
 
     // MARK: - Private
+
+    /// Saves the created draft to local database for immediate visibility.
+    private func saveDraftLocally(draft: GmailDraftDTO, accountEmail: String) async throws {
+        do {
+            try await databaseService.performWrite { context in
+                // Find the account in this context
+                let predicate = #Predicate<Account> { $0.email == accountEmail }
+                var descriptor = FetchDescriptor<Account>(predicate: predicate)
+                descriptor.fetchLimit = 1
+                guard let account = try context.fetch(descriptor).first else {
+                    Logger.mcp.warning("Account not found when saving draft locally")
+                    return
+                }
+
+                // Map draft to Email with draftId set (does NOT set account to avoid auto-insertion)
+                let email = try GmailModelMapper.mapDraftToEmail(draft)
+
+                // Check if draft already exists (by draftId or gmailId)
+                let draftId = draft.id
+                let gmailId = draft.message.id
+                let existingPredicate = #Predicate<Email> {
+                    $0.draftId == draftId || $0.gmailId == gmailId
+                }
+                var existingDescriptor = FetchDescriptor<Email>(predicate: existingPredicate)
+                existingDescriptor.fetchLimit = 1
+
+                if let existing = try context.fetch(existingDescriptor).first {
+                    // Update existing
+                    existing.gmailId = email.gmailId
+                    existing.draftId = email.draftId
+                    existing.subject = email.subject
+                    existing.snippet = email.snippet
+                    existing.bodyText = email.bodyText
+                    existing.bodyHtml = email.bodyHtml
+                    existing.toAddresses = email.toAddresses
+                    existing.ccAddresses = email.ccAddresses
+                    existing.labelIds = email.labelIds
+                    existing.date = email.date
+                    existing.account = account
+                } else {
+                    // Insert new - set account before inserting
+                    email.account = account
+                    context.insert(email)
+                }
+            }
+            Logger.mcp.debug("Draft saved to local database: \(draft.id)")
+        } catch {
+            // Log but don't fail - draft was created successfully in Gmail
+            Logger.mcp.warning("Failed to save draft locally: \(error.localizedDescription)")
+        }
+    }
 
     private func formatDraftResult(draft: GmailDraftDTO, to: [String], cc: [String], subject: String) -> String {
         var output = "Draft created successfully!\n\n"

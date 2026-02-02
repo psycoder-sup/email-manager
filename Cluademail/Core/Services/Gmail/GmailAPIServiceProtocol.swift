@@ -83,6 +83,18 @@ protocol GmailAPIServiceProtocol: Sendable {
 
     // MARK: - Drafts
 
+    /// Lists drafts for the account.
+    /// - Parameters:
+    ///   - accountEmail: Account email for authentication
+    ///   - maxResults: Maximum drafts per page
+    ///   - pageToken: Token for pagination
+    /// - Returns: List of draft summaries and optional next page token
+    func listDrafts(
+        accountEmail: String,
+        maxResults: Int?,
+        pageToken: String?
+    ) async throws -> (drafts: [GmailDraftSummaryDTO], nextPageToken: String?)
+
     /// Creates a new draft.
     /// - Parameters:
     ///   - accountEmail: Account email for authentication
