@@ -48,12 +48,43 @@ final class CIDResolver {
             }
         }
 
-        // Resolve each CID
+        // Resolve each CID in parallel
+        // First, check cache and identify which CIDs need fetching
         var resolved: [String: String] = [:]
+        var cidsToFetch: Set<String> = []
+
         for cid in cids {
-            if let dataURI = await resolveCID(cid, email: email, account: account) {
-                resolved[cid] = dataURI
+            if let cachedData = cache[cid] {
+                resolved[cid] = dataURI(from: cachedData, mimeType: guessMimeType(for: cid))
+            } else {
+                cidsToFetch.insert(cid)
             }
+        }
+
+        // Fetch uncached CIDs in parallel, then batch-update cache
+        // This pattern ensures cache writes happen after TaskGroup completes
+        var fetchedData: [(String, Data, String)] = []
+
+        await withTaskGroup(of: (String, Data?, String?).self) { group in
+            for cid in cidsToFetch {
+                group.addTask {
+                    guard let (data, mimeType) = await self.fetchCIDData(cid, email: email, account: account) else {
+                        return (cid, nil, nil)
+                    }
+                    return (cid, data, mimeType)
+                }
+            }
+            for await (cid, data, mimeType) in group {
+                if let data, let mimeType {
+                    fetchedData.append((cid, data, mimeType))
+                }
+            }
+        }
+
+        // Batch-update cache and build data URIs (runs on MainActor after TaskGroup)
+        for (cid, data, mimeType) in fetchedData {
+            cache[cid] = data
+            resolved[cid] = dataURI(from: data, mimeType: mimeType)
         }
 
         // Replace CID references with data URIs
@@ -66,6 +97,7 @@ final class CIDResolver {
     }
 
     /// Resolves a single CID reference to a data URI.
+    /// Checks cache first, then fetches if needed.
     /// - Parameters:
     ///   - cid: The Content-ID to resolve
     ///   - email: The email containing the attachment
@@ -77,6 +109,23 @@ final class CIDResolver {
             return dataURI(from: cachedData, mimeType: guessMimeType(for: cid))
         }
 
+        // Fetch and cache
+        guard let (data, mimeType) = await fetchCIDData(cid, email: email, account: account) else {
+            return nil
+        }
+
+        cache[cid] = data
+        return dataURI(from: data, mimeType: mimeType)
+    }
+
+    /// Fetches CID data from the API without caching.
+    /// This method is safe to call from TaskGroup child tasks.
+    /// - Parameters:
+    ///   - cid: The Content-ID to resolve
+    ///   - email: The email containing the attachment
+    ///   - account: The account for API access
+    /// - Returns: Tuple of (data, mimeType) or nil if fetch fails
+    private func fetchCIDData(_ cid: String, email: Email, account: Account) async -> (Data, String)? {
         // Find the attachment with matching Content-ID
         let normalizedCID = cid.trimmingCharacters(in: CharacterSet(charactersIn: "<>"))
         guard let attachment = email.attachments.first(where: {
@@ -93,11 +142,7 @@ final class CIDResolver {
                 messageId: email.gmailId,
                 attachmentId: attachment.gmailAttachmentId
             )
-
-            // Cache the result
-            cache[cid] = data
-
-            return dataURI(from: data, mimeType: attachment.mimeType)
+            return (data, attachment.mimeType)
         } catch {
             Logger.ui.error("Failed to resolve CID \(cid, privacy: .private): \(error.localizedDescription)")
             return nil
