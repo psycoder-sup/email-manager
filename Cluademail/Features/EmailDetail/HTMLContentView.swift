@@ -2,6 +2,19 @@ import SwiftUI
 import WebKit
 import os.log
 
+// MARK: - Scroll-Forwarding WebView
+
+/// A WKWebView subclass that forwards scroll wheel events to its parent scroll view.
+/// This allows the WebView to be embedded in a SwiftUI ScrollView without capturing scroll events.
+final class ScrollForwardingWebView: WKWebView {
+    override func scrollWheel(with event: NSEvent) {
+        // Forward scroll events to the next responder (parent scroll view)
+        nextResponder?.scrollWheel(with: event)
+    }
+}
+
+// MARK: - HTMLContentView
+
 /// A WKWebView wrapper for displaying HTML email content securely.
 struct HTMLContentView: NSViewRepresentable {
     /// The HTML content to display
@@ -16,16 +29,20 @@ struct HTMLContentView: NSViewRepresentable {
     /// Called when a link is clicked
     var onLinkClick: ((URL) -> Void)?
 
-    func makeNSView(context: Context) -> WKWebView {
+    /// Binding to report the content height for dynamic sizing
+    @Binding var contentHeight: CGFloat
+
+    func makeNSView(context: Context) -> ScrollForwardingWebView {
         let configuration = WKWebViewConfiguration()
 
-        // Security: Disable JavaScript
-        configuration.defaultWebpagePreferences.allowsContentJavaScript = false
+        // Enable JavaScript for content height measurement
+        // This is safe since we control the HTML content
+        configuration.defaultWebpagePreferences.allowsContentJavaScript = true
 
         // Disable features we don't need
         configuration.preferences.isElementFullscreenEnabled = false
 
-        let webView = WKWebView(frame: .zero, configuration: configuration)
+        let webView = ScrollForwardingWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
 
         // Disable zoom
@@ -37,7 +54,7 @@ struct HTMLContentView: NSViewRepresentable {
         return webView
     }
 
-    func updateNSView(_ webView: WKWebView, context: Context) {
+    func updateNSView(_ webView: ScrollForwardingWebView, context: Context) {
         context.coordinator.loadExternalImages = loadExternalImages
         context.coordinator.onLinkClick = onLinkClick
 
@@ -52,7 +69,7 @@ struct HTMLContentView: NSViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(loadExternalImages: loadExternalImages, onLinkClick: onLinkClick)
+        Coordinator(loadExternalImages: loadExternalImages, onLinkClick: onLinkClick, contentHeight: $contentHeight)
     }
 
     // MARK: - HTML Building
@@ -89,6 +106,18 @@ struct HTMLContentView: NSViewRepresentable {
         """
         :root {
             color-scheme: light dark;
+        }
+        /* Global width constraints to prevent overflow from inline styles */
+        * {
+            max-width: 100% !important;
+            box-sizing: border-box;
+        }
+        img, table, iframe, video, object, embed {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+        html, body {
+            overflow: hidden !important;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -141,32 +170,34 @@ struct HTMLContentView: NSViewRepresentable {
         }
         table {
             border-collapse: collapse;
+            table-layout: fixed;
+            width: 100%;
             max-width: 100%;
         }
         td, th {
-            border: 1px solid #ddd;
             padding: 8px;
-        }
-        @media (prefers-color-scheme: dark) {
-            td, th {
-                border-color: #444;
-            }
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         /* Hide external images when not allowed */
         .external-image-blocked {
             display: none;
         }
         .image-placeholder {
-            display: inline-block;
-            background: rgba(128, 128, 128, 0.2);
+            display: block;
+            background: rgba(128, 128, 128, 0.1);
+            border: 1px dashed rgba(128, 128, 128, 0.3);
             border-radius: 4px;
-            padding: 8px 12px;
+            padding: 12px;
+            margin: 8px 0;
             color: #666;
             font-size: 12px;
+            text-align: center;
         }
         @media (prefers-color-scheme: dark) {
             .image-placeholder {
                 color: #999;
+                border-color: rgba(128, 128, 128, 0.4);
             }
         }
         """
@@ -214,10 +245,12 @@ struct HTMLContentView: NSViewRepresentable {
         var loadExternalImages: Bool
         var onLinkClick: ((URL) -> Void)?
         var lastContentHash: Int?
+        @Binding var contentHeight: CGFloat
 
-        init(loadExternalImages: Bool, onLinkClick: ((URL) -> Void)?) {
+        init(loadExternalImages: Bool, onLinkClick: ((URL) -> Void)?, contentHeight: Binding<CGFloat>) {
             self.loadExternalImages = loadExternalImages
             self.onLinkClick = onLinkClick
+            self._contentHeight = contentHeight
         }
 
         func webView(
@@ -248,6 +281,21 @@ struct HTMLContentView: NSViewRepresentable {
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             Logger.ui.debug("WebView finished loading")
+            // Use JavaScript to measure document height
+            measureContentHeight(webView)
+        }
+
+        private func measureContentHeight(_ webView: WKWebView) {
+            let script = "document.body.scrollHeight"
+            webView.evaluateJavaScript(script) { [weak self] result, error in
+                if let height = result as? CGFloat, height > 0 {
+                    DispatchQueue.main.async {
+                        self?.contentHeight = height
+                    }
+                } else if let error {
+                    Logger.ui.error("Failed to measure content height: \(error.localizedDescription)")
+                }
+            }
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -257,15 +305,24 @@ struct HTMLContentView: NSViewRepresentable {
 }
 
 #Preview {
-    HTMLContentView(
-        html: """
-        <h1>Welcome!</h1>
-        <p>This is a <strong>test email</strong> with some HTML content.</p>
-        <blockquote>This is a quoted reply</blockquote>
-        <p>Here's a <a href="https://example.com">link</a>.</p>
-        """,
-        plainText: nil,
-        loadExternalImages: false
-    )
-    .frame(width: 600, height: 400)
+    struct PreviewWrapper: View {
+        @State private var contentHeight: CGFloat = 200
+
+        var body: some View {
+            HTMLContentView(
+                html: """
+                <h1>Welcome!</h1>
+                <p>This is a <strong>test email</strong> with some HTML content.</p>
+                <blockquote>This is a quoted reply</blockquote>
+                <p>Here's a <a href="https://example.com">link</a>.</p>
+                """,
+                plainText: nil,
+                loadExternalImages: false,
+                contentHeight: $contentHeight
+            )
+            .frame(width: 600, height: contentHeight)
+        }
+    }
+
+    return PreviewWrapper()
 }

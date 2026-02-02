@@ -13,6 +13,9 @@ struct EmailBodyView: View {
     /// Whether quoted content is expanded
     @State private var isQuotedExpanded: Bool = false
 
+    /// Dynamic content height from the WebView
+    @State private var contentHeight: CGFloat = 200
+
     /// The effective HTML to display (resolved if available, otherwise raw)
     private var effectiveHtml: String? {
         resolvedBodyHtml ?? email.bodyHtml
@@ -38,17 +41,19 @@ struct EmailBodyView: View {
                 HTMLContentView(
                     html: processQuotedContent(sanitized),
                     plainText: nil,
-                    loadExternalImages: loadExternalImages
+                    loadExternalImages: loadExternalImages,
+                    contentHeight: $contentHeight
                 )
-                .frame(minHeight: 200)
+                .frame(height: max(200, contentHeight))
             } else if let plainText = email.bodyText, !plainText.isEmpty {
                 // Plain text fallback
                 HTMLContentView(
                     html: nil,
                     plainText: plainText,
-                    loadExternalImages: false
+                    loadExternalImages: false,
+                    contentHeight: $contentHeight
                 )
-                .frame(minHeight: 200)
+                .frame(height: max(200, contentHeight))
             } else {
                 // No content
                 noContentView
@@ -82,7 +87,7 @@ struct EmailBodyView: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
-        .background(Color.orange.opacity(0.1))
+        .glassEffect(.regular.tint(.orange))
     }
 
     private var noContentView: some View {
@@ -111,8 +116,7 @@ struct EmailBodyView: View {
             .foregroundStyle(.secondary)
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .background(Color(nsColor: .controlBackgroundColor))
-            .clipShape(Capsule())
+            .glassEffect(.regular.interactive(), in: .capsule)
         }
         .buttonStyle(.plain)
         .padding()
