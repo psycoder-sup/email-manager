@@ -11,6 +11,8 @@ struct EmailListView: View {
 
     @State private var viewModel: EmailListViewModel?
     @State private var searchText = ""
+    @State private var showFilterPicker = false
+    @State private var searchTask: Task<Void, Never>?
     @FocusState private var isListFocused: Bool
 
     /// Task ID for reactive reloading when account or folder changes.
@@ -28,7 +30,7 @@ struct EmailListView: View {
         }
         .onAppear {
             if viewModel == nil {
-                viewModel = EmailListViewModel(databaseService: databaseService)
+                viewModel = EmailListViewModel(databaseService: databaseService, appState: appState)
             }
         }
         .task(id: taskId) {
@@ -36,7 +38,34 @@ struct EmailListView: View {
         }
         .searchable(text: $searchText, placement: .toolbar, prompt: "Search emails")
         .onChange(of: searchText) { _, newValue in
-            viewModel?.searchQuery = newValue
+            // Cancel previous debounce task
+            searchTask?.cancel()
+
+            // Debounce search input (300ms)
+            searchTask = Task {
+                do {
+                    try await Task.sleep(for: .milliseconds(300))
+                    guard !Task.isCancelled else { return }
+                    viewModel?.searchQuery = newValue
+                } catch {
+                    // Task was cancelled, ignore
+                }
+            }
+        }
+        .onSubmit(of: .search) {
+            // Save to history when user submits search
+            viewModel?.saveSearchToHistory()
+        }
+        .popover(isPresented: $showFilterPicker) {
+            if let vm = viewModel {
+                FilterPickerPopover(
+                    filters: Binding(
+                        get: { vm.searchFilters },
+                        set: { vm.searchFilters = $0 }
+                    ),
+                    isPresented: $showFilterPicker
+                )
+            }
         }
         .onChange(of: viewModel?.selectedIds) { _, newIds in
             // Update appState.selectedEmail when a single email is selected
@@ -55,10 +84,16 @@ struct EmailListView: View {
         .onChange(of: appState.isSyncing) { oldValue, newValue in
             // Reload data when sync completes (isSyncing changes from true to false)
             if oldValue && !newValue {
+                // Explicitly refresh context before reloading data
+                databaseService.refreshMainContext()
                 Task {
                     await viewModel?.loadData(account: appState.selectedAccount, folder: appState.selectedFolder)
                 }
             }
+        }
+        .onChange(of: appState.unreadCountVersion) { _, _ in
+            // Force re-render by triggering observable change
+            viewModel?.triggerUIRefresh()
         }
         .toolbar {
             toolbarContent
@@ -117,25 +152,38 @@ struct EmailListView: View {
 
     @ViewBuilder
     private func listContent(viewModel: EmailListViewModel) -> some View {
-        List(selection: Binding(
-            get: { viewModel.selectedIds },
-            set: { viewModel.selectedIds = $0 }
-        )) {
-            switch viewModel.displayMode {
-            case .emails:
-                emailsList(viewModel: viewModel)
-            case .threads:
-                threadsList(viewModel: viewModel)
+        VStack(spacing: 0) {
+            // Search filters bar (shown when filters are active)
+            if viewModel.searchFilters.isActive {
+                SearchFiltersBar(
+                    filters: Binding(
+                        get: { viewModel.searchFilters },
+                        set: { viewModel.searchFilters = $0 }
+                    ),
+                    onAddFilter: { showFilterPicker = true }
+                )
             }
-        }
-        .listStyle(.inset(alternatesRowBackgrounds: true))
-        .focused($isListFocused)
-        .onKeyPress { keyPress in
-            handleKeyPress(keyPress, viewModel: viewModel)
-        }
-        .safeAreaInset(edge: .bottom) {
-            if viewModel.isMultiSelectMode {
-                bulkActionToolbar(viewModel: viewModel)
+
+            List(selection: Binding(
+                get: { viewModel.selectedIds },
+                set: { viewModel.selectedIds = $0 }
+            )) {
+                switch viewModel.displayMode {
+                case .emails:
+                    emailsList(viewModel: viewModel)
+                case .threads:
+                    threadsList(viewModel: viewModel)
+                }
+            }
+            .listStyle(.inset(alternatesRowBackgrounds: true))
+            .focused($isListFocused)
+            .onKeyPress { keyPress in
+                handleKeyPress(keyPress, viewModel: viewModel)
+            }
+            .safeAreaInset(edge: .bottom) {
+                if viewModel.isMultiSelectMode {
+                    bulkActionToolbar(viewModel: viewModel)
+                }
             }
         }
     }
@@ -186,6 +234,52 @@ struct EmailListView: View {
 
         if viewModel.isLoadingMore {
             loadingMoreIndicator
+        }
+
+        // Server search section (shown when search is active)
+        if viewModel.isSearchActive {
+            serverSearchSection(viewModel: viewModel)
+        }
+    }
+
+    @ViewBuilder
+    private func serverSearchSection(viewModel: EmailListViewModel) -> some View {
+        if viewModel.isLoadingFromServer {
+            HStack {
+                ProgressView()
+                    .controlSize(.small)
+                Text("Searching server...")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .listRowBackground(Color.clear)
+        } else if viewModel.hasSearchedServer {
+            HStack {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                Text("Searched all emails on server")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .listRowBackground(Color.clear)
+        } else if viewModel.emails.count >= 10 {
+            Button {
+                Task { await viewModel.loadMoreFromServer() }
+            } label: {
+                HStack {
+                    Image(systemName: "cloud")
+                    Text("Load more from server")
+                }
+                .font(.caption)
+            }
+            .buttonStyle(.bordered)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .listRowBackground(Color.clear)
         }
     }
 
@@ -337,6 +431,25 @@ struct EmailListView: View {
     private var toolbarContent: some ToolbarContent {
         ToolbarItemGroup(placement: .automatic) {
             if let viewModel {
+                // Filter button (shown when search is active)
+                if viewModel.isSearchActive || !searchText.isEmpty {
+                    Button {
+                        showFilterPicker.toggle()
+                    } label: {
+                        ActionLabel("Filters", systemImage: viewModel.searchFilters.isActive ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                    }
+                    .help("Add search filters")
+
+                    // Clear search button
+                    Button {
+                        searchText = ""
+                        viewModel.clearSearch()
+                    } label: {
+                        ActionLabel("Clear", systemImage: "xmark.circle")
+                    }
+                    .help("Clear search")
+                }
+
                 Picker("View", selection: Binding(
                     get: { viewModel.displayMode },
                     set: { viewModel.displayMode = $0 }
