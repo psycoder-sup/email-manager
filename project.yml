@@ -36,8 +36,25 @@ targets:
       - path: Cluademail
         excludes:
           - "**/*.xcconfig"
+          - "MCP/Server/MCPMain.swift"
     resources:
       - path: Cluademail/Resources/Assets.xcassets
+    dependencies:
+      - target: CluademailMCP
+        link: false
+    postCompileScripts:
+      - name: Embed and Install MCP Server
+        script: |
+          # Copy app bundle to /Applications first
+          rm -rf "/Applications/${PRODUCT_NAME}.app"
+          cp -R "${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app" "/Applications/"
+
+          # Copy MCP binary into installed app bundle
+          cp "${BUILT_PRODUCTS_DIR}/cluademail-mcp" "/Applications/${PRODUCT_NAME}.app/Contents/MacOS/cluademail-mcp"
+
+          # Re-sign the MCP binary
+          codesign --force --sign "${EXPANDED_CODE_SIGN_IDENTITY:-"-"}" --preserve-metadata=entitlements "/Applications/${PRODUCT_NAME}.app/Contents/MacOS/cluademail-mcp"
+        basedOnDependencyAnalysis: false
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.cluademail.app
@@ -84,11 +101,48 @@ targets:
         INFOPLIST_FILE: CluademailUITests/Info.plist
         TEST_TARGET_NAME: Cluademail
 
+  CluademailMCP:
+    type: tool
+    platform: macOS
+    sources:
+      # MCP server code
+      - path: Cluademail/MCP
+      # Shared Core code (models, services, etc.)
+      - path: Cluademail/Core
+        excludes:
+          # Exclude services that depend on AppState or UI components
+          - "Services/Sync/SyncCoordinator.swift"
+          - "Services/Sync/SyncEngine.swift"
+          - "Services/Sync/SyncScheduler.swift"
+          - "Services/Sync/SyncLock.swift"
+          - "Services/DatabaseService.swift"
+          - "Services/NotificationService.swift"
+          - "Services/EmailDetail/CIDResolver.swift"
+          - "Services/EmailDetail/HTMLSanitizer.swift"
+      # App configuration
+      - path: Cluademail/App/AppConfiguration.swift
+    settings:
+      base:
+        PRODUCT_NAME: cluademail-mcp
+        PRODUCT_BUNDLE_IDENTIFIER: com.cluademail.mcp
+        SWIFT_VERSION: "5.9"
+        MACOSX_DEPLOYMENT_TARGET: "26.0"
+        # Google OAuth credentials (same as main app)
+        GOOGLE_CLIENT_ID: 745260212298-e59afp5voo9f53arm4qfa6oogn09gbkh.apps.googleusercontent.com
+        GOOGLE_REVERSED_CLIENT_ID: com.googleusercontent.apps.745260212298-e59afp5voo9f53arm4qfa6oogn09gbkh
+      configs:
+        Debug:
+          CODE_SIGN_IDENTITY: "-"
+          ENABLE_HARDENED_RUNTIME: NO
+        Release:
+          ENABLE_HARDENED_RUNTIME: YES
+
 schemes:
   Cluademail:
     build:
       targets:
         Cluademail: all
+        CluademailMCP: all
         CluademailTests: [test]
         CluademailUITests: [test]
     run:
@@ -98,6 +152,19 @@ schemes:
       targets:
         - CluademailTests
         - CluademailUITests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+
+  CluademailMCP:
+    build:
+      targets:
+        CluademailMCP: all
+    run:
+      config: Debug
     profile:
       config: Release
     analyze:

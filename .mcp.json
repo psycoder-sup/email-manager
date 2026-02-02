@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "cluademail": {
+      "command": "/Applications/Cluademail.app/Contents/MacOS/cluademail-mcp",
+      "args": []
+    }
+  }
+}
