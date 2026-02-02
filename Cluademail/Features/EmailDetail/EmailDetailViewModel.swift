@@ -29,11 +29,13 @@ final class EmailDetailViewModel {
     private let gmailAPIService: GmailAPIService
     private let databaseService: DatabaseService
     private let cidResolver: CIDResolver
+    private let appState: AppState
 
     // MARK: - Initialization
 
-    init(databaseService: DatabaseService) {
+    init(databaseService: DatabaseService, appState: AppState) {
         self.databaseService = databaseService
+        self.appState = appState
         self.gmailAPIService = GmailAPIService.shared
         self.cidResolver = CIDResolver()
     }
@@ -53,7 +55,9 @@ final class EmailDetailViewModel {
         // If body is already loaded, resolve CIDs and mark as read
         if email.bodyHtml != nil || email.bodyText != nil {
             await resolveCIDsIfNeeded(email)
-            await markAsReadIfNeeded(email)
+            Task { [weak self] in
+                await self?.markAsReadIfNeeded(email)
+            }
             return
         }
 
@@ -78,7 +82,7 @@ final class EmailDetailViewModel {
 
     /// Loads the full content of an email from Gmail API.
     private func loadFullEmail(_ email: Email) async {
-        guard let account = email.account else {
+        guard let account = getAccountForEmail(email) else {
             errorMessage = "No account associated with email"
             return
         }
@@ -111,7 +115,9 @@ final class EmailDetailViewModel {
 
             // Resolve CID references after loading
             await resolveCIDsIfNeeded(email)
-            await markAsReadIfNeeded(email)
+            Task { [weak self] in
+                await self?.markAsReadIfNeeded(email)
+            }
 
         } catch {
             Logger.ui.error("Failed to load email content: \(error.localizedDescription)")
@@ -121,7 +127,13 @@ final class EmailDetailViewModel {
 
     /// Marks the email as read if it's currently unread.
     private func markAsReadIfNeeded(_ email: Email) async {
-        guard !email.isRead, let account = email.account else { return }
+        guard !email.isRead else { return }
+
+        // Try to get the account, with fallback to selected account if relationship is missing
+        guard let account = getAccountForEmail(email) else {
+            Logger.ui.warning("Cannot mark email as read: no account available for email \(email.gmailId)")
+            return
+        }
 
         do {
             _ = try await gmailAPIService.modifyMessage(
@@ -135,17 +147,88 @@ final class EmailDetailViewModel {
             email.labelIds.removeAll { $0 == "UNREAD" }
             try databaseService.mainContext.save()
 
+            // Trigger UI refresh for unread counts
+            appState.incrementUnreadCountVersion()
+
             Logger.ui.info("Marked email as read: \(email.gmailId, privacy: .private)")
         } catch {
             Logger.ui.error("Failed to mark as read: \(error.localizedDescription)")
         }
     }
 
+    /// Gets the account for an email, repairing the relationship if needed.
+    /// Falls back to the currently selected account only if it can be verified as correct.
+    private func getAccountForEmail(_ email: Email) -> Account? {
+        // If email already has an account, use it
+        if let account = email.account {
+            return account
+        }
+
+        // Try to find the correct account by verifying email addresses
+        let matchingAccount = findMatchingAccount(for: email)
+
+        guard let account = matchingAccount else {
+            Logger.ui.warning("Email \(email.gmailId) has no account and no matching account found")
+            return nil
+        }
+
+        // Repair the relationship with the verified account
+        email.account = account
+        do {
+            try databaseService.mainContext.save()
+            Logger.ui.info("Repaired account relationship for email \(email.gmailId, privacy: .private)")
+        } catch {
+            Logger.ui.error("Failed to save repaired account relationship: \(error.localizedDescription)")
+        }
+
+        return account
+    }
+
+    /// Finds the matching account for an orphaned email by checking email addresses.
+    private func findMatchingAccount(for email: Email) -> Account? {
+        // First, try the selected account if it matches
+        if let selected = appState.selectedAccount, accountMatches(selected, email: email) {
+            return selected
+        }
+
+        // Otherwise, search all accounts for a match
+        for account in appState.accounts {
+            if accountMatches(account, email: email) {
+                return account
+            }
+        }
+
+        return nil
+    }
+
+    /// Checks if an account matches an email based on email addresses.
+    private func accountMatches(_ account: Account, email: Email) -> Bool {
+        let accountEmailLower = account.email.lowercased()
+
+        // Check if account sent the email
+        if email.fromAddress.lowercased() == accountEmailLower {
+            return true
+        }
+
+        // Check if account received the email (to or cc)
+        let toAddresses = email.toAddresses.map { $0.lowercased() }
+        if toAddresses.contains(accountEmailLower) {
+            return true
+        }
+
+        let ccAddresses = email.ccAddresses.map { $0.lowercased() }
+        if ccAddresses.contains(accountEmailLower) {
+            return true
+        }
+
+        return false
+    }
+
     // MARK: - Actions
 
     /// Toggles the star status of the current email.
     func toggleStar() async {
-        guard let email, let account = email.account else { return }
+        guard let email, let account = getAccountForEmail(email) else { return }
 
         do {
             let addLabels = email.isStarred ? [] : ["STARRED"]
@@ -176,7 +259,7 @@ final class EmailDetailViewModel {
 
     /// Archives the current email (removes from inbox).
     func archive() async {
-        guard let email, let account = email.account else { return }
+        guard let email, let account = getAccountForEmail(email) else { return }
 
         do {
             _ = try await gmailAPIService.modifyMessage(
@@ -197,7 +280,7 @@ final class EmailDetailViewModel {
 
     /// Moves the current email to trash.
     func moveToTrash() async {
-        guard let email, let account = email.account else { return }
+        guard let email, let account = getAccountForEmail(email) else { return }
 
         do {
             try await gmailAPIService.trashMessage(
@@ -225,7 +308,7 @@ final class EmailDetailViewModel {
 
     /// Marks the current email as unread.
     func markAsUnread() async {
-        guard let email, email.isRead, let account = email.account else { return }
+        guard let email, email.isRead, let account = getAccountForEmail(email) else { return }
 
         do {
             _ = try await gmailAPIService.modifyMessage(
@@ -240,6 +323,9 @@ final class EmailDetailViewModel {
                 email.labelIds.append("UNREAD")
             }
             try databaseService.mainContext.save()
+
+            // Trigger UI refresh for unread counts
+            appState.incrementUnreadCountVersion()
 
             Logger.ui.info("Marked as unread: \(email.gmailId, privacy: .private)")
         } catch {

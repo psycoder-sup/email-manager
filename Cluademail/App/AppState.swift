@@ -37,6 +37,16 @@ final class AppState {
 
     var mcpServerRunning: Bool = false
 
+    // MARK: - UI Refresh Triggers
+
+    /// Version counter for triggering unread count refreshes
+    var unreadCountVersion: Int = 0
+
+    /// Increments the version to trigger UI refreshes for unread counts
+    func incrementUnreadCountVersion() {
+        unreadCountVersion += 1
+    }
+
     // MARK: - Computed Properties
 
     /// Display title combining folder and account name

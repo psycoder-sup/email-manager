@@ -5,6 +5,7 @@ import os.log
 /// This is the root view displayed in the main window.
 struct ContentView: View {
     @Environment(AppState.self) private var appState
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         NavigationSplitView {
@@ -19,6 +20,11 @@ struct ContentView: View {
         }
         .frame(minWidth: 900, minHeight: 600)
         .navigationTitle(appState.displayTitle)
+        .onReceive(NotificationCenter.default.publisher(for: .openComposeWindowWithData)) { notification in
+            if let data = notification.userInfo?["data"] as? ComposeWindowData {
+                openWindow(id: "compose", value: data)
+            }
+        }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button {

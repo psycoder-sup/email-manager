@@ -7,6 +7,7 @@ struct FolderRow: View {
     let folder: Folder
     let account: Account?
 
+    @Environment(AppState.self) private var appState
     @Environment(DatabaseService.self) private var databaseService
     @State private var unreadCount: Int = 0
 
@@ -27,6 +28,11 @@ struct FolderRow: View {
         .contentShape(Rectangle())
         .task(id: taskId) {
             await loadUnreadCount()
+        }
+        .onChange(of: appState.unreadCountVersion) { _, _ in
+            Task {
+                await loadUnreadCount()
+            }
         }
     }
 
@@ -60,5 +66,6 @@ struct FolderRow: View {
     }
     .listStyle(.sidebar)
     .frame(width: 250)
+    .environment(AppState())
     .environment(DatabaseService(isStoredInMemoryOnly: true))
 }

@@ -19,7 +19,7 @@ struct EmailDetailView: View {
         .onAppear {
             // Initialize view model synchronously to avoid SwiftData threading issues
             if viewModel == nil {
-                viewModel = EmailDetailViewModel(databaseService: databaseService)
+                viewModel = EmailDetailViewModel(databaseService: databaseService, appState: appState)
             }
         }
         .task(id: appState.selectedEmail?.id) {

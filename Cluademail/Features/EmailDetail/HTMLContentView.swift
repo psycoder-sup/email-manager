@@ -80,7 +80,7 @@ struct HTMLContentView: NSViewRepresentable {
         if let html, !html.isEmpty {
             bodyContent = processHTML(html)
         } else if let plainText, !plainText.isEmpty {
-            bodyContent = "<pre style=\"white-space: pre-wrap; word-wrap: break-word; font-family: inherit;\">\(escapeHTML(plainText))</pre>"
+            bodyContent = "<pre class=\"plain-text-fallback\">\(escapeHTML(plainText))</pre>"
         } else {
             bodyContent = "<p style=\"color: gray;\">No content</p>"
         }
@@ -107,92 +107,38 @@ struct HTMLContentView: NSViewRepresentable {
         :root {
             color-scheme: light dark;
         }
-        /* Global width constraints to prevent overflow from inline styles */
-        * {
-            max-width: 100% !important;
-            box-sizing: border-box;
-        }
-        img, table, iframe, video, object, embed {
-            max-width: 100% !important;
-            height: auto !important;
-        }
-        html, body {
-            overflow: hidden !important;
-        }
+        /* Minimal base styles - let emails define their own design */
         body {
+            background: transparent;
+            margin: 0;
+            padding: 8px;
+        }
+        /* Only style plain text fallback content */
+        pre.plain-text-fallback {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             font-size: 14px;
             line-height: 1.5;
-            color: var(--text-color, #333);
-            background: transparent;
-            margin: 0;
-            padding: 16px;
+            color: #333;
+            white-space: pre-wrap;
             word-wrap: break-word;
-            overflow-wrap: break-word;
         }
         @media (prefers-color-scheme: dark) {
-            body {
+            pre.plain-text-fallback {
                 color: #e0e0e0;
             }
-            a {
-                color: #6eb5ff;
-            }
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-        }
-        a {
-            color: #0066cc;
-        }
-        blockquote {
-            margin: 0.5em 0;
-            padding-left: 1em;
-            border-left: 2px solid #ccc;
-            color: #666;
-        }
-        @media (prefers-color-scheme: dark) {
-            blockquote {
-                border-left-color: #555;
-                color: #aaa;
-            }
-        }
-        pre, code {
-            font-family: "SF Mono", Monaco, "Courier New", monospace;
-            font-size: 13px;
-            background: rgba(128, 128, 128, 0.1);
-            border-radius: 4px;
-            padding: 2px 4px;
-        }
-        pre {
-            padding: 8px;
-            overflow-x: auto;
-        }
-        table {
-            border-collapse: collapse;
-            table-layout: fixed;
-            width: 100%;
-            max-width: 100%;
-        }
-        td, th {
-            padding: 8px;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
         }
         /* Hide external images when not allowed */
         .external-image-blocked {
             display: none;
         }
         .image-placeholder {
-            display: block;
+            display: inline-block;
             background: rgba(128, 128, 128, 0.1);
             border: 1px dashed rgba(128, 128, 128, 0.3);
             border-radius: 4px;
-            padding: 12px;
-            margin: 8px 0;
+            padding: 8px 12px;
             color: #666;
             font-size: 12px;
-            text-align: center;
         }
         @media (prefers-color-scheme: dark) {
             .image-placeholder {
