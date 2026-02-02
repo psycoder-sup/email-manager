@@ -42,7 +42,7 @@ targets:
     dependencies:
       - target: CluademailMCP
         link: false
-    postCompileScripts:
+    postBuildScripts:
       - name: Embed and Install MCP Server
         script: |
           # Copy app bundle to /Applications first
@@ -52,8 +52,8 @@ targets:
           # Copy MCP binary into installed app bundle
           cp "${BUILT_PRODUCTS_DIR}/cluademail-mcp" "/Applications/${PRODUCT_NAME}.app/Contents/MacOS/cluademail-mcp"
 
-          # Re-sign the MCP binary
-          codesign --force --sign "${EXPANDED_CODE_SIGN_IDENTITY:-"-"}" --preserve-metadata=entitlements "/Applications/${PRODUCT_NAME}.app/Contents/MacOS/cluademail-mcp"
+          # Re-sign the entire app (including MCP binary)
+          codesign --force --deep --sign "${EXPANDED_CODE_SIGN_IDENTITY:-"-"}" "/Applications/${PRODUCT_NAME}.app"
         basedOnDependencyAnalysis: false
     settings:
       base:
