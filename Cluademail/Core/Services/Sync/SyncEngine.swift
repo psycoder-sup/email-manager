@@ -76,6 +76,7 @@ actor SyncEngine: SyncEngineProtocol {
         // Update sync status
         syncState.syncStatus = .syncing
         try context.save()
+        await postSyncContextDidSave()
 
         do {
             // Sync labels first
@@ -112,6 +113,7 @@ actor SyncEngine: SyncEngineProtocol {
                 }
             }
             try context.save()
+            await postSyncContextDidSave()
 
             Logger.sync.info("Sync completed for account: \(self.account.email, privacy: .private(mask: .hash))")
             return result
@@ -295,6 +297,10 @@ actor SyncEngine: SyncEngineProtocol {
             } else if !delta.labelsToAdd.isEmpty || !delta.labelsToRemove.isEmpty {
                 // Update labels only
                 if let email = try await emailRepository.fetch(byGmailId: delta.messageId, context: context) {
+                    // Ensure account relationship is intact
+                    if email.account == nil {
+                        email.account = account
+                    }
                     var labelIds = Set(email.labelIds)
                     labelIds.formUnion(delta.labelsToAdd)
                     labelIds.subtract(delta.labelsToRemove)
@@ -302,6 +308,7 @@ actor SyncEngine: SyncEngineProtocol {
                     email.isRead = !labelIds.contains("UNREAD")
                     email.isStarred = labelIds.contains("STARRED")
                     try context.save()
+                    await postSyncContextDidSave()
                     affectedEmails.append(email)
                     updatedCount += 1
                 }
@@ -354,6 +361,7 @@ actor SyncEngine: SyncEngineProtocol {
         }
 
         try context.save()
+        await postSyncContextDidSave()
         Logger.sync.debug("Synced \(labelDTOs.count) labels")
     }
 
@@ -421,6 +429,7 @@ actor SyncEngine: SyncEngineProtocol {
         }
 
         try context.save()
+        await postSyncContextDidSave()
         Logger.sync.debug("Derived \(affectedThreadIds.count) threads")
     }
 
@@ -488,6 +497,7 @@ actor SyncEngine: SyncEngineProtocol {
                     existing.isRead = email.isRead
                     existing.isStarred = email.isStarred
                     existing.snippet = email.snippet
+                    existing.account = account  // Preserve account relationship
                     updatedCount += 1
                     emails.append(existing)
                 } else {
@@ -512,5 +522,14 @@ actor SyncEngine: SyncEngineProtocol {
             updatedCount: updatedCount,
             nextPageToken: nextToken
         )
+    }
+
+    // MARK: - Notification
+
+    /// Posts notification to signal main context should refresh.
+    private func postSyncContextDidSave() async {
+        await MainActor.run {
+            NotificationCenter.default.post(name: .syncContextDidSave, object: nil)
+        }
     }
 }

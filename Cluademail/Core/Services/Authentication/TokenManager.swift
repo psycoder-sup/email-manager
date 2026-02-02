@@ -32,9 +32,14 @@ actor TokenManager: TokenManagerProtocol {
     // MARK: - TokenManagerProtocol Implementation
 
     /// Saves tokens for an account.
+    /// Also saves to file storage for MCP CLI access.
     func saveTokens(_ tokens: OAuthTokens, for accountEmail: String) async throws {
         let key = tokenKeyPrefix + accountEmail
         try keychainService.save(tokens, forKey: key)
+
+        // Also save to file storage for MCP CLI tool access
+        try? FileTokenStorage.shared.saveTokens(tokens, for: accountEmail)
+
         Logger.auth.info("Saved tokens for account: \(accountEmail, privacy: .private(mask: .hash))")
     }
 
@@ -57,6 +62,9 @@ actor TokenManager: TokenManagerProtocol {
         } catch KeychainError.itemNotFound {
             Logger.auth.debug("No tokens to delete for account: \(accountEmail, privacy: .private(mask: .hash))")
         }
+
+        // Also delete from file storage
+        try? FileTokenStorage.shared.deleteTokens(for: accountEmail)
     }
 
     /// Checks if tokens exist for an account without throwing.

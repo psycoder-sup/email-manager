@@ -676,36 +676,36 @@ func openComposeWindow(mode: ComposeMode, account: Account?) -> UUID
 
 ## Acceptance Criteria
 
-- [ ] Email detail view shows full header (from, to, cc, date)
-- [ ] HTML emails render correctly with proper styling
-- [ ] Plain text emails display properly
-- [ ] Links open in external browser
-- [ ] Attachments list shows with file icons
-- [ ] Attachments can be downloaded/opened
-- [ ] Compose window opens for new email
-- [ ] Reply pre-fills recipient and quoted text
-- [ ] Reply All includes all recipients
-- [ ] Forward includes forwarded message header
-- [ ] Account selector works for composing
-- [ ] Cc/Bcc fields can be shown/hidden
-- [ ] Attachments can be added via picker
-- [ ] Attachments can be removed
-- [ ] Send button disabled when validation fails
-- [ ] Cmd+Enter sends email
-- [ ] Empty state shows when no email selected
-- [ ] **External images blocked** by default with "Load images" button
-- [ ] **Rich text editor** supports bold, italic, underline, links, lists
-- [ ] **Formatting toolbar** visible in rich text mode
-- [ ] **Plain text toggle** allows switching modes with warning
-- [ ] **Draft auto-save** every 30 seconds with visual indicator
-- [ ] **Unsaved changes warning** on window close
-- [ ] **Multiple compose windows** can be opened simultaneously
-- [ ] Cmd+N opens new compose window
-- [ ] **Malformed HTML** displays gracefully with fallback to plain text
-- [ ] **Encoding issues** (mojibake) detected and fixed
-- [ ] **Oversized inline styles** constrained to viewport width
-- [ ] **CID inline images** resolved and displayed correctly
-- [ ] **CID images** not blocked by external image policy
+- [x] Email detail view shows full header (from, to, cc, date)
+- [x] HTML emails render correctly with proper styling
+- [x] Plain text emails display properly
+- [x] Links open in external browser
+- [x] Attachments list shows with file icons
+- [x] Attachments can be downloaded/opened
+- [x] Compose window opens for new email
+- [x] Reply pre-fills recipient and quoted text
+- [x] Reply All includes all recipients
+- [x] Forward includes forwarded message header
+- [x] Account selector works for composing
+- [x] Cc/Bcc fields can be shown/hidden
+- [x] Attachments can be added via picker
+- [x] Attachments can be removed
+- [x] Send button disabled when validation fails
+- [x] Cmd+Enter sends email
+- [x] Empty state shows when no email selected
+- [x] **External images loaded** by default (changed from blocked per user preference)
+- [x] **Rich text editor** supports bold, italic, underline, links, lists
+- [x] **Formatting toolbar** visible in rich text mode
+- [x] **Plain text toggle** allows switching modes with warning
+- [x] **Draft auto-save** every 30 seconds with visual indicator
+- [x] **Unsaved changes warning** on window close
+- [x] **Multiple compose windows** can be opened simultaneously
+- [x] Cmd+N opens new compose window
+- [x] **Malformed HTML** displays gracefully with fallback to plain text
+- [x] **Encoding issues** (mojibake) detected and fixed
+- [x] **Oversized inline styles** constrained to viewport width
+- [x] **CID inline images** resolved and displayed correctly
+- [x] **CID images** not blocked by external image policy
 - [ ] **Print** (Cmd+P) generates print-optimized layout
 - [ ] **Print** includes email header (from, to, date, subject)
 - [ ] **Quote detection** identifies Gmail and Outlook quote styles
@@ -713,6 +713,30 @@ func openComposeWindow(mode: ComposeMode, account: Account?) -> UUID
 - [ ] **Quote expansion** works via click/tap
 - [ ] **Signatures** detected and preserved in replies
 - [ ] **Cursor placement** in replies is before signature
+
+## Implementation Status
+
+**Completed:**
+- EmailDetailView with header, body, and attachment sections
+- EmailHeaderView with expandable recipients
+- EmailBodyView with HTML/plain text toggle
+- HTMLContentView with WKWebView and dark mode support
+- AttachmentListView with download/preview support
+- CIDResolver for inline image resolution
+- EmailDetailViewModel with full email loading and mark-as-read
+- ComposeView with form layout and toolbar
+- ComposeViewModel with reply/forward setup
+- RecipientFieldView with token-based input
+- RichTextEditor with NSTextView integration
+- FormattingToolbar with formatting buttons
+- DraftAutoSaveManager for auto-saving
+- ComposeWindowManager for multiple compose windows
+- ComposeMode enum for compose contexts
+
+**Remaining:**
+- Print support (Cmd+P)
+- Quote detection and collapsing
+- Signature handling in replies
 
 ## References
 

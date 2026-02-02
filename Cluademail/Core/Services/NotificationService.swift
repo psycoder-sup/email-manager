@@ -11,6 +11,9 @@ extension Notification.Name {
 
     /// Posted when user taps Reply on a notification
     static let openComposeWithReply = Notification.Name("openComposeWithReply")
+
+    /// Posted when a background sync context saves, signaling the main context to refresh
+    static let syncContextDidSave = Notification.Name("syncContextDidSave")
 }
 
 // MARK: - Notification Service

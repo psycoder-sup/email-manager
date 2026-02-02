@@ -485,40 +485,61 @@ label:{name}        - Has label
 
 ## Acceptance Criteria
 
-- [ ] Search bar appears in toolbar with `.searchable()`
-- [ ] Search queries local database first
-- [ ] Search falls back to Gmail API for more results
-- [ ] **Server search triggered** when local < 10 results or user requests
-- [ ] **Multi-account search** works from "All Accounts" view
-- [ ] **Parallel search** across accounts for server queries
-- [ ] Search results highlight matching text
-- [ ] Search supports Gmail operators (from:, to:, subject:)
-- [ ] Advanced filters can be applied (date, attachment, unread)
-- [ ] **Date range picker** allows selecting after/before dates
-- [ ] **Date presets** (Today, Last 7 days, etc.) work correctly
-- [ ] **Label filter picker** allows selecting multiple labels
-- [ ] **FilterPickerPopover** accessible via "Add filter..." button
-- [ ] Filter chips show active filters
-- [ ] Label picker shows user labels
-- [ ] Labels can be applied/removed from emails
-- [ ] Label colors display correctly
-- [ ] User labels appear in sidebar when account selected
+- [x] Search bar appears in toolbar with `.searchable()`
+- [x] Search queries local database first
+- [x] Search falls back to Gmail API for more results
+- [x] **Server search triggered** when local < 10 results or user requests
+- [x] **Multi-account search** works from "All Accounts" view
+- [x] **Parallel search** across accounts for server queries
+- [x] Search results highlight matching text
+- [x] Search supports Gmail operators (from:, to:, subject:)
+- [x] Advanced filters can be applied (date, attachment, unread)
+- [x] **Date range picker** allows selecting after/before dates
+- [x] **Date presets** (Today, Last 7 days, etc.) work correctly
+- [x] **Label filter picker** allows selecting multiple labels
+- [x] **FilterPickerPopover** accessible via "Add filter..." button
+- [x] Filter chips show active filters
+- [x] Label picker shows user labels
+- [x] Labels can be applied/removed from emails
+- [x] Label colors display correctly
+- [x] User labels appear in sidebar when account selected
 - [ ] Label filtering works from sidebar
 - [ ] **Account badge** shows on results in multi-account search
-- [ ] Search is debounced to avoid excessive queries
-- [ ] Empty state shows when no results
-- [ ] Search can be cleared
-- [ ] **Recent searches** displayed as suggestions
-- [ ] **Search history** persists across app launches
-- [ ] **Delete search** from history via swipe
-- [ ] **Clear all history** option available
-- [ ] **Search tips** shown (from:, has:, is: operators)
-- [ ] **"Load more from server"** button appears when local results ≥ 10
-- [ ] **Server search indicator** shows when searching remotely
-- [ ] **"Searched all emails"** confirmation after server search
-- [ ] **Merged results** deduplicated and sorted by date
-- [ ] **Labels sorted** with system labels first, then alphabetical user labels
-- [ ] **Nested labels** (Parent/Child) display with proper indentation
+- [x] Search is debounced to avoid excessive queries
+- [x] Empty state shows when no results
+- [x] Search can be cleared
+- [x] **Recent searches** displayed as suggestions
+- [x] **Search history** persists across app launches
+- [x] **Delete search** from history via swipe
+- [x] **Clear all history** option available
+- [x] **Search tips** shown (from:, has:, is: operators)
+- [x] **"Load more from server"** button appears when local results ≥ 10
+- [x] **Server search indicator** shows when searching remotely
+- [x] **"Searched all emails"** confirmation after server search
+- [x] **Merged results** deduplicated and sorted by date
+- [x] **Labels sorted** with system labels first, then alphabetical user labels
+- [x] **Nested labels** (Parent/Child) display with proper indentation
+
+## Implementation Status
+
+**Completed:**
+- SearchService with local/server coordination, debouncing, and TaskGroup parallel search
+- SearchFilters struct with Gmail query building
+- SearchFiltersBar with removable filter chips
+- FilterPickerPopover with date pickers, quick presets, and validation
+- HighlightedText for search match highlighting
+- SearchHistoryService with UserDefaults persistence
+- SearchSuggestionsView with history and search tips
+- LabelService with caching, sorting, and nested label support
+- LabelPickerView with label apply/remove via Gmail API
+- LabelBadgeView and LabelBadgeFromIdView for colored badges
+- UserLabelsSection for sidebar display
+- Color+Hex extension for parsing Gmail hex colors
+- EmailListView integration with search filters bar and "Load more from server"
+
+**Remaining:**
+- Label filtering from sidebar tap (UserLabelsSection -> filter emails)
+- Account badge display in multi-account search results
 
 ## References
 
