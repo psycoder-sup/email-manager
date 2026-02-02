@@ -22,7 +22,7 @@ final class EmailDetailViewModel {
     private(set) var errorMessage: String?
 
     /// Whether external images should be loaded
-    var loadExternalImages: Bool = false
+    var loadExternalImages: Bool = true
 
     // MARK: - Dependencies
 
@@ -45,7 +45,7 @@ final class EmailDetailViewModel {
     func setEmail(_ email: Email?) async {
         self.email = email
         self.errorMessage = nil
-        self.loadExternalImages = false
+        self.loadExternalImages = true
         self.resolvedBodyHtml = nil
 
         guard let email else { return }
