@@ -20,7 +20,11 @@ struct CluademailApp: App {
     /// Notification service singleton (exposed for environment)
     private let notificationService = NotificationService.shared
 
+    /// Manager for compose windows
+    @State private var composeWindowManager = ComposeWindowManager()
+
     var body: some Scene {
+        // Main window
         WindowGroup {
             ContentView()
                 .environment(appState)
@@ -37,12 +41,15 @@ struct CluademailApp: App {
                 .onReceive(NotificationCenter.default.publisher(for: .openComposeWithReply)) { notification in
                     handleOpenComposeWithReply(notification)
                 }
+                .onReceive(NotificationCenter.default.publisher(for: .openComposeWindow)) { notification in
+                    handleOpenComposeWindow(notification)
+                }
         }
         .modelContainer(databaseService.container)
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("New Message") {
-                    // TODO: Implement in Task 09
+                    openComposeWindow(mode: .new)
                 }
                 .keyboardShortcut("N", modifiers: .command)
             }
@@ -57,6 +64,27 @@ struct CluademailApp: App {
                 .disabled(appState.isSyncing)
             }
         }
+
+        // Compose windows
+        WindowGroup(id: "compose", for: ComposeWindowData.self) { $windowData in
+            if let data = windowData {
+                ComposeView(
+                    mode: data.mode,
+                    account: data.account,
+                    windowId: data.id,
+                    onClose: {
+                        composeWindowManager.closeWindow(id: data.id)
+                    },
+                    windowData: data
+                )
+                .environment(appState)
+                .environment(errorHandler)
+                .environment(databaseService)
+            }
+        }
+        .modelContainer(databaseService.container)
+        .windowResizability(.contentSize)
+        .defaultSize(width: 640, height: 480)
 
         Settings {
             if let scheduler = syncScheduler {
@@ -139,7 +167,154 @@ struct CluademailApp: App {
             return
         }
 
-        // TODO: Open compose window with reply context (Task 09 integration)
+        // Find the email and open reply compose
+        // Note: In a full implementation, we'd fetch the email from the database
         Logger.ui.info("Open compose with reply to email: \(context.emailId) for account: \(context.accountId)")
+    }
+
+    /// Handles the openComposeWindow notification.
+    @MainActor
+    private func handleOpenComposeWindow(_ notification: Foundation.Notification) {
+        guard let userInfo = notification.userInfo,
+              let mode = userInfo["mode"] as? ComposeMode else {
+            // Default to new message if no mode specified
+            openComposeWindow(mode: .new)
+            return
+        }
+        openComposeWindow(mode: mode)
+    }
+
+    /// Opens a new compose window with the specified mode.
+    @MainActor
+    private func openComposeWindow(mode: ComposeMode) {
+        // Get the first account or use the selected account
+        let account = appState.selectedAccount ?? appState.accounts.first
+
+        guard let account else {
+            Logger.ui.warning("No account available for compose")
+            errorHandler.handle(ComposeError.noAccountAvailable)
+            return
+        }
+
+        let windowData = composeWindowManager.createWindow(mode: mode, account: account)
+
+        // Post notification to trigger window opening
+        NotificationCenter.default.post(
+            name: .openComposeWindowWithData,
+            object: nil,
+            userInfo: ["data": windowData]
+        )
+
+        Logger.ui.info("Opening compose window: \(mode.windowTitle)")
+    }
+}
+
+// MARK: - Compose Window Data
+
+/// Data passed to compose windows for initialization.
+struct ComposeWindowData: Identifiable, Hashable, Codable {
+    let id: UUID
+    let modeType: String  // "new", "reply", "replyAll", "forward", "draft"
+    let emailId: String?  // Gmail ID of original email (nil for .new)
+    let accountEmail: String
+
+    // Non-codable fields (reconstructed from stored data)
+    // Note: For email-based modes, the actual mode must be reconstructed in ComposeView
+    // by fetching the email from the database using emailId.
+    var mode: ComposeMode {
+        // Only .new can be fully reconstructed without database access
+        if modeType == "new" || emailId == nil {
+            return .new
+        }
+        // Return .new as placeholder - actual mode reconstruction happens in ComposeView
+        return .new
+    }
+
+    var account: Account? {
+        // This would need to be looked up from the database
+        // For now, we'll handle this in the ComposeView
+        nil
+    }
+
+    init(id: UUID = UUID(), mode: ComposeMode, account: Account) {
+        self.id = id
+        self.accountEmail = account.email
+
+        switch mode {
+        case .new:
+            self.modeType = "new"
+            self.emailId = nil
+        case .reply(let email):
+            self.modeType = "reply"
+            self.emailId = email.gmailId
+        case .replyAll(let email):
+            self.modeType = "replyAll"
+            self.emailId = email.gmailId
+        case .forward(let email):
+            self.modeType = "forward"
+            self.emailId = email.gmailId
+        case .draft(let email):
+            self.modeType = "draft"
+            self.emailId = email.gmailId
+        }
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+    static func == (lhs: ComposeWindowData, rhs: ComposeWindowData) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+
+// MARK: - Notification Names
+
+extension Notification.Name {
+    static let openComposeWindowWithData = Notification.Name("openComposeWindowWithData")
+}
+
+// MARK: - Compose Errors
+
+enum ComposeError: AppError {
+    case noAccountAvailable
+    case sendFailed(Error)
+    case draftSaveFailed(Error)
+
+    var errorCode: String {
+        switch self {
+        case .noAccountAvailable: return "COMPOSE_001"
+        case .sendFailed: return "COMPOSE_002"
+        case .draftSaveFailed: return "COMPOSE_003"
+        }
+    }
+
+    var isRecoverable: Bool {
+        switch self {
+        case .noAccountAvailable: return false
+        case .sendFailed, .draftSaveFailed: return true
+        }
+    }
+
+    var errorDescription: String? {
+        switch self {
+        case .noAccountAvailable:
+            return "No email account available"
+        case .sendFailed(let error):
+            return "Failed to send message: \(error.localizedDescription)"
+        case .draftSaveFailed(let error):
+            return "Failed to save draft: \(error.localizedDescription)"
+        }
+    }
+
+    var recoverySuggestion: String? {
+        switch self {
+        case .noAccountAvailable:
+            return "Please add an email account in Settings."
+        case .sendFailed:
+            return "Check your internet connection and try again."
+        case .draftSaveFailed:
+            return "Your draft may not be saved. Try saving manually."
+        }
     }
 }

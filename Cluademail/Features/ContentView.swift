@@ -14,7 +14,7 @@ struct ContentView: View {
             EmailListView()
                 .navigationSplitViewColumnWidth(min: 300, ideal: 400, max: 500)
         } detail: {
-            EmailDetailPlaceholderView()
+            EmailDetailView()
                 .navigationSplitViewColumnWidth(min: 400, ideal: 600)
         }
         .frame(minWidth: 900, minHeight: 600)
@@ -22,12 +22,12 @@ struct ContentView: View {
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button {
-                    // TODO: Implement in Task 09
-                    Logger.ui.info("Compose button tapped")
+                    openComposeWindow(mode: .new)
                 } label: {
                     Image(systemName: "square.and.pencil")
                 }
                 .help("Compose new message")
+                .keyboardShortcut("n", modifiers: .command)
 
                 Button {
                     // TODO: Implement in Task 06
@@ -40,22 +40,15 @@ struct ContentView: View {
             }
         }
     }
-}
 
-// MARK: - Placeholder Views
-
-/// Placeholder email detail view (Task 09)
-struct EmailDetailPlaceholderView: View {
-    var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "envelope.open")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-            Text("Select an email")
-                .font(.title2)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    /// Opens a compose window with the specified mode.
+    private func openComposeWindow(mode: ComposeMode) {
+        NotificationCenter.default.post(
+            name: .openComposeWindow,
+            object: nil,
+            userInfo: ["mode": mode]
+        )
+        Logger.ui.info("Opening compose window: \(mode.windowTitle)")
     }
 }
 

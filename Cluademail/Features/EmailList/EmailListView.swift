@@ -38,6 +38,20 @@ struct EmailListView: View {
         .onChange(of: searchText) { _, newValue in
             viewModel?.searchQuery = newValue
         }
+        .onChange(of: viewModel?.selectedIds) { _, newIds in
+            // Update appState.selectedEmail when a single email is selected
+            guard let newIds, newIds.count == 1, let selectedId = newIds.first else {
+                // Clear selection if none or multiple selected
+                if newIds?.isEmpty ?? true {
+                    appState.selectedEmail = nil
+                }
+                return
+            }
+            // Find the selected email and update appState
+            if let email = viewModel?.emails.first(where: { $0.gmailId == selectedId }) {
+                appState.selectedEmail = email
+            }
+        }
         .onChange(of: appState.isSyncing) { oldValue, newValue in
             // Reload data when sync completes (isSyncing changes from true to false)
             if oldValue && !newValue {

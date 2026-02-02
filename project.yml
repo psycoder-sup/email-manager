@@ -45,6 +45,9 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Cluademail/Supporting/Cluademail.entitlements
         CODE_SIGN_STYLE: Automatic
         COMBINE_HIDPI_IMAGES: YES
+        # Google OAuth credentials
+        GOOGLE_CLIENT_ID: 745260212298-e59afp5voo9f53arm4qfa6oogn09gbkh.apps.googleusercontent.com
+        GOOGLE_REVERSED_CLIENT_ID: com.googleusercontent.apps.745260212298-e59afp5voo9f53arm4qfa6oogn09gbkh
       configs:
         Debug:
           # Allow ad-hoc signing for development without a team

@@ -57,6 +57,8 @@ Categories: `app`, `auth`, `sync`, `api`, `database`, `mcp`, `ui`
 
 **Data Models**: SwiftData `@Model` classes with `@Attribute(.unique)` for identifiers. Use cascade delete for dependent relationships.
 
+**SwiftData Threading**: Models from `mainContext` must only be accessed on `@MainActor`. SwiftUI's `.task` runs on background threads, so view methods calling repository must be marked `@MainActor`. For repositories, split methods: use `@MainActor` for UI (with in-memory filtering), non-isolated for background sync.
+
 **Async/Await**: Use structured concurrency throughout. Avoid callbacks.
 
 **Testing**: Use `TestFixtures` for consistent test data. Mock protocols for dependency injection.
