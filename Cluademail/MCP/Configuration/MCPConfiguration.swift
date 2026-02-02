@@ -11,9 +11,9 @@ enum MCPConfiguration {
             .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
     }
 
-    /// SwiftData store URL (SwiftData uses default.store in Application Support)
+    /// SwiftData store URL in app-specific directory
     static var databaseURL: URL {
-        applicationSupportDirectory.appendingPathComponent("default.store")
+        cluademailDirectory.appendingPathComponent("Cluademail.store")
     }
 
     /// Cluademail-specific directory for tokens and other files

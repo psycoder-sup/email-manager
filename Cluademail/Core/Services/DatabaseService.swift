@@ -24,17 +24,32 @@ final class DatabaseService {
             SyncState.self
         ])
 
-        let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: isStoredInMemoryOnly
-        )
+        // Ensure the database directory exists
+        if !isStoredInMemoryOnly {
+            try? FileManager.default.createDirectory(
+                at: MCPConfiguration.cluademailDirectory,
+                withIntermediateDirectories: true
+            )
+        }
+
+        let modelConfiguration: ModelConfiguration
+        if isStoredInMemoryOnly {
+            modelConfiguration = ModelConfiguration(
+                schema: schema,
+                isStoredInMemoryOnly: true
+            )
+        } else {
+            modelConfiguration = ModelConfiguration(
+                url: MCPConfiguration.databaseURL
+            )
+        }
 
         do {
             self.container = try ModelContainer(
                 for: schema,
                 configurations: [modelConfiguration]
             )
-            Logger.database.info("DatabaseService initialized successfully")
+            Logger.database.info("DatabaseService initialized successfully at \(MCPConfiguration.databaseURL.path)")
         } catch {
             Logger.database.fault("Failed to create ModelContainer: \(error.localizedDescription)")
             fatalError("Could not create ModelContainer: \(error)")
