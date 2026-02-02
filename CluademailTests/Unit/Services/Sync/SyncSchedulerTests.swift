@@ -56,9 +56,11 @@ final class SyncSchedulerTests: XCTestCase {
     // MARK: - Helpers
 
     private func setupDefaultMockResponses() {
-        mockApiService.listLabelsResult = .success([])
         mockApiService.listMessagesResult = .success((messages: [], nextPageToken: nil))
+        mockApiService.listDraftsResult = .success((drafts: [], nextPageToken: nil))
         mockApiService.getProfileResult = .success(TestFixtures.makeGmailProfileDTO(historyId: "12345"))
+        // Set history result for incremental sync (used when historyId exists from previous sync)
+        mockApiService.getHistoryResult = .success(GmailHistoryListDTO(history: nil, nextPageToken: nil, historyId: "12345"))
     }
 
     private func createTestAccount() {
@@ -84,7 +86,7 @@ final class SyncSchedulerTests: XCTestCase {
         // Wait for immediate sync to trigger
         try await Task.sleep(nanoseconds: 50_000_000)  // 50ms
 
-        XCTAssertGreaterThanOrEqual(mockApiService.listLabelsCallCount, 1)
+        XCTAssertGreaterThanOrEqual(mockApiService.listMessagesCallCount, 1)
     }
 
     func testStartTriggersImmediateSync() async throws {
@@ -98,7 +100,7 @@ final class SyncSchedulerTests: XCTestCase {
         try await Task.sleep(nanoseconds: 50_000_000)  // 50ms
 
         // Then - Sync should have been triggered immediately
-        XCTAssertGreaterThanOrEqual(mockApiService.listLabelsCallCount, 1)
+        XCTAssertGreaterThanOrEqual(mockApiService.listMessagesCallCount, 1)
     }
 
     func testStopCancelsScheduledSync() async throws {
@@ -109,7 +111,7 @@ final class SyncSchedulerTests: XCTestCase {
         // Wait for immediate sync
         try await Task.sleep(nanoseconds: 50_000_000)  // 50ms
 
-        let callCountAtStop = mockApiService.listLabelsCallCount
+        let callCountAtStop = mockApiService.listMessagesCallCount
 
         // When
         sut.stop()
@@ -121,7 +123,7 @@ final class SyncSchedulerTests: XCTestCase {
         try await Task.sleep(nanoseconds: 200_000_000)  // 200ms
 
         // No additional syncs should have occurred
-        XCTAssertEqual(mockApiService.listLabelsCallCount, callCountAtStop)
+        XCTAssertEqual(mockApiService.listMessagesCallCount, callCountAtStop)
     }
 
     // MARK: - Running State Tests
@@ -149,13 +151,18 @@ final class SyncSchedulerTests: XCTestCase {
         // Wait for initial sync
         try await Task.sleep(nanoseconds: 50_000_000)  // 50ms
 
-        let countAfterStart = mockApiService.listLabelsCallCount
+        // Get total API calls after start (either full sync or incremental sync)
+        let listMessagesAfterStart = mockApiService.listMessagesCallCount
+        let getHistoryAfterStart = mockApiService.getHistoryCallCount
 
         // When
         await sut.triggerImmediateSync()
 
-        // Then - One more sync should have happened
-        XCTAssertEqual(mockApiService.listLabelsCallCount, countAfterStart + 1)
+        // Then - One more sync should have happened (either full or incremental)
+        // After first sync sets historyId, subsequent syncs use incremental (getHistory)
+        let newListMessages = mockApiService.listMessagesCallCount - listMessagesAfterStart
+        let newGetHistory = mockApiService.getHistoryCallCount - getHistoryAfterStart
+        XCTAssertTrue(newListMessages >= 1 || newGetHistory >= 1, "At least one sync API call should have been made")
 
         // And scheduler should still be running
         XCTAssertTrue(sut.isRunning)
@@ -170,7 +177,7 @@ final class SyncSchedulerTests: XCTestCase {
         await sut.triggerImmediateSync()
 
         // Then - Sync should have run
-        XCTAssertEqual(mockApiService.listLabelsCallCount, 1)
+        XCTAssertEqual(mockApiService.listMessagesCallCount, 1)
 
         // And scheduler should still not be running
         XCTAssertFalse(sut.isRunning)

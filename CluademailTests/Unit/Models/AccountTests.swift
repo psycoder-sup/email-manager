@@ -25,7 +25,6 @@ final class AccountTests: XCTestCase {
         XCTAssertNil(account.lastSyncDate)
         XCTAssertNil(account.historyId)
         XCTAssertTrue(account.emails.isEmpty)
-        XCTAssertTrue(account.labels.isEmpty)
     }
 
     func testInitGeneratesUniqueId() {

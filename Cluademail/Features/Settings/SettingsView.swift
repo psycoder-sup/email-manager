@@ -331,7 +331,6 @@ struct MCPSettingsView: View {
                 MCPToolRow(name: "read_email", description: "Read full email content")
                 MCPToolRow(name: "search_emails", description: "Search emails by query")
                 MCPToolRow(name: "create_draft", description: "Create email draft")
-                MCPToolRow(name: "manage_labels", description: "Add or remove labels")
                 MCPToolRow(name: "get_attachment", description: "Download attachment")
             } header: {
                 Text("Available Tools")

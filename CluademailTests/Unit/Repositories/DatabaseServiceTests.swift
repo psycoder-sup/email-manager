@@ -71,10 +71,6 @@ final class DatabaseServiceTests: XCTestCase {
         attachment.email = email
         service.mainContext.insert(attachment)
 
-        let label = TestFixtures.makeLabel()
-        label.account = account
-        service.mainContext.insert(label)
-
         let syncState = TestFixtures.makeSyncState(accountId: account.id)
         service.mainContext.insert(syncState)
 

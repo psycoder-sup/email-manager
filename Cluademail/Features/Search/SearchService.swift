@@ -297,7 +297,8 @@ final class SearchService {
                         }
                         emails.append(existing)
                     } else {
-                        let email = try GmailModelMapper.mapToEmail(messageDTO, account: account)
+                        let email = try GmailModelMapper.mapToEmail(messageDTO)
+                        email.account = account  // Set account before inserting
                         databaseService.mainContext.insert(email)
                         emails.append(email)
                     }

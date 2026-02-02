@@ -40,6 +40,7 @@ enum TestFixtures {
     /// - Parameters:
     ///   - gmailId: Gmail message ID (default: generated UUID string)
     ///   - threadId: Gmail thread ID (default: generated UUID string)
+    ///   - draftId: Gmail draft ID (default: nil)
     ///   - subject: Email subject (default: "Test Subject")
     ///   - snippet: Email snippet (default: "Test email content...")
     ///   - fromAddress: Sender's email address (default: "sender@gmail.com")
@@ -53,6 +54,7 @@ enum TestFixtures {
     static func makeEmail(
         gmailId: String = UUID().uuidString,
         threadId: String = UUID().uuidString,
+        draftId: String? = nil,
         subject: String = "Test Subject",
         snippet: String = "Test email content...",
         fromAddress: String = "sender@gmail.com",
@@ -66,6 +68,7 @@ enum TestFixtures {
         Email(
             gmailId: gmailId,
             threadId: threadId,
+            draftId: draftId,
             subject: subject,
             snippet: snippet,
             fromAddress: fromAddress,
@@ -75,6 +78,28 @@ enum TestFixtures {
             isRead: isRead,
             isStarred: isStarred,
             labelIds: labelIds
+        )
+    }
+
+    /// Creates a test draft Email.
+    /// - Parameters:
+    ///   - gmailId: Gmail message ID (default: generated UUID string)
+    ///   - threadId: Gmail thread ID (default: generated UUID string)
+    ///   - draftId: Gmail draft ID (default: generated UUID string)
+    ///   - subject: Email subject (default: "Draft Subject")
+    /// - Returns: A configured draft Email
+    static func makeDraftEmail(
+        gmailId: String = UUID().uuidString,
+        threadId: String = UUID().uuidString,
+        draftId: String = UUID().uuidString,
+        subject: String = "Draft Subject"
+    ) -> Email {
+        makeEmail(
+            gmailId: gmailId,
+            threadId: threadId,
+            draftId: draftId,
+            subject: subject,
+            labelIds: ["DRAFT"]
         )
     }
 
@@ -239,14 +264,6 @@ enum TestFixtures {
         .invalidGrant
     ]
 
-    /// Sample keychain errors for testing
-    static let sampleKeychainErrors: [KeychainError] = [
-        .itemNotFound,
-        .duplicateItem,
-        .unexpectedStatus(errSecInternalError),
-        .encodingError(NSError(domain: "test", code: -1)),
-        .decodingError(NSError(domain: "test", code: -1))
-    ]
 
     /// Sample sync errors for testing
     static let sampleSyncErrors: [SyncError] = [
@@ -339,11 +356,24 @@ extension TestFixtures {
     /// Creates a test GmailDraftDTO with optional customization.
     static func makeGmailDraftDTO(
         id: String = UUID().uuidString,
-        messageId: String = UUID().uuidString
+        messageId: String = UUID().uuidString,
+        threadId: String = UUID().uuidString
     ) -> GmailDraftDTO {
         GmailDraftDTO(
             id: id,
-            message: makeGmailMessageDTO(id: messageId, labelIds: ["DRAFT"])
+            message: makeGmailMessageDTO(id: messageId, threadId: threadId, labelIds: ["DRAFT"])
+        )
+    }
+
+    /// Creates a test GmailDraftSummaryDTO for listing drafts.
+    static func makeGmailDraftSummaryDTO(
+        id: String = UUID().uuidString,
+        messageId: String = UUID().uuidString,
+        threadId: String = UUID().uuidString
+    ) -> GmailDraftSummaryDTO {
+        GmailDraftSummaryDTO(
+            id: id,
+            message: GmailMessageSummaryDTO(id: messageId, threadId: threadId)
         )
     }
 

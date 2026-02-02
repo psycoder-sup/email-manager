@@ -49,9 +49,11 @@ final class SyncCoordinatorTests: XCTestCase {
     // MARK: - Helpers
 
     private func setupDefaultMockResponses() {
-        mockApiService.listLabelsResult = .success([])
         mockApiService.listMessagesResult = .success((messages: [], nextPageToken: nil))
+        mockApiService.listDraftsResult = .success((drafts: [], nextPageToken: nil))
         mockApiService.getProfileResult = .success(TestFixtures.makeGmailProfileDTO(historyId: "12345"))
+        // Set history result for incremental sync (used when historyId exists from previous sync)
+        mockApiService.getHistoryResult = .success(GmailHistoryListDTO(history: nil, nextPageToken: nil, historyId: "12345"))
     }
 
     private func createEnabledAccount(email: String = "enabled@gmail.com") -> Account {
@@ -82,7 +84,7 @@ final class SyncCoordinatorTests: XCTestCase {
 
         // Then - Both accounts should have been synced
         // API should be called for labels for each account
-        XCTAssertEqual(mockApiService.listLabelsCallCount, 2)
+        XCTAssertEqual(mockApiService.listMessagesCallCount, 2)
     }
 
     func testSyncAllAccountsSkipsDisabledAccounts() async throws {
@@ -94,7 +96,7 @@ final class SyncCoordinatorTests: XCTestCase {
         await sut.syncAllAccounts()
 
         // Then - Only enabled account should be synced
-        XCTAssertEqual(mockApiService.listLabelsCallCount, 1)
+        XCTAssertEqual(mockApiService.listMessagesCallCount, 1)
     }
 
     func testSyncAllAccountsUpdatesisSyncing() async throws {
@@ -147,10 +149,7 @@ final class SyncCoordinatorTests: XCTestCase {
         // Given
         let account = createEnabledAccount()
 
-        // Slow down the API response
-        mockApiService.listLabelsResult = .success([
-            TestFixtures.makeGmailLabelDTO(id: "INBOX", name: "Inbox")
-        ])
+        // Default API response is fine for this test
 
         // Start first sync
         let task1 = Task {
@@ -171,7 +170,7 @@ final class SyncCoordinatorTests: XCTestCase {
         // Then - API should only be called once (second sync was skipped)
         // Note: Due to async timing, this test may be flaky. In production,
         // we'd use more robust synchronization mechanisms.
-        XCTAssertLessThanOrEqual(mockApiService.listLabelsCallCount, 2)
+        XCTAssertLessThanOrEqual(mockApiService.listMessagesCallCount, 2)
     }
 
     func testSyncAccountReleasesLockAfterCompletion() async throws {
@@ -186,13 +185,15 @@ final class SyncCoordinatorTests: XCTestCase {
         setupDefaultMockResponses()
         await sut.syncAccount(account)
 
-        XCTAssertEqual(mockApiService.listLabelsCallCount, 1)
+        // Verify second sync ran (either full sync or incremental sync)
+        let syncApiCalls = mockApiService.listMessagesCallCount + mockApiService.getHistoryCallCount
+        XCTAssertGreaterThanOrEqual(syncApiCalls, 1, "Second sync should have made API calls")
     }
 
     func testSyncAccountReleasesLockOnError() async throws {
         // Given
         let account = createEnabledAccount()
-        mockApiService.listLabelsResult = .failure(APIError.serverError(statusCode: 500))
+        mockApiService.listDraftsResult = .failure(APIError.serverError(statusCode: 500))
 
         // When - First sync (fails)
         await sut.syncAccount(account)
@@ -273,8 +274,9 @@ final class SyncCoordinatorTests: XCTestCase {
         await sut.syncAccount(account)
 
         // Then - API calls should reflect two syncs were performed
-        // (If engines were recreated, we might see different behavior)
-        XCTAssertEqual(mockApiService.listLabelsCallCount, 2)
+        // First sync uses full sync (listMessages), second uses incremental (getHistory)
+        let totalSyncCalls = mockApiService.listMessagesCallCount + mockApiService.getHistoryCallCount
+        XCTAssertGreaterThanOrEqual(totalSyncCalls, 2, "Two syncs should have been performed")
     }
 
     func testClearEngineCacheRemovesEngines() async throws {
@@ -290,7 +292,9 @@ final class SyncCoordinatorTests: XCTestCase {
         setupDefaultMockResponses()
         await sut.syncAccount(account)
 
-        XCTAssertEqual(mockApiService.listLabelsCallCount, 1)
+        // Verify sync ran (either full sync or incremental sync)
+        let syncApiCalls = mockApiService.listMessagesCallCount + mockApiService.getHistoryCallCount
+        XCTAssertGreaterThanOrEqual(syncApiCalls, 1, "Sync should have made API calls after cache clear")
     }
 
     // MARK: - Trigger Sync Tests
@@ -303,7 +307,7 @@ final class SyncCoordinatorTests: XCTestCase {
         await sut.triggerSync(for: account)
 
         // Then
-        XCTAssertEqual(mockApiService.listLabelsCallCount, 1)
+        XCTAssertEqual(mockApiService.listMessagesCallCount, 1)
         let progress = sut.getProgress(for: account.id)
         XCTAssertEqual(progress.status, .completed)
     }

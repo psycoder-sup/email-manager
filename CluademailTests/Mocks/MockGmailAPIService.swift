@@ -14,7 +14,7 @@ final class MockGmailAPIService: GmailAPIServiceProtocol, @unchecked Sendable {
     var untrashMessageCallCount = 0
     var listThreadsCallCount = 0
     var getThreadCallCount = 0
-    var listLabelsCallCount = 0
+    var listDraftsCallCount = 0
     var createDraftCallCount = 0
     var updateDraftCallCount = 0
     var deleteDraftCallCount = 0
@@ -41,7 +41,9 @@ final class MockGmailAPIService: GmailAPIServiceProtocol, @unchecked Sendable {
 
     var getThreadResult: Result<GmailThreadDTO, Error>?
 
-    var listLabelsResult: Result<[GmailLabelDTO], Error> = .success([])
+    var listDraftsResult: Result<(drafts: [GmailDraftSummaryDTO], nextPageToken: String?), Error> =
+        .success((drafts: [], nextPageToken: nil))
+    var getDraftResults: [String: Result<GmailDraftDTO, Error>] = [:]
 
     var createDraftResult: Result<GmailDraftDTO, Error>?
     var updateDraftResult: Result<GmailDraftDTO, Error>?
@@ -170,9 +172,13 @@ final class MockGmailAPIService: GmailAPIServiceProtocol, @unchecked Sendable {
         throw APIError.notFound
     }
 
-    func listLabels(accountEmail: String) async throws -> [GmailLabelDTO] {
-        listLabelsCallCount += 1
-        return try listLabelsResult.get()
+    func listDrafts(
+        accountEmail: String,
+        maxResults: Int?,
+        pageToken: String?
+    ) async throws -> (drafts: [GmailDraftSummaryDTO], nextPageToken: String?) {
+        listDraftsCallCount += 1
+        return try listDraftsResult.get()
     }
 
     func createDraft(
@@ -220,6 +226,13 @@ final class MockGmailAPIService: GmailAPIServiceProtocol, @unchecked Sendable {
 
     func getDraft(accountEmail: String, draftId: String) async throws -> GmailDraftDTO {
         getDraftCallCount += 1
+
+        // Check per-draft results first
+        if let result = getDraftResults[draftId] {
+            return try result.get()
+        }
+
+        // Fall back to default result
         if let result = getDraftResult {
             return try result.get()
         }
@@ -287,7 +300,7 @@ final class MockGmailAPIService: GmailAPIServiceProtocol, @unchecked Sendable {
         untrashMessageCallCount = 0
         listThreadsCallCount = 0
         getThreadCallCount = 0
-        listLabelsCallCount = 0
+        listDraftsCallCount = 0
         createDraftCallCount = 0
         updateDraftCallCount = 0
         deleteDraftCallCount = 0
@@ -304,7 +317,8 @@ final class MockGmailAPIService: GmailAPIServiceProtocol, @unchecked Sendable {
         modifyMessageResult = nil
         listThreadsResult = .success((threads: [], nextPageToken: nil))
         getThreadResult = nil
-        listLabelsResult = .success([])
+        listDraftsResult = .success((drafts: [], nextPageToken: nil))
+        getDraftResults = [:]
         createDraftResult = nil
         updateDraftResult = nil
         getDraftResult = nil

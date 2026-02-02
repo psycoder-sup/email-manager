@@ -157,52 +157,6 @@ final class GmailDTOsTests: XCTestCase {
         XCTAssertEqual(list.resultSizeEstimate, 100)
     }
 
-    // MARK: - GmailLabelDTO Tests
-
-    func testGmailLabelDTODecoding() throws {
-        let json = """
-        {
-            "id": "INBOX",
-            "name": "Inbox",
-            "type": "system",
-            "messageListVisibility": "show",
-            "labelListVisibility": "labelShow",
-            "messagesTotal": 1000,
-            "messagesUnread": 50
-        }
-        """
-
-        let data = json.data(using: .utf8)!
-        let label = try JSONDecoder().decode(GmailLabelDTO.self, from: data)
-
-        XCTAssertEqual(label.id, "INBOX")
-        XCTAssertEqual(label.name, "Inbox")
-        XCTAssertEqual(label.type, "system")
-        XCTAssertEqual(label.messagesTotal, 1000)
-        XCTAssertEqual(label.messagesUnread, 50)
-    }
-
-    func testGmailLabelDTOWithColor() throws {
-        let json = """
-        {
-            "id": "Label_1",
-            "name": "Work",
-            "type": "user",
-            "color": {
-                "textColor": "#000000",
-                "backgroundColor": "#16a765"
-            }
-        }
-        """
-
-        let data = json.data(using: .utf8)!
-        let label = try JSONDecoder().decode(GmailLabelDTO.self, from: data)
-
-        XCTAssertEqual(label.id, "Label_1")
-        XCTAssertEqual(label.color?.textColor, "#000000")
-        XCTAssertEqual(label.color?.backgroundColor, "#16a765")
-    }
-
     // MARK: - GmailHistoryDTO Tests
 
     func testGmailHistoryListDTODecoding() throws {
@@ -248,13 +202,4 @@ final class GmailDTOsTests: XCTestCase {
         XCTAssertEqual(payload.mimeType, "text/plain")
     }
 
-    func testMakeGmailLabelDTOFixture() {
-        let dto = TestFixtures.makeGmailLabelDTO(
-            id: "SENT",
-            name: "Sent Mail"
-        )
-
-        XCTAssertEqual(dto.id, "SENT")
-        XCTAssertEqual(dto.name, "Sent Mail")
-    }
 }

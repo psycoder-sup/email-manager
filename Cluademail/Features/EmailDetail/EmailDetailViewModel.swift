@@ -96,8 +96,8 @@ final class EmailDetailViewModel {
                 messageId: email.gmailId
             )
 
-            // Update email with full content
-            let updatedEmail = try GmailModelMapper.mapToEmail(fullMessage, account: account)
+            // Update email with full content (no need to set account on temporary email)
+            let updatedEmail = try GmailModelMapper.mapToEmail(fullMessage)
             email.bodyHtml = updatedEmail.bodyHtml
             email.bodyText = updatedEmail.bodyText
 

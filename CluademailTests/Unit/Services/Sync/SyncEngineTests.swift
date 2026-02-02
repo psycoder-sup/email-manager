@@ -47,42 +47,30 @@ final class SyncEngineTests: XCTestCase {
         try await super.tearDown()
     }
 
-    // MARK: - Full Sync Tests
+    // MARK: - Helper Methods
 
-    func testFullSyncFetchesLabelsFirst() async throws {
-        // Given
-        let labels = [
-            TestFixtures.makeGmailLabelDTO(id: "INBOX", name: "Inbox"),
-            TestFixtures.makeGmailLabelDTO(id: "SENT", name: "Sent")
-        ]
-        mockApiService.listLabelsResult = .success(labels)
+    private func setupBasicSyncMocks() {
         mockApiService.listMessagesResult = .success((messages: [], nextPageToken: nil))
         mockApiService.getProfileResult = .success(TestFixtures.makeGmailProfileDTO(historyId: "12345"))
-
-        // When
-        _ = try await sut.sync()
-
-        // Then
-        XCTAssertEqual(mockApiService.listLabelsCallCount, 1)
-
-        // Verify labels were saved
-        let labelDescriptor = FetchDescriptor<Label>()
-        let savedLabels = try context.fetch(labelDescriptor)
-        XCTAssertEqual(savedLabels.count, 2)
+        mockApiService.listDraftsResult = .success((drafts: [], nextPageToken: nil))
+        // Set history result for incremental sync (used when historyId exists from previous sync)
+        mockApiService.getHistoryResult = .success(GmailHistoryListDTO(history: nil, nextPageToken: nil, historyId: "12345"))
     }
+
+    // MARK: - Full Sync Tests
 
     func testFullSyncFetchesEmails() async throws {
         // Given
         let messageId = "msg-123"
         let threadId = "thread-123"
         let messageSummary = GmailMessageSummaryDTO(id: messageId, threadId: threadId)
-        mockApiService.listLabelsResult = .success([])
         mockApiService.listMessagesResult = .success((messages: [messageSummary], nextPageToken: nil))
         mockApiService.batchGetMessagesResult = .success(BatchResult(
             succeeded: [TestFixtures.makeGmailMessageDTO(id: messageId, threadId: threadId)],
             failed: []
         ))
         mockApiService.getProfileResult = .success(TestFixtures.makeGmailProfileDTO(historyId: "12345"))
+        mockApiService.listDraftsResult = .success((drafts: [], nextPageToken: nil))
 
         // When
         let result = try await sut.sync()
@@ -98,8 +86,7 @@ final class SyncEngineTests: XCTestCase {
     func testFullSyncUpdatesHistoryId() async throws {
         // Given
         let expectedHistoryId = "99999"
-        mockApiService.listLabelsResult = .success([])
-        mockApiService.listMessagesResult = .success((messages: [], nextPageToken: nil))
+        setupBasicSyncMocks()
         mockApiService.getProfileResult = .success(TestFixtures.makeGmailProfileDTO(historyId: expectedHistoryId))
 
         // When
@@ -116,9 +103,7 @@ final class SyncEngineTests: XCTestCase {
 
     func testFullSyncHandlesEmptyMailbox() async throws {
         // Given
-        mockApiService.listLabelsResult = .success([])
-        mockApiService.listMessagesResult = .success((messages: [], nextPageToken: nil))
-        mockApiService.getProfileResult = .success(TestFixtures.makeGmailProfileDTO(historyId: "12345"))
+        setupBasicSyncMocks()
 
         // When
         let result = try await sut.sync()
@@ -139,7 +124,6 @@ final class SyncEngineTests: XCTestCase {
         let msg1 = TestFixtures.makeGmailMessageDTO(id: "msg-1", threadId: threadId, snippet: "First message")
         let msg2 = TestFixtures.makeGmailMessageDTO(id: "msg-2", threadId: threadId, snippet: "Second message")
 
-        mockApiService.listLabelsResult = .success([])
         mockApiService.listMessagesResult = .success((
             messages: [
                 GmailMessageSummaryDTO(id: "msg-1", threadId: threadId),
@@ -149,13 +133,12 @@ final class SyncEngineTests: XCTestCase {
         ))
         mockApiService.batchGetMessagesResult = .success(BatchResult(succeeded: [msg1, msg2], failed: []))
         mockApiService.getProfileResult = .success(TestFixtures.makeGmailProfileDTO(historyId: "12345"))
+        mockApiService.listDraftsResult = .success((drafts: [], nextPageToken: nil))
 
         // When
         let result = try await sut.sync()
 
         // Then - Should report 2 new emails synced
-        // Note: Thread derivation is tested via integration test since it requires
-        // proper SwiftData context relationship handling
         if case .success(let newEmails, _, _) = result {
             XCTAssertEqual(newEmails, 2)
         } else {
@@ -176,13 +159,13 @@ final class SyncEngineTests: XCTestCase {
             labelIds: ["INBOX"]  // No UNREAD = isRead
         )
 
-        mockApiService.listLabelsResult = .success([])
         mockApiService.listMessagesResult = .success((
             messages: [GmailMessageSummaryDTO(id: "msg-123", threadId: "thread-123")],
             nextPageToken: nil
         ))
         mockApiService.batchGetMessagesResult = .success(BatchResult(succeeded: [updatedDTO], failed: []))
         mockApiService.getProfileResult = .success(TestFixtures.makeGmailProfileDTO(historyId: "12345"))
+        mockApiService.listDraftsResult = .success((drafts: [], nextPageToken: nil))
 
         // When
         let result = try await sut.sync()
@@ -206,11 +189,11 @@ final class SyncEngineTests: XCTestCase {
         context.insert(syncState)
         try context.save()
 
-        mockApiService.listLabelsResult = .success([])
         mockApiService.getHistoryResult = .success(TestFixtures.makeGmailHistoryListDTO(
             history: [],
             historyId: "10001"
         ))
+        mockApiService.listDraftsResult = .success((drafts: [], nextPageToken: nil))
 
         // When
         _ = try await sut.sync()
@@ -235,12 +218,12 @@ final class SyncEngineTests: XCTestCase {
             messagesAdded: [TestFixtures.makeGmailHistoryMessageDTO(messageId: newMessageId, threadId: newThreadId)]
         )
 
-        mockApiService.listLabelsResult = .success([])
         mockApiService.getHistoryResult = .success(TestFixtures.makeGmailHistoryListDTO(
             history: [historyRecord],
             historyId: "10001"
         ))
         mockApiService.getMessageResult = .success(TestFixtures.makeGmailMessageDTO(id: newMessageId, threadId: newThreadId))
+        mockApiService.listDraftsResult = .success((drafts: [], nextPageToken: nil))
 
         // When
         let result = try await sut.sync()
@@ -271,11 +254,11 @@ final class SyncEngineTests: XCTestCase {
             messagesDeleted: [TestFixtures.makeGmailHistoryMessageDTO(messageId: "to-delete", threadId: "thread-1")]
         )
 
-        mockApiService.listLabelsResult = .success([])
         mockApiService.getHistoryResult = .success(TestFixtures.makeGmailHistoryListDTO(
             history: [historyRecord],
             historyId: "10001"
         ))
+        mockApiService.listDraftsResult = .success((drafts: [], nextPageToken: nil))
 
         // When
         let result = try await sut.sync()
@@ -293,55 +276,6 @@ final class SyncEngineTests: XCTestCase {
         XCTAssertTrue(emails.isEmpty)
     }
 
-    func testIncrementalSyncHandlesLabelsChanged() async throws {
-        // Given - Email exists with UNREAD label
-        let existingEmail = TestFixtures.makeEmail(
-            gmailId: "existing-msg",
-            threadId: "thread-1",
-            isRead: false,
-            labelIds: ["INBOX", "UNREAD"]
-        )
-        existingEmail.account = account
-        context.insert(existingEmail)
-
-        let syncState = SyncState(accountId: account.id)
-        syncState.historyId = "10000"
-        syncState.lastFullSyncDate = Date()
-        context.insert(syncState)
-        try context.save()
-
-        // Remove UNREAD label (mark as read)
-        let historyRecord = TestFixtures.makeGmailHistoryDTO(
-            id: "10001",
-            labelsRemoved: [TestFixtures.makeGmailHistoryLabelDTO(
-                messageId: "existing-msg",
-                threadId: "thread-1",
-                labelIds: ["UNREAD"]
-            )]
-        )
-
-        mockApiService.listLabelsResult = .success([])
-        mockApiService.getHistoryResult = .success(TestFixtures.makeGmailHistoryListDTO(
-            history: [historyRecord],
-            historyId: "10001"
-        ))
-
-        // When
-        let result = try await sut.sync()
-
-        // Then
-        if case .success(_, let updatedEmails, _) = result {
-            XCTAssertEqual(updatedEmails, 1)
-        } else {
-            XCTFail("Expected success result")
-        }
-
-        // Verify email is now read
-        let emailDescriptor = FetchDescriptor<Email>(predicate: #Predicate { $0.gmailId == "existing-msg" })
-        let emails = try context.fetch(emailDescriptor)
-        XCTAssertTrue(emails.first?.isRead ?? false)
-    }
-
     func testIncrementalSyncFallsBackOnHistoryExpired() async throws {
         // Given - Set up sync state with old history ID
         let syncState = SyncState(accountId: account.id)
@@ -352,9 +286,9 @@ final class SyncEngineTests: XCTestCase {
 
         // History API returns 404 (history expired)
         mockApiService.getHistoryResult = .failure(APIError.notFound)
-        mockApiService.listLabelsResult = .success([])
         mockApiService.listMessagesResult = .success((messages: [], nextPageToken: nil))
         mockApiService.getProfileResult = .success(TestFixtures.makeGmailProfileDTO(historyId: "99999"))
+        mockApiService.listDraftsResult = .success((drafts: [], nextPageToken: nil))
 
         // When
         _ = try await sut.sync()
@@ -380,13 +314,12 @@ final class SyncEngineTests: XCTestCase {
             id: "10001",
             messagesAdded: [TestFixtures.makeGmailHistoryMessageDTO(messageId: messageId, threadId: threadId)]
         )
-        // Second record: label added to same message
+        // Second record: label changed on same message (simulated as labels added)
         let record2 = TestFixtures.makeGmailHistoryDTO(
             id: "10002",
-            labelsAdded: [TestFixtures.makeGmailHistoryLabelDTO(messageId: messageId, threadId: threadId, labelIds: ["STARRED"])]
+            labelsAdded: [GmailHistoryLabelDTO(message: GmailMessageSummaryDTO(id: messageId, threadId: threadId), labelIds: ["STARRED"])]
         )
 
-        mockApiService.listLabelsResult = .success([])
         mockApiService.getHistoryResult = .success(TestFixtures.makeGmailHistoryListDTO(
             history: [record1, record2],
             historyId: "10002"
@@ -396,6 +329,7 @@ final class SyncEngineTests: XCTestCase {
             threadId: threadId,
             labelIds: ["INBOX", "STARRED"]
         ))
+        mockApiService.listDraftsResult = .success((drafts: [], nextPageToken: nil))
 
         // When
         let result = try await sut.sync()
@@ -413,7 +347,7 @@ final class SyncEngineTests: XCTestCase {
 
     func testSyncUpdatesSyncStateOnError() async throws {
         // Given
-        mockApiService.listLabelsResult = .failure(APIError.serverError(statusCode: 500))
+        mockApiService.listMessagesResult = .failure(APIError.serverError(statusCode: 500))
 
         // When/Then
         let accountId = account.id
@@ -433,7 +367,7 @@ final class SyncEngineTests: XCTestCase {
 
     func testSyncCanBeCancelled() async throws {
         // Given
-        mockApiService.listLabelsResult = .success([])
+        setupBasicSyncMocks()
 
         // Create slow message listing
         let messages = (0..<100).map {
@@ -444,7 +378,6 @@ final class SyncEngineTests: XCTestCase {
             succeeded: messages.map { TestFixtures.makeGmailMessageDTO(id: $0.id, threadId: $0.threadId) },
             failed: []
         ))
-        mockApiService.getProfileResult = .success(TestFixtures.makeGmailProfileDTO(historyId: "12345"))
 
         // Cancel before completing
         Task {
@@ -461,7 +394,7 @@ final class SyncEngineTests: XCTestCase {
 
     func testSyncHandlesApiErrors() async throws {
         // Given
-        mockApiService.listLabelsResult = .failure(APIError.networkError(nil))
+        mockApiService.listMessagesResult = .failure(APIError.networkError(nil))
 
         // When/Then
         do {

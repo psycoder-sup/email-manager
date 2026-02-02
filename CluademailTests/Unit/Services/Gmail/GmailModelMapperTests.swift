@@ -47,7 +47,7 @@ final class GmailModelMapperTests: XCTestCase {
             )
         )
 
-        let email = try GmailModelMapper.mapToEmail(dto, account: account)
+        let email = try GmailModelMapper.mapToEmail(dto)
 
         XCTAssertEqual(email.gmailId, "msg123")
         XCTAssertEqual(email.threadId, "thread456")
@@ -78,7 +78,7 @@ final class GmailModelMapperTests: XCTestCase {
             )
         )
 
-        let email = try GmailModelMapper.mapToEmail(dto, account: account)
+        let email = try GmailModelMapper.mapToEmail(dto)
 
         XCTAssertTrue(email.isRead)
         XCTAssertTrue(email.isStarred)
@@ -104,7 +104,7 @@ final class GmailModelMapperTests: XCTestCase {
             )
         )
 
-        let email = try GmailModelMapper.mapToEmail(dto, account: account)
+        let email = try GmailModelMapper.mapToEmail(dto)
 
         XCTAssertEqual(email.fromAddress, "john@example.com")
         XCTAssertEqual(email.fromName, "John Doe")
@@ -130,7 +130,7 @@ final class GmailModelMapperTests: XCTestCase {
             )
         )
 
-        let email = try GmailModelMapper.mapToEmail(dto, account: account)
+        let email = try GmailModelMapper.mapToEmail(dto)
 
         XCTAssertEqual(email.bodyText, "Hello, World!")
         XCTAssertNil(email.bodyHtml)
@@ -154,7 +154,7 @@ final class GmailModelMapperTests: XCTestCase {
             )
         )
 
-        let email = try GmailModelMapper.mapToEmail(dto, account: account)
+        let email = try GmailModelMapper.mapToEmail(dto)
 
         XCTAssertNil(email.bodyText)
         XCTAssertEqual(email.bodyHtml, "<p>Hello, World!</p>")
@@ -203,7 +203,7 @@ final class GmailModelMapperTests: XCTestCase {
             )
         )
 
-        let email = try GmailModelMapper.mapToEmail(dto, account: account)
+        let email = try GmailModelMapper.mapToEmail(dto)
 
         XCTAssertEqual(email.bodyText, "Plain text body")
         XCTAssertEqual(email.bodyHtml, "<p>HTML body</p>")
@@ -241,59 +241,13 @@ final class GmailModelMapperTests: XCTestCase {
             )
         )
 
-        let email = try GmailModelMapper.mapToEmail(dto, account: account)
+        let email = try GmailModelMapper.mapToEmail(dto)
 
         XCTAssertEqual(email.attachments.count, 1)
         XCTAssertEqual(email.attachments.first?.filename, "document.pdf")
         XCTAssertEqual(email.attachments.first?.mimeType, "application/pdf")
         XCTAssertEqual(email.attachments.first?.gmailAttachmentId, "att123")
         XCTAssertEqual(email.attachments.first?.size, 1024)
-    }
-
-    // MARK: - Label Mapping Tests
-
-    func testMapToLabel_SystemLabel() {
-        let dto = GmailLabelDTO(
-            id: "INBOX",
-            name: "Inbox",
-            type: "system",
-            messageListVisibility: "show",
-            labelListVisibility: "labelShow",
-            color: nil,
-            messagesTotal: 100,
-            messagesUnread: 5
-        )
-
-        let label = GmailModelMapper.mapToLabel(dto, account: account)
-
-        XCTAssertEqual(label.gmailLabelId, "INBOX")
-        XCTAssertEqual(label.name, "Inbox")
-        XCTAssertEqual(label.type, .system)
-        XCTAssertEqual(label.messageListVisibility, .show)
-        XCTAssertEqual(label.labelListVisibility, .show)
-    }
-
-    func testMapToLabel_UserLabel() {
-        let dto = GmailLabelDTO(
-            id: "Label_1",
-            name: "My Label",
-            type: "user",
-            messageListVisibility: "hide",
-            labelListVisibility: "labelHide",
-            color: GmailLabelColorDTO(textColor: "#000000", backgroundColor: "#ffffff"),
-            messagesTotal: 50,
-            messagesUnread: 0
-        )
-
-        let label = GmailModelMapper.mapToLabel(dto, account: account)
-
-        XCTAssertEqual(label.gmailLabelId, "Label_1")
-        XCTAssertEqual(label.name, "My Label")
-        XCTAssertEqual(label.type, .user)
-        XCTAssertEqual(label.messageListVisibility, .hide)
-        XCTAssertEqual(label.labelListVisibility, .hide)
-        XCTAssertEqual(label.textColor, "#000000")
-        XCTAssertEqual(label.backgroundColor, "#ffffff")
     }
 
     // MARK: - RFC 2047 Decoding Tests

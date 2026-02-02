@@ -89,7 +89,7 @@ final class MockTokenManager: TokenManagerProtocol, @unchecked Sendable {
         }
 
         guard let storedTokens = storedTokens else {
-            throw KeychainError.itemNotFound
+            throw AuthError.tokenExpired
         }
 
         return storedTokens
@@ -122,7 +122,7 @@ final class MockTokenManager: TokenManagerProtocol, @unchecked Sendable {
         }
 
         guard let storedTokens = storedTokens else {
-            throw KeychainError.itemNotFound
+            throw AuthError.tokenExpired
         }
 
         return storedTokens.accessToken
