@@ -64,7 +64,7 @@ final class CreateDraftTool: MCPToolProtocol, @unchecked Sendable {
         // Create draft via Gmail API
         Logger.mcp.info("Creating draft for account: \(accountEmail, privacy: .private(mask: .hash))")
 
-        let draft = try await gmailAPI.createDraft(
+        let createdDraft = try await gmailAPI.createDraft(
             accountEmail: accountEmail,
             to: toAddresses,
             cc: ccAddresses,
@@ -76,10 +76,26 @@ final class CreateDraftTool: MCPToolProtocol, @unchecked Sendable {
             attachments: []
         )
 
-        // Save draft to local database for immediate visibility
-        try await saveDraftLocally(draft: draft, accountEmail: accountEmail)
+        // Fetch full draft data (creation response is minimal and lacks message payload)
+        let fullDraft = try await gmailAPI.getDraft(
+            accountEmail: accountEmail,
+            draftId: createdDraft.id
+        )
 
-        return formatDraftResult(draft: draft, to: toAddresses, cc: ccAddresses, subject: subject)
+        // Debug: Log what headers we got
+        if let headers = fullDraft.message.payload?.headers {
+            Logger.mcp.debug("Draft headers count: \(headers.count)")
+            for header in headers {
+                Logger.mcp.debug("Header: \(header.name) = \(header.value)")
+            }
+        } else {
+            Logger.mcp.warning("Draft has no payload headers!")
+        }
+
+        // Save draft to local database for immediate visibility
+        try await saveDraftLocally(draft: fullDraft, accountEmail: accountEmail)
+
+        return formatDraftResult(draft: fullDraft, to: toAddresses, cc: ccAddresses, subject: subject)
     }
 
     // MARK: - Private
