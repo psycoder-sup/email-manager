@@ -243,32 +243,50 @@ final class SearchService {
     }
 
     /// Searches Gmail API for matching emails.
+    /// Uses two-phase approach: parallel API fetches, then serial database operations.
     private func searchServer(accounts: [Account]) async -> [Email] {
         let gmailQuery = searchFilters.toGmailQuery(baseQuery: searchQuery)
 
-        // Use TaskGroup for parallel multi-account search
-        return await withTaskGroup(of: [Email].self) { group in
-            for account in accounts {
-                group.addTask { @MainActor in
-                    await self.searchServerSingleAccount(account: account, query: gmailQuery)
+        // Phase 1: Parallel API fetches (no database access)
+        // Capture account IDs and emails before entering TaskGroup to avoid cross-context issues
+        let accountInfos = accounts.map { (id: $0.id, email: $0.email) }
+
+        // Capture API service reference to pass to static method
+        let apiService = gmailAPIService
+
+        let apiResults = await withTaskGroup(of: (UUID, [GmailMessageDTO]).self) { group in
+            for accountInfo in accountInfos {
+                group.addTask {
+                    // Use static nonisolated method - completely off MainActor
+                    await (accountInfo.id, Self.fetchMessagesFromAPI(
+                        apiService: apiService,
+                        accountEmail: accountInfo.email,
+                        query: gmailQuery
+                    ))
                 }
             }
 
-            var allResults: [Email] = []
-            for await results in group {
-                allResults.append(contentsOf: results)
+            var results: [(UUID, [GmailMessageDTO])] = []
+            for await result in group {
+                results.append(result)
             }
-
-            return allResults
+            return results
         }
+
+        // Phase 2: Serial database operations on MainActor
+        return await persistSearchResults(apiResults)
     }
 
-    /// Searches Gmail API for a single account.
-    private func searchServerSingleAccount(account: Account, query: String) async -> [Email] {
+    /// Fetches messages from Gmail API without any database operations.
+    /// Static nonisolated to ensure parallel calls run completely off MainActor.
+    private nonisolated static func fetchMessagesFromAPI(
+        apiService: GmailAPIService,
+        accountEmail: String,
+        query: String
+    ) async -> [GmailMessageDTO] {
         do {
-            // Get message IDs from search
-            let (messages, _) = try await gmailAPIService.listMessages(
-                accountEmail: account.email,
+            let (messages, _) = try await apiService.listMessages(
+                accountEmail: accountEmail,
                 query: query.isEmpty ? nil : query,
                 labelIds: nil,
                 maxResults: 50,
@@ -277,16 +295,34 @@ final class SearchService {
 
             guard !messages.isEmpty else { return [] }
 
-            // Batch fetch full message details
             let messageIds = messages.map(\.id)
-            let batchResult = try await gmailAPIService.batchGetMessages(
-                accountEmail: account.email,
+            let batchResult = try await apiService.batchGetMessages(
+                accountEmail: accountEmail,
                 messageIds: messageIds
             )
 
-            // Map to Email models and persist to database
-            var emails: [Email] = []
-            for messageDTO in batchResult.succeeded {
+            return batchResult.succeeded
+        } catch {
+            Logger.api.error("API fetch failed for \(accountEmail): \(error.localizedDescription)")
+            return []
+        }
+    }
+
+    /// Persists search results to database. Must run serially on MainActor.
+    /// This ensures all database operations use a consistent context.
+    @MainActor
+    private func persistSearchResults(_ apiResults: [(UUID, [GmailMessageDTO])]) async -> [Email] {
+        var allEmails: [Email] = []
+
+        for (accountId, messageDTOs) in apiResults {
+            // Fetch account fresh in this context to ensure proper model binding
+            let accountDescriptor = FetchDescriptor<Account>(predicate: #Predicate { $0.id == accountId })
+            guard let account = try? databaseService.mainContext.fetch(accountDescriptor).first else {
+                Logger.database.warning("Could not find account with ID \(accountId) for search results")
+                continue
+            }
+
+            for messageDTO in messageDTOs {
                 do {
                     // Check if email already exists in database
                     let descriptor = FetchDescriptor<Email>(predicate: #Predicate { $0.gmailId == messageDTO.id })
@@ -295,33 +331,29 @@ final class SearchService {
                         if existing.account == nil {
                             existing.account = account
                         }
-                        emails.append(existing)
+                        allEmails.append(existing)
                     } else {
                         let email = try GmailModelMapper.mapToEmail(messageDTO)
-                        email.account = account  // Set account before inserting
+                        email.account = account
                         databaseService.mainContext.insert(email)
-                        emails.append(email)
+                        allEmails.append(email)
                     }
                 } catch {
                     Logger.api.error("Failed to map message: \(error.localizedDescription)")
                 }
             }
-
-            // Save persisted emails
-            if !emails.isEmpty {
-                do {
-                    try databaseService.mainContext.save()
-                } catch {
-                    Logger.database.error("Failed to save server emails: \(error.localizedDescription)")
-                }
-            }
-
-            return emails
-
-        } catch {
-            Logger.api.error("Server search failed for \(account.email): \(error.localizedDescription)")
-            return []
         }
+
+        // Save all persisted emails in a single batch
+        if !allEmails.isEmpty {
+            do {
+                try databaseService.mainContext.save()
+            } catch {
+                Logger.database.error("Failed to save search results: \(error.localizedDescription)")
+            }
+        }
+
+        return allEmails
     }
 
     /// Applies filters to email results.

@@ -68,10 +68,13 @@ final class SyncCoordinator {
             }
 
             // Sync accounts concurrently
+            // Extract account IDs before TaskGroup to avoid passing SwiftData models across isolation boundaries
+            let accountIds = enabledAccounts.map(\.id)
+
             await withTaskGroup(of: Void.self) { group in
-                for account in enabledAccounts {
+                for accountId in accountIds {
                     group.addTask {
-                        await self.syncAccount(account)
+                        await self.syncAccountById(accountId)
                     }
                 }
             }
@@ -151,6 +154,22 @@ final class SyncCoordinator {
         }
     }
 
+    /// Syncs an account by its ID. Used internally for TaskGroup-based concurrent sync.
+    /// Fetches the Account fresh from the database to ensure proper MainActor binding.
+    /// - Parameter accountId: The account ID to sync
+    private func syncAccountById(_ accountId: UUID) async {
+        do {
+            let context = databaseService.mainContext
+            guard let account = try await accountRepository.fetch(byId: accountId, context: context) else {
+                Logger.sync.warning("Account not found for sync: \(accountId)")
+                return
+            }
+            await syncAccount(account)
+        } catch {
+            Logger.sync.error("Failed to fetch account for sync: \(error)")
+        }
+    }
+
     /// Gets the current sync progress for an account.
     /// - Parameter accountId: The account ID
     /// - Returns: The sync progress, or idle if no progress tracked
@@ -171,7 +190,8 @@ final class SyncCoordinator {
         }
 
         let engine = SyncEngine(
-            account: account,
+            accountId: account.id,
+            accountEmail: account.email,
             apiService: apiService,
             databaseService: databaseService
         )

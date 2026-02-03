@@ -21,7 +21,10 @@ actor SyncEngine: SyncEngineProtocol {
 
     // MARK: - Dependencies
 
-    private let account: Account
+    /// Account ID (primitive, safe to access from actor isolation)
+    private let accountId: UUID
+    /// Account email (primitive, safe to access from actor isolation)
+    private let accountEmail: String
     private let apiService: any GmailAPIServiceProtocol
     private let databaseService: DatabaseService
     private let emailRepository: EmailRepository
@@ -34,11 +37,13 @@ actor SyncEngine: SyncEngineProtocol {
     // MARK: - Initialization
 
     init(
-        account: Account,
+        accountId: UUID,
+        accountEmail: String,
         apiService: any GmailAPIServiceProtocol,
         databaseService: DatabaseService
     ) {
-        self.account = account
+        self.accountId = accountId
+        self.accountEmail = accountEmail
         self.apiService = apiService
         self.databaseService = databaseService
         self.emailRepository = EmailRepository()
@@ -50,13 +55,13 @@ actor SyncEngine: SyncEngineProtocol {
     func sync() async throws -> SyncResult {
         isCancelled = false
 
-        Logger.sync.info("Starting sync for account: \(self.account.email, privacy: .private(mask: .hash))")
+        Logger.sync.info("Starting sync for account: \(self.accountEmail, privacy: .private(mask: .hash))")
 
         let context = await databaseService.newBackgroundContext()
 
         // Fetch the account from the background context to avoid cross-context issues
         let accountRepository = AccountRepository()
-        guard let contextAccount = try await accountRepository.fetch(byId: account.id, context: context) else {
+        guard let contextAccount = try await accountRepository.fetch(byId: accountId, context: context) else {
             Logger.sync.error("Account not found in background context")
             throw SyncError.databaseError(NSError(domain: "SyncEngine", code: -1, userInfo: [NSLocalizedDescriptionKey: "Account not found"]))
         }
@@ -110,7 +115,7 @@ actor SyncEngine: SyncEngineProtocol {
             try context.save()
             await postSyncContextDidSave()
 
-            Logger.sync.info("Sync completed for account: \(self.account.email, privacy: .private(mask: .hash))")
+            Logger.sync.info("Sync completed for account: \(self.accountEmail, privacy: .private(mask: .hash))")
             return result
 
         } catch {
@@ -119,14 +124,18 @@ actor SyncEngine: SyncEngineProtocol {
             syncState.errorMessage = error.localizedDescription
             try? context.save()
 
-            Logger.sync.error("Sync failed for account: \(self.account.email, privacy: .private(mask: .hash)), error: \(error)")
+            // Log detailed error info for debugging (public for visibility)
+            if let apiError = error as? APIError {
+                Logger.sync.error("Sync APIError type: \(String(describing: apiError), privacy: .public), code: \(apiError.errorCode, privacy: .public)")
+            }
+            Logger.sync.error("Sync failed for account: \(self.accountEmail, privacy: .private(mask: .hash)), error: \(error)")
             throw error
         }
     }
 
     func cancelSync() async {
         isCancelled = true
-        Logger.sync.info("Sync cancelled for account: \(self.account.email, privacy: .private(mask: .hash))")
+        Logger.sync.info("Sync cancelled for account: \(self.accountEmail, privacy: .private(mask: .hash))")
     }
 
     // MARK: - Full Sync
@@ -178,7 +187,7 @@ actor SyncEngine: SyncEngineProtocol {
         try await enforceEmailLimit(account: account, context: context)
 
         // Derive threads from synced emails
-        try await deriveThreads(from: allEmails, context: context)
+        try await deriveThreads(from: allEmails, account: account, context: context)
 
         // Sync drafts
         try await syncDrafts(account: account, context: context)
@@ -218,7 +227,7 @@ actor SyncEngine: SyncEngineProtocol {
         let historyList = try await apiService.getHistory(
             accountEmail: account.email,
             startHistoryId: startHistoryId,
-            historyTypes: ["messageAdded", "messageDeleted", "labelsAdded", "labelsRemoved"]
+            historyTypes: ["messageAdded", "messageDeleted", "labelAdded", "labelRemoved"]
         )
 
         if let history = historyList.history {
@@ -319,7 +328,7 @@ actor SyncEngine: SyncEngineProtocol {
 
         // Update threads for affected emails
         if !affectedEmails.isEmpty {
-            try await deriveThreads(from: affectedEmails, context: context)
+            try await deriveThreads(from: affectedEmails, account: account, context: context)
         }
 
         // Sync drafts
@@ -335,7 +344,7 @@ actor SyncEngine: SyncEngineProtocol {
 
     // MARK: - Thread Derivation
 
-    private func deriveThreads(from emails: [Email], context: ModelContext) async throws {
+    private func deriveThreads(from emails: [Email], account: Account, context: ModelContext) async throws {
         guard !emails.isEmpty else { return }
 
         Logger.sync.debug("Deriving threads from \(emails.count) emails")
@@ -346,9 +355,9 @@ actor SyncEngine: SyncEngineProtocol {
         for threadId in affectedThreadIds {
             // Fetch ALL emails for this thread from database (not just the passed ones)
             // This ensures accurate counts and state derivation
-            let accountId = account.id
+            let currentAccountId = self.accountId
             let emailPredicate = #Predicate<Email> {
-                $0.threadId == threadId && $0.account?.id == accountId
+                $0.threadId == threadId && $0.account?.id == currentAccountId
             }
             var emailDescriptor = FetchDescriptor<Email>(predicate: emailPredicate)
             emailDescriptor.sortBy = [SortDescriptor(\.date)]

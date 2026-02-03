@@ -1,6 +1,13 @@
 import Foundation
 import os.log
 
+/// Holds primitive attachment data extracted from SwiftData models for cross-isolation use.
+private struct AttachmentInfo: Sendable {
+    let contentId: String?
+    let gmailAttachmentId: String
+    let mimeType: String
+}
+
 /// Resolves Content-ID (CID) references in HTML email bodies to actual image data.
 /// CID references are used for inline images embedded in emails.
 @MainActor
@@ -65,10 +72,30 @@ final class CIDResolver {
         // This pattern ensures cache writes happen after TaskGroup completes
         var fetchedData: [(String, Data, String)] = []
 
+        // Extract primitive data from SwiftData models BEFORE entering TaskGroup
+        // to avoid passing models across isolation boundaries
+        let attachmentInfos = email.attachments.map { attachment in
+            AttachmentInfo(
+                contentId: attachment.contentId,
+                gmailAttachmentId: attachment.gmailAttachmentId,
+                mimeType: attachment.mimeType
+            )
+        }
+        let accountEmail = account.email
+        let emailGmailId = email.gmailId
+        let apiService = gmailAPIService
+
         await withTaskGroup(of: (String, Data?, String?).self) { group in
             for cid in cidsToFetch {
                 group.addTask {
-                    guard let (data, mimeType) = await self.fetchCIDData(cid, email: email, account: account) else {
+                    // Use static nonisolated method with only primitive data
+                    guard let (data, mimeType) = await Self.fetchCIDDataStatic(
+                        cid: cid,
+                        attachmentInfos: attachmentInfos,
+                        accountEmail: accountEmail,
+                        emailGmailId: emailGmailId,
+                        apiService: apiService
+                    ) else {
                         return (cid, nil, nil)
                     }
                     return (cid, data, mimeType)
@@ -140,6 +167,45 @@ final class CIDResolver {
             let data = try await gmailAPIService.getAttachment(
                 accountEmail: account.email,
                 messageId: email.gmailId,
+                attachmentId: attachment.gmailAttachmentId
+            )
+            return (data, attachment.mimeType)
+        } catch {
+            Logger.ui.error("Failed to resolve CID \(cid, privacy: .private): \(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    /// Static nonisolated version of fetchCIDData for use in TaskGroup.
+    /// Uses primitive types only to avoid SwiftData model isolation issues.
+    /// - Parameters:
+    ///   - cid: The Content-ID to resolve
+    ///   - attachmentInfos: Pre-extracted attachment data
+    ///   - accountEmail: The account email address
+    ///   - emailGmailId: The email's Gmail ID
+    ///   - apiService: The Gmail API service
+    /// - Returns: Tuple of (data, mimeType) or nil if fetch fails
+    private nonisolated static func fetchCIDDataStatic(
+        cid: String,
+        attachmentInfos: [AttachmentInfo],
+        accountEmail: String,
+        emailGmailId: String,
+        apiService: GmailAPIService
+    ) async -> (Data, String)? {
+        // Find the attachment with matching Content-ID
+        let normalizedCID = cid.trimmingCharacters(in: CharacterSet(charactersIn: "<>"))
+        guard let attachment = attachmentInfos.first(where: {
+            $0.contentId?.trimmingCharacters(in: CharacterSet(charactersIn: "<>")) == normalizedCID
+        }) else {
+            Logger.ui.debug("No attachment found for CID: \(cid, privacy: .private)")
+            return nil
+        }
+
+        // Download the attachment data
+        do {
+            let data = try await apiService.getAttachment(
+                accountEmail: accountEmail,
+                messageId: emailGmailId,
                 attachmentId: attachment.gmailAttachmentId
             )
             return (data, attachment.mimeType)
