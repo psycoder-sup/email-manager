@@ -45,7 +45,7 @@ final class DraftAutoSaveManager {
         debounceTask?.cancel()
 
         // Schedule new debounce
-        debounceTask = Task { [weak self] in
+        debounceTask = Task { @MainActor [weak self] in
             guard let self else { return }
 
             do {
@@ -94,7 +94,7 @@ final class DraftAutoSaveManager {
     private func startPeriodicSave() {
         guard periodicTask == nil else { return }
 
-        periodicTask = Task { [weak self] in
+        periodicTask = Task { @MainActor [weak self] in
             while !Task.isCancelled {
                 guard let self else { break }
 

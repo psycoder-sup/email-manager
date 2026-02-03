@@ -55,7 +55,7 @@ final class EmailDetailViewModel {
         // If body is already loaded, resolve CIDs and mark as read
         if email.bodyHtml != nil || email.bodyText != nil {
             await resolveCIDsIfNeeded(email)
-            Task { [weak self] in
+            Task { @MainActor [weak self] in
                 await self?.markAsReadIfNeeded(email)
             }
             return
@@ -115,7 +115,7 @@ final class EmailDetailViewModel {
 
             // Resolve CID references after loading
             await resolveCIDsIfNeeded(email)
-            Task { [weak self] in
+            Task { @MainActor [weak self] in
                 await self?.markAsReadIfNeeded(email)
             }
 
