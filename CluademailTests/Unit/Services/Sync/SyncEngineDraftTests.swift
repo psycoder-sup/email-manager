@@ -32,7 +32,8 @@ final class SyncEngineDraftTests: XCTestCase {
 
         // Create SUT
         sut = SyncEngine(
-            account: account,
+            accountId: account.id,
+            accountEmail: account.email,
             apiService: mockApiService,
             databaseService: databaseService
         )
