@@ -498,10 +498,14 @@ final class GmailAPIService: GmailAPIServiceProtocol, @unchecked Sendable {
 
                 try handleResponseError(statusCode: httpResponse.statusCode, data: data, headers: httpResponse.allHeaderFields)
 
+                // If we reach here, status was 2xx - attempt decode
                 do {
                     return try decoder.decode(T.self, from: data)
                 } catch {
-                    Logger.api.error("Decoding error: \(error.localizedDescription)")
+                    // Log detailed decoding error for debugging
+                    let responsePreview = String(data: data.prefix(500), encoding: .utf8) ?? "<binary data>"
+                    Logger.api.error("Decoding error for \(url.absoluteString): \(error)")
+                    Logger.api.debug("Response preview: \(responsePreview, privacy: .private)")
                     throw APIError.decodingError(error)
                 }
 
@@ -573,6 +577,10 @@ final class GmailAPIService: GmailAPIServiceProtocol, @unchecked Sendable {
         headers: [AnyHashable: Any]
     ) throws {
         guard !(200..<300).contains(statusCode) else { return }
+
+        // Log error response body for debugging (public for visibility)
+        let errorBody = String(data: data.prefix(500), encoding: .utf8) ?? "<binary>"
+        Logger.api.error("HTTP error \(statusCode, privacy: .public): \(errorBody, privacy: .public)")
 
         let retryAfter = (headers["Retry-After"] as? String).flatMap(TimeInterval.init)
         throw mapStatusCodeToError(statusCode, retryAfter: retryAfter)
@@ -742,6 +750,9 @@ final class GmailAPIService: GmailAPIServiceProtocol, @unchecked Sendable {
                     let message = try decoder.decode(GmailMessageDTO.self, from: jsonData)
                     succeeded.append(message)
                 } catch {
+                    // Log detailed decoding error for batch response debugging
+                    Logger.api.error("Batch decode error for message \(messageId): \(error)")
+                    Logger.api.debug("Response JSON: \(jsonString.prefix(500), privacy: .private)")
                     failed.append(BatchFailure(
                         requestIndex: baseIndex + index,
                         itemId: messageId,
